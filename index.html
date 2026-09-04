@@ -33,7 +33,7 @@
       </button>
 
       <div id="auth-buttons" class="nav-actions">
-        <button class="btn-nav btn-nav-filled" onclick="document.getElementById('auth-modal').classList.add('active')" data-i18n="sign_in">Sign In</button>
+        <button class="btn-nav btn-nav-filled" onclick="APP.openAuthModal()" data-i18n="sign_in">Sign In</button>
       </div>
 
       <div class="user-menu" id="user-menu">
@@ -247,12 +247,7 @@
           <div style="flex:1; height:1px; background:var(--border);"></div>
         </div>
 
-        <div id="g_id_onload"
-             data-client_id="410210397515-shjon2a71788da9dlnkcssbetpncdgmp.apps.googleusercontent.com"
-             data-callback="handleGoogleLogin"
-             data-auto_prompt="false">
-        </div>
-        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="sign_in_with" data-size="large" data-width="100%" style="width:100%;"></div>
+        <div id="google-signin-btn" style="width:100%; display:flex; justify-content:center;"></div>
       </div>
     </div>
   </div>
