@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nove Store - FiveM & Discord Products</title>
+  <meta name="description" content="Premium FiveM scripts, Discord bots, and gaming resources.">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>N</text></svg>">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand">
+      <div class="nav-brand-icon">N</div>
+      <div class="nav-brand-text">NOVE <span>STORE</span></div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="#products" class="active" data-i18n="nav_products">Products</a></li>
+      <li><a href="#features" data-i18n="nav_features">Features</a></li>
+      <li><a href="#about" data-i18n="nav_about">About</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="lang-toggle" id="lang-toggle" onclick="APP.toggleLang()" title="Language">ع</button>
+
+      <button class="nav-cart" onclick="APP.openCart()">
+        &#128722;
+        <span class="cart-badge hidden">0</span>
+      </button>
+
+      <div id="auth-buttons" class="nav-actions">
+        <button class="btn-nav btn-nav-filled" onclick="document.getElementById('auth-modal').classList.add('active')" data-i18n="sign_in">Sign In</button>
+      </div>
+
+      <div class="user-menu" id="user-menu">
+        <img class="user-avatar" src="" alt="User" onclick="APP.toggleUserDropdown()">
+        <div class="user-dropdown">
+          <div class="user-dropdown-header">
+            <h4 class="user-name">User</h4>
+            <p class="user-email">user@email.com</p>
+            <span class="user-role" id="user-role" data-role="user"></span>
+          </div>
+          <label class="user-dropdown-action" style="cursor:pointer;">
+            📷 <span data-i18n="change_avatar">Change Avatar</span>
+            <input type="file" accept="image/*" onchange="APP.uploadAvatar(event)" style="display:none;">
+          </label>
+          <button class="user-dropdown-action" onclick="APP.showProfilePanel()">
+            &#128100; <span data-i18n="my_account">My Account</span>
+          </button>
+          <a href="pages/admin.html" class="admin-link" data-i18n="admin_panel">&#9881; Admin Panel</a>
+          <button onclick="APP.logout()" data-i18n="sign_out">&#10140; Sign Out</button>
+        </div>
+      </div>
+
+      <button class="mobile-toggle">&#9776;</button>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero" id="home">
+    <div class="hero-content">
+      <div class="hero-badge">
+        <span class="hero-badge-dot"></span>
+        <span data-i18n="hero_badge">Premium FiveM & Discord Products</span>
+      </div>
+      <h1>
+        <span data-i18n="hero_title1">Premium Scripts &amp; Bots</span>
+        <span data-i18n="hero_title2">For Your Server</span>
+      </h1>
+      <p data-i18n="hero_desc">
+        High-quality FiveM scripts, Discord bots, and gaming resources.
+        Professional tools for serious server owners.
+      </p>
+      <div class="hero-actions">
+        <a href="#products" class="btn-primary" data-i18n="browse">Browse Products</a>
+        <a href="#features" class="btn-secondary" data-i18n="learn_more">Learn More</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <h3 id="stat-customers">0</h3>
+          <p data-i18n="happy_customers">Happy Customers</p>
+        </div>
+        <div class="hero-stat">
+          <h3 id="stat-products">0</h3>
+          <p data-i18n="premium_products">Premium Products</p>
+        </div>
+        <div class="hero-stat">
+          <h3 id="stat-orders">0</h3>
+          <p data-i18n="orders_completed">Orders Completed</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="section" id="products">
+    <div class="section-header">
+      <h2 data-i18n="our_products">Our Products</h2>
+      <p data-i18n="our_products_desc">Professional scripts and bots for your FiveM and Discord servers</p>
+    </div>
+
+    <div class="category-filters">
+      <button class="filter-btn active" onclick="APP.filterProducts('all')" data-i18n="all">All</button>
+      <button class="filter-btn" onclick="APP.filterProducts('fivem')">FiveM</button>
+      <button class="filter-btn" onclick="APP.filterProducts('discord')">Discord</button>
+    </div>
+
+    <div class="products-grid" id="products-grid">
+      <!-- Products rendered by JS -->
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="section" id="features">
+    <div class="section-header">
+      <h2 data-i18n="why_us">Why Choose Nove Store?</h2>
+      <p data-i18n="why_us_desc">We deliver quality, support, and reliability</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">&#9889;</div>
+        <h3 data-i18n="inst_delivery">Instant Delivery</h3>
+        <p data-i18n="inst_delivery_desc">Get your products instantly after payment. No waiting, no delays.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128274;</div>
+        <h3 data-i18n="secure_payment">Secure Payment</h3>
+        <p data-i18n="secure_payment_desc">Safe and secure payments through PayPal. Your data is protected.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128640;</div>
+        <h3 data-i18n="updates">Regular Updates</h3>
+        <p data-i18n="updates_desc">All products receive regular updates and improvements.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128172;</div>
+        <h3 data-i18n="support247">24/7 Support</h3>
+        <p data-i18n="support247_desc">Our support team is available around the clock on Discord.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128736;</div>
+        <h3 data-i18n="easy_setup">Easy Setup</h3>
+        <p data-i18n="easy_setup_desc">All products come with detailed documentation and easy installation.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#10084;</div>
+        <h3 data-i18n="quality_code">Quality Code</h3>
+        <p data-i18n="quality_code_desc">Clean, optimized, and well-documented code you can trust.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT -->
+  <section class="section" id="about">
+    <div class="section-header">
+      <h2 data-i18n="about_title">About Nove Store</h2>
+      <p data-i18n="store_slogan">Your trusted source for FiveM and Discord products</p>
+    </div>
+    <div class="features-grid" style="max-width: 800px; margin: 0 auto;">
+      <div class="feature-card" style="grid-column: 1 / -1; text-align: right; padding: 2.5rem;">
+        <p style="color: var(--gray-300); font-size: 0.95rem; line-height: 1.8; margin-bottom: 1.5rem;" data-i18n="about_desc">
+          Nove Store is a premium marketplace for FiveM scripts, Discord bots, and gaming resources. We specialize in providing high-quality, well-coded products that help you build and manage your gaming communities.
+        </p>
+        <p style="color: var(--gray-400); font-size: 0.9rem; line-height: 1.8;" data-i18n="about_desc2">
+          Our mission is to deliver professional-grade tools at affordable prices with exceptional customer support. Every product is tested, documented, and comes with free updates.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="footer-content">
+      <p data-i18n="footer_rights">&copy; 2026 Nove Store. All rights reserved.</p>
+      <div class="footer-links">
+        <a href="#products" data-i18n="nav_products">Products</a>
+        <a href="#features" data-i18n="nav_features">Features</a>
+        <a href="#about" data-i18n="nav_about">About</a>
+        <a href="https://discord.gg/nove" target="_blank">Discord</a>
+      </div>
+      <div class="footer-social" id="social-icons"></div>
+    </div>
+  </footer>
+
+  <!-- AUTH MODAL -->
+  <div class="modal-overlay" id="auth-modal">
+    <div class="modal">
+      <button class="modal-close" onclick="APP.closeModal('auth-modal')">&times;</button>
+      <div class="modal-body">
+        <h2 data-i18n="signin_title">Welcome to Nove Store</h2>
+        <p data-i18n="signin_desc">Sign in to make purchases and manage your orders</p>
+
+        <div class="auth-tabs">
+          <button class="auth-tab active" data-tab="login" onclick="APP.showAuthTab('login')" data-i18n="tab_login">Login</button>
+          <button class="auth-tab" data-tab="register" onclick="APP.showAuthTab('register')" data-i18n="tab_register">Register</button>
+        </div>
+
+        <!-- LOGIN FORM -->
+        <div class="auth-form" id="auth-login-form">
+          <form onsubmit="APP.loginWithEmail(event)">
+            <div class="form-group">
+              <label data-i18n="email_label">Email</label>
+              <input type="email" id="auth-email" placeholder="example@email.com" required>
+            </div>
+            <div class="form-group">
+              <label data-i18n="password_label">Password</label>
+              <input type="password" id="auth-password" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022" required minlength="6">
+            </div>
+            <button type="submit" class="auth-submit-btn" style="background:var(--primary); color:#fff; margin-top:0.5rem;">
+              <span data-i18n="tab_login">Login</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- REGISTER FORM -->
+        <div class="auth-form" id="auth-register-form" style="display:none;">
+          <form onsubmit="APP.registerWithEmail(event)">
+            <div class="form-group">
+              <label data-i18n="name_label">Full Name</label>
+              <input type="text" id="reg-name" placeholder="John Doe" required>
+            </div>
+            <div class="form-group">
+              <label data-i18n="email_label">Email</label>
+              <input type="email" id="reg-email" placeholder="example@email.com" required>
+            </div>
+            <div class="form-group">
+              <label data-i18n="password_label">Password</label>
+              <input type="password" id="reg-password" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022" required minlength="6">
+            </div>
+            <button type="submit" class="auth-submit-btn" style="background:var(--primary); color:#fff; margin-top:0.5rem;">
+              <span data-i18n="tab_register">Register</span>
+            </button>
+          </form>
+        </div>
+
+        <p style="text-align:center; font-size: 0.8rem; color: var(--gray-500); margin-top:1rem;" data-i18n="terms_note">
+          By signing in, you agree to our Terms of Service and Privacy Policy
+        </p>
+
+        <div style="display:flex; align-items:center; gap:0.8rem; margin:1.2rem 0 0.8rem;">
+          <div style="flex:1; height:1px; background:var(--border);"></div>
+          <span style="font-size:0.75rem; color:var(--gray-500);" data-i18n="or">or</span>
+          <div style="flex:1; height:1px; background:var(--border);"></div>
+        </div>
+
+        <div id="g_id_onload"
+             data-client_id="410210397515-shjon2a71788da9dlnkcssbetpncdgmp.apps.googleusercontent.com"
+             data-callback="handleGoogleLogin"
+             data-auto_prompt="false">
+        </div>
+        <div class="g_id_signin" data-type="standard" data-shape="rectangular" data-theme="outline" data-text="sign_in_with" data-size="large" data-width="100%" style="width:100%;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CART MODAL -->
+  <div class="modal-overlay" id="cart-modal">
+    <div class="modal">
+      <button class="modal-close" onclick="APP.closeModal('cart-modal')">&times;</button>
+      <div class="modal-body">
+        <!-- Cart content rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- PRODUCT DETAIL MODAL -->
+  <div class="modal-overlay" id="product-modal">
+    <div class="modal">
+      <div class="modal-body">
+        <!-- Product detail rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- PROFILE MODAL -->
+  <div class="modal-overlay" id="profile-modal">
+    <div class="modal" style="max-width:520px;">
+      <button class="modal-close" onclick="APP.closeModal('profile-modal')">&times;</button>
+      <div class="modal-body" id="profile-content">
+        <!-- Rendered by JS -->
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS PAGE -->
+  <div id="success-content" style="min-height:100vh; display:none; align-items:center; justify-content:center; text-align:center; padding:120px 2rem 2rem;">
+  </div>
+
+  <script src="js/app.js"></script>
+  <script>
+    window.handleGoogleLogin = function(response) { APP.handleGoogleLogin(response); };
+    document.addEventListener('DOMContentLoaded', () => {
+      APP.loadSettings();
+      APP.applyStaticTranslations();
+      const lt = document.getElementById('lang-toggle');
+      if (lt) lt.textContent = APP.lang === 'ar' ? 'EN' : 'ع';
+      APP.applyLogo();
+      APP.renderProducts();
+    });
+  </script>
+</body>
+</html>

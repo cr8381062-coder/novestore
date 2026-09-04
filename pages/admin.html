@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - Nove Store</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>N</text></svg>">
+</head>
+<body>
+
+  <!-- NAVBAR -->
+  <nav class="navbar">
+    <a href="../index.html" class="nav-brand">
+      <div class="nav-brand-icon">N</div>
+      <div class="nav-brand-text">NOVE <span>STORE</span></div>
+    </a>
+
+    <ul class="nav-links">
+      <li><a href="../index.html" data-i18n="store">Store</a></li>
+      <li><a href="admin.html" class="active" data-i18n="admin_panel">Admin Panel</a></li>
+    </ul>
+
+    <div class="nav-actions">
+      <button class="lang-toggle" id="lang-toggle" onclick="APP.toggleLang()" title="Language">ع</button>
+
+      <div class="user-menu active" id="user-menu">
+        <img class="user-avatar" src="" alt="User" onclick="APP.toggleUserDropdown()">
+        <div class="user-dropdown">
+          <div class="user-dropdown-header">
+            <h4 class="user-name">Admin</h4>
+            <p class="user-email">admin@nove.store</p>
+            <span class="user-role" id="user-role" data-role="owner"></span>
+          </div>
+          <label class="user-dropdown-action" style="cursor:pointer;">
+            📷 <span data-i18n="change_avatar">Change Avatar</span>
+            <input type="file" accept="image/*" onchange="APP.uploadAvatar(event)" style="display:none;">
+          </label>
+          <a href="../index.html" data-i18n="store">&#128203; Store</a>
+          <button onclick="APP.logout()" data-i18n="sign_out">&#10140; Sign Out</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ADMIN LAYOUT -->
+  <div class="admin-layout">
+    <!-- SIDEBAR -->
+    <aside class="admin-sidebar" id="admin-sidebar">
+      <div class="admin-sidebar-brand">
+        <div class="sb-icon">N</div>
+        <div>
+          <div class="sb-title">Nove Admin</div>
+          <div class="sb-sub">Management Panel</div>
+        </div>
+      </div>
+
+      <div class="admin-nav-group" data-i18n="group_overview">Overview</div>
+      <button class="admin-nav-item active" data-section="dashboard" onclick="APP.showAdminSection('dashboard')">
+        <span class="nav-icon">&#128202;</span> <span data-i18n="dashboard">Dashboard</span>
+      </button>
+
+      <div class="admin-nav-group" data-i18n="group_management">Management</div>
+      <button class="admin-nav-item" data-section="products" onclick="APP.showAdminSection('products')">
+        <span class="nav-icon">&#128230;</span> <span data-i18n="products_manage">Products</span>
+      </button>
+      <button class="admin-nav-item" data-section="categories" onclick="APP.showAdminSection('categories')">
+        <span class="nav-icon">&#128193;</span> <span data-i18n="categories_manage">Product Categories</span>
+      </button>
+      <button class="admin-nav-item" data-section="coupons" onclick="APP.showAdminSection('coupons')">
+        <span class="nav-icon">&#127872;</span> <span data-i18n="coupons_manage">Coupons</span>
+      </button>
+      <button class="admin-nav-item" data-section="orders" onclick="APP.showAdminSection('orders')">
+        <span class="nav-icon">&#128179;</span> <span data-i18n="orders_manage">Orders</span>
+        <span class="nav-badge" id="orders-badge">0</span>
+      </button>
+
+      <div class="admin-nav-group" data-i18n="group_people">People</div>
+      <button class="admin-nav-item" data-section="users" onclick="APP.showAdminSection('users')">
+        <span class="nav-icon">&#128101;</span> <span data-i18n="users_manage">Users</span>
+      </button>
+      <button class="admin-nav-item" data-section="permissions" id="nav-permissions" onclick="APP.showAdminSection('permissions')">
+        <span class="nav-icon">&#128274;</span> <span data-i18n="permissions_manage">Permissions</span>
+      </button>
+
+      <div class="admin-nav-group" data-i18n="group_system">System</div>
+      <button class="admin-nav-item" data-section="settings" onclick="APP.showAdminSection('settings')">
+        <span class="nav-icon">&#9881;</span> <span data-i18n="settings_manage">Settings</span>
+      </button>
+
+      <div class="admin-sidebar-footer">
+        <div class="admin-owner-card">
+          <img src="" alt="Owner" id="owner-avatar">
+          <div class="owner-info">
+            <h5 class="owner-name">Store Owner</h5>
+            <p class="owner-email">cr8381062@gmail.com</p>
+          </div>
+          <span class="owner-crown">&#128081;</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- CONTENT -->
+    <main class="admin-content" id="admin-content">
+      <!-- Content rendered by JS -->
+    </main>
+  </div>
+
+  <script src="../js/app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      APP.checkAuth();
+      APP.loadSettings();
+      APP.applyStaticTranslations();
+      APP.applyLogo();
+      const lt = document.getElementById('lang-toggle');
+      if (lt) lt.textContent = APP.lang === 'ar' ? 'EN' : 'ع';
+      APP.createRainDrops();
+      if (!APP.isAdmin()) {
+        document.getElementById('admin-content').innerHTML = `
+          <div class="access-denied">
+            <div>
+              <h1>&#128683;</h1>
+              <h1>${APP.t('access_denied')}</h1>
+              <p>${APP.t('access_denied_desc')}</p>
+              <a href="../index.html" class="btn-primary">${APP.t('back_to_store')}</a>
+            </div>
+          </div>
+        `;
+        return;
+      }
+      APP.updateAuthUI();
+      if (APP.currentUser && APP.currentUser.avatar) {
+        document.getElementById('owner-avatar').src = APP.currentUser.avatar;
+      } else {
+        document.getElementById('owner-avatar').src = APP.generateAvatar('O');
+      }
+      document.querySelector('.owner-name').textContent = APP.currentUser.name;
+      document.querySelector('.owner-email').textContent = APP.currentUser.email;
+      document.getElementById('orders-badge').textContent = APP.orders.length || 0;
+      APP.applyNavPermissions();
+      APP.showAdminSection('dashboard');
+    });
+  </script>
+</body>
+</html>
