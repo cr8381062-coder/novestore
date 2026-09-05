@@ -13,8 +13,6 @@ const APP = {
     telegram: '',
     x: ''
   },
-  GOOGLE_CLIENT_ID: '410210397515-shjon2a71788da9dlnkcssbetpncdgmp.apps.googleusercontent.com',
-  googleInited: false,
 
   currentUser: null,
   products: [],
@@ -144,9 +142,6 @@ const APP = {
       latest_orders: 'آخر الطلبات',
       recent_orders: 'طلبات حديثة',
       no_orders: 'لا توجد طلبات بعد',
-      or: 'أو',
-      sign_in_with: 'تسجيل الدخول بـ Google',
-      google_error: 'خطأ في تسجيل الدخول عبر Google، حاول مرة أخرى',
       customer: 'العميل',
       products: 'المنتجات',
       status: 'الحالة',
@@ -437,9 +432,6 @@ const APP = {
       latest_orders: 'Latest Orders',
       recent_orders: 'Recent Orders',
       no_orders: 'No orders yet',
-      or: 'or',
-      sign_in_with: 'Sign in with Google',
-      google_error: 'Google sign-in failed, please try again',
       customer: 'Customer',
       products: 'Products',
       status: 'Status',
@@ -880,75 +872,6 @@ const APP = {
     this.updateAuthUI();
     this.closeModal('auth-modal');
     this.showToast(this.t('welcome') + ', ' + name + '!', 'success');
-  },
-
-  initGoogleSignIn() {
-    if (!window.google || !google.accounts || this.googleInited) return;
-    google.accounts.id.initialize({
-      client_id: APP.GOOGLE_CLIENT_ID,
-      callback: window.handleGoogleLogin,
-      auto_select: false,
-      cancel_on_tap_outside: true
-    });
-    this.googleInited = true;
-  },
-
-  renderGoogleButton() {
-    const btn = document.getElementById('google-signin-btn');
-    if (!btn) return;
-    if (!window.google || !google.accounts) return;
-    this.initGoogleSignIn();
-    btn.innerHTML = '';
-    google.accounts.id.renderButton(btn, {
-      type: 'standard',
-      shape: 'rectangular',
-      theme: 'outline',
-      text: 'signin_with',
-      size: 'large',
-      width: 280,
-      locale: this.lang === 'ar' ? 'ar' : 'en'
-    });
-  },
-
-  openAuthModal() {
-    document.getElementById('auth-modal').classList.add('active');
-    this.renderGoogleButton();
-  },
-
-  handleGoogleLogin(response) {
-    try {
-      const payload = JSON.parse(atob(response.credential));
-      const email = payload.email;
-      const name = payload.name || email.split('@')[0];
-      const picture = payload.picture || '';
-      const list = JSON.parse(localStorage.getItem('nove_users')) || [];
-      let user = list.find(u => u.email === email);
-      if (!user) {
-        user = {
-          id: 'google_' + Date.now(),
-          name: name,
-          email: email,
-          password: '',
-          avatar: picture,
-          isAdmin: email === APP.ADMIN_EMAIL,
-          joinedAt: new Date().toISOString()
-        };
-        list.push(user);
-        localStorage.setItem('nove_users', JSON.stringify(list));
-      } else if (picture && !user.avatar) {
-        user.avatar = picture;
-        localStorage.setItem('nove_users', JSON.stringify(list));
-      }
-      APP.currentUser = { ...user };
-      delete APP.currentUser.password;
-      localStorage.setItem('nove_user', JSON.stringify(APP.currentUser));
-      APP.updateAuthUI();
-      APP.closeModal('auth-modal');
-      APP.showToast(APP.t('welcome') + ', ' + name + '!', 'success');
-    } catch (err) {
-      console.error('Google login error:', err);
-      APP.showToast(APP.t('google_error'), 'error');
-    }
   },
 
   async loginWithEmail(e) {
@@ -1468,7 +1391,7 @@ const APP = {
     if (!this.currentUser) {
       this.showToast(this.t('please_signin'), 'error');
       this.closeModal('cart-modal');
-      this.openAuthModal();
+      document.getElementById('auth-modal').classList.add('active');
       return;
     }
     // If PayPal SDK loaded, buttons will handle it. Otherwise redirect.

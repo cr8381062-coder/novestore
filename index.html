@@ -7,7 +7,6 @@
   <meta name="description" content="Premium FiveM scripts, Discord bots, and gaming resources.">
   <link rel="stylesheet" href="css/style.css">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>N</text></svg>">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -33,7 +32,7 @@
       </button>
 
       <div id="auth-buttons" class="nav-actions">
-        <button class="btn-nav btn-nav-filled" onclick="APP.openAuthModal()" data-i18n="sign_in">Sign In</button>
+        <button class="btn-nav btn-nav-filled" onclick="document.getElementById('auth-modal').classList.add('active')" data-i18n="sign_in">Sign In</button>
       </div>
 
       <div class="user-menu" id="user-menu">
@@ -240,14 +239,6 @@
         <p style="text-align:center; font-size: 0.8rem; color: var(--gray-500); margin-top:1rem;" data-i18n="terms_note">
           By signing in, you agree to our Terms of Service and Privacy Policy
         </p>
-
-        <div style="display:flex; align-items:center; gap:0.8rem; margin:1.2rem 0 0.8rem;">
-          <div style="flex:1; height:1px; background:var(--border);"></div>
-          <span style="font-size:0.75rem; color:var(--gray-500);" data-i18n="or">or</span>
-          <div style="flex:1; height:1px; background:var(--border);"></div>
-        </div>
-
-        <div id="google-signin-btn" style="width:100%; display:flex; justify-content:center;"></div>
       </div>
     </div>
   </div>
@@ -287,7 +278,6 @@
 
   <script src="js/app.js"></script>
   <script>
-    window.handleGoogleLogin = function(response) { APP.handleGoogleLogin(response); };
     document.addEventListener('DOMContentLoaded', () => {
       APP.loadSettings();
       APP.applyStaticTranslations();
