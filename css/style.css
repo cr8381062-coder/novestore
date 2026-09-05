@@ -1163,6 +1163,84 @@ body::before {
   margin-bottom: 0.5rem;
 }
 
+/* ===== SHARE ===== */
+.btn-share {
+  width: 34px;
+  height: 34px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--white);
+  font-size: 0.9rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all 0.3s ease;
+}
+
+.btn-share:hover {
+  border-color: var(--primary);
+  background: rgba(124,58,237,0.15);
+  color: var(--primary-light);
+  box-shadow: 0 0 12px rgba(124,58,237,0.3);
+}
+
+.product-share-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.8rem;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+
+.product-share-label {
+  font-size: 0.78rem;
+  color: var(--gray-500);
+  margin-left: 0.3rem;
+}
+
+.share-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255,255,255,0.04);
+  color: var(--white);
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+  font-family: inherit;
+}
+
+.share-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+}
+
+.share-btn.whatsapp:hover {
+  border-color: #25d366;
+  background: rgba(37,211,102,0.15);
+}
+
+.share-btn.telegram:hover {
+  border-color: #229ed9;
+  background: rgba(34,158,217,0.15);
+}
+
+.share-btn.x:hover {
+  border-color: var(--white);
+  background: rgba(255,255,255,0.15);
+}
+
+.share-btn.copy:hover {
+  border-color: var(--primary);
+  background: rgba(124,58,237,0.15);
+  color: var(--primary-light);
+}
+
 /* ===== FOOTER ===== */
 .footer {
   border-top: 1px solid var(--border);

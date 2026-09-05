@@ -142,6 +142,10 @@ const APP = {
       latest_orders: 'آخر الطلبات',
       recent_orders: 'طلبات حديثة',
       no_orders: 'لا توجد طلبات بعد',
+      share: 'مشاركة',
+      share_text: '{name} — متوفر الآن في Nove Store',
+      copy_link: 'نسخ الرابط',
+      link_copied: 'تم نسخ الرابط!',
       customer: 'العميل',
       products: 'المنتجات',
       status: 'الحالة',
@@ -432,6 +436,10 @@ const APP = {
       latest_orders: 'Latest Orders',
       recent_orders: 'Recent Orders',
       no_orders: 'No orders yet',
+      share: 'Share',
+      share_text: '{name} — now available at Nove Store',
+      copy_link: 'Copy Link',
+      link_copied: 'Link copied!',
       customer: 'Customer',
       products: 'Products',
       status: 'Status',
@@ -1190,6 +1198,11 @@ const APP = {
     } else if (successContent) {
       successContent.style.display = 'none';
     }
+    const params = new URLSearchParams(window.location.search);
+    const sharedId = params.get('product');
+    if (sharedId && page === 'home') {
+      this.showProduct(parseInt(sharedId));
+    }
     if (page === 'admin') this.renderAdminPage();
   },
 
@@ -1215,9 +1228,12 @@ const APP = {
           <p>${p.description}</p>
           <div class="product-footer">
             <div class="product-price">$${p.price} <span>${this.t('usd')}</span></div>
-            <button class="btn-add-cart" data-id="${p.id}" onclick="event.stopPropagation(); APP.addToCart(${p.id})">
-              ${this.cart.find(c => c.id === p.id) ? this.t('in_cart') : this.t('add_to_cart')}
-            </button>
+            <div style="display:flex; gap:0.4rem; align-items:center;">
+              <button class="btn-add-cart" data-id="${p.id}" onclick="event.stopPropagation(); APP.addToCart(${p.id})">
+                ${this.cart.find(c => c.id === p.id) ? this.t('in_cart') : this.t('add_to_cart')}
+              </button>
+              <button class="btn-share" title="${this.t('share')}" onclick="event.stopPropagation(); APP.shareProduct(${p.id})">&#128227;</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1258,6 +1274,40 @@ const APP = {
     this.renderProducts(key);
   },
 
+  getShareUrl(id) {
+    const product = this.products.find(p => p.id === id);
+    const base = window.location.origin + window.location.pathname;
+    return { url: base + '?product=' + id, name: product ? product.name : 'Product' };
+  },
+
+  shareProduct(id) {
+    const { url, name } = this.getShareUrl(id);
+    const text = this.t('share_text').replace('{name}', name);
+    if (navigator.share) {
+      navigator.share({ title: name, text: text, url: url }).catch(() => {});
+      return;
+    }
+    this.shareTo(id, 'copy');
+  },
+
+  shareTo(id, via) {
+    const { url, name } = this.getShareUrl(id);
+    const text = this.t('share_text').replace('{name}', name) + ' ' + url;
+    let target = '';
+    if (via === 'whatsapp') target = 'https://wa.me/?text=' + encodeURIComponent(text);
+    else if (via === 'telegram') target = 'https://t.me/share/url?url=' + encodeURIComponent(url) + '&text=' + encodeURIComponent(this.t('share_text').replace('{name}', name));
+    else if (via === 'x') target = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(text);
+    else if (via === 'copy') {
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(url).then(() => this.showToast(this.t('link_copied'), 'success'));
+      } else {
+        this.showToast(url, 'success');
+      }
+      return;
+    }
+    window.open(target, '_blank', 'noopener,width=600,height=500');
+  },
+
   showProduct(id) {
     const product = this.products.find(p => p.id === id);
     if (!product) return;
@@ -1278,6 +1328,13 @@ const APP = {
           <button class="btn-primary" style="width:100%" onclick="APP.addToCart(${product.id}); APP.closeModal('product-modal');">
             ${this.cart.find(c => c.id === product.id) ? this.t('in_cart') : this.t('add_to_cart')}
           </button>
+          <div class="product-share-row">
+            <span class="product-share-label">${this.t('share')}:</span>
+            <button class="share-btn whatsapp" onclick="APP.shareTo(${product.id}, 'whatsapp')" title="WhatsApp">&#128172;</button>
+            <button class="share-btn telegram" onclick="APP.shareTo(${product.id}, 'telegram')" title="Telegram">&#128073;</button>
+            <button class="share-btn x" onclick="APP.shareTo(${product.id}, 'x')" title="X">&#128777;</button>
+            <button class="share-btn copy" onclick="APP.shareTo(${product.id}, 'copy')" title="${this.t('copy_link')}">&#128203;</button>
+          </div>
         </div>
       </div>
     `;
