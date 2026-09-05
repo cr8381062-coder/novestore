@@ -1,8 +1,8 @@
-// ===== NOVE STORE - MAIN APPLICATION =====
+// ===== NOVE STOR - MAIN APPLICATION =====
 
 const APP = {
   ADMIN_EMAIL: 'cr8381062@gmail.com',
-  STORE_NAME: 'Nove Store',
+  STORE_NAME: 'NOVE STOR',
   STORE_LOGO: '',
   PAYPAL_CLIENT_ID: 'AdZijgGKQiP5hkM7nWSUQgVFH4dBS8K5SuClk9n9B1NP6KHUTe84pTcjVWBF7fIe8IZ-XXxhfJ0SegzO',
   SOCIAL_LINKS: {
@@ -47,7 +47,7 @@ const APP = {
       all: 'الكل',
       in_cart: 'في السلة',
       add_to_cart: 'أضف للسلة',
-      why_us: 'لماذا Nove Store؟',
+      why_us: 'لماذا NOVE STOR؟',
       why_us_desc: 'نوفر الجودة والدعم والموثوقية',
       inst_delivery: 'توصيل فوري',
       inst_delivery_desc: 'احصل على منتجاتك فور الدفع بدون انتظار.',
@@ -61,17 +61,17 @@ const APP = {
       easy_setup_desc: 'جميع المنتجات تأتي مع توثيق مفصل وتثبيت سهل.',
       quality_code: 'كود عالي الجودة',
       quality_code_desc: 'كود نظيف ومحسّن يمكنك الوثوق به.',
-      about_title: 'عن Nove Store',
-      about_desc: 'Nove Store سوق مميز لسكريبتات فايف ام وبوتات الديسكورد والأدوات. نتخصص في توفير منتجات عالية الجودة تساعدك في بناء وإدارة مجتمعاتك.',
+      about_title: 'عن NOVE STOR',
+      about_desc: 'NOVE STOR سوق مميز لسكريبتات فايف ام وبوتات الديسكورد والأدوات. نتخصص في توفير منتجات عالية الجودة تساعدك في بناء وإدارة مجتمعاتك.',
       about_desc2: 'مهمتنا تقديم أدوات بمستوى احترافي بأسعار مناسبة ودعم استثنائي. كل منتج مُختبَر وموثّق ومعه تحديثات مجانية.',
-      footer_rights: '© 2026 Nove Store. جميع الحقوق محفوظة.',
+      footer_rights: '© 2026 NOVE STOR. جميع الحقوق محفوظة.',
       your_cart: 'سلة المشتريات',
       cart_selected: 'المنتجات المختارة',
       cart_empty: 'سلتك فارغة',
       total: 'الإجمالي',
       pay_paypal: 'ادفع عبر باي بال',
       remove: 'حذف',
-      signin_title: 'أهلاً بك في Nove Store',
+      signin_title: 'أهلاً بك في NOVE STOR',
       signin_desc: 'سجل دخولك لتتمكن من الشراء وإدارة طلباتك',
       terms_note: 'بموجب تسجيل الدخول فأنت توافق على شروط الخدمة وسياسة الخصوصية',
       tab_login: 'تسجيل الدخول',
@@ -143,7 +143,7 @@ const APP = {
       recent_orders: 'طلبات حديثة',
       no_orders: 'لا توجد طلبات بعد',
       share: 'مشاركة',
-      share_text: '{name} — متوفر الآن في Nove Store',
+      share_text: '{name} — متوفر الآن في NOVE STOR',
       copy_link: 'نسخ الرابط',
       link_copied: 'تم نسخ الرابط!',
       customer: 'العميل',
@@ -341,7 +341,7 @@ const APP = {
       all: 'All',
       in_cart: 'In Cart',
       add_to_cart: 'Add to Cart',
-      why_us: 'Why Nove Store?',
+      why_us: 'Why NOVE STOR?',
       why_us_desc: 'We deliver quality, support & reliability',
       inst_delivery: 'Instant Delivery',
       inst_delivery_desc: 'Get products instantly after payment. No waiting.',
@@ -355,17 +355,17 @@ const APP = {
       easy_setup_desc: 'All products come with detailed docs & easy install.',
       quality_code: 'Quality Code',
       quality_code_desc: 'Clean, optimized, well-documented code you can trust.',
-      about_title: 'About Nove Store',
-      about_desc: 'Nove Store is a premium marketplace for FiveM scripts, Discord bots & gaming resources. We specialize in high-quality products for your gaming communities.',
+      about_title: 'About NOVE STOR',
+      about_desc: 'NOVE STOR is a premium marketplace for FiveM scripts, Discord bots & gaming resources. We specialize in high-quality products for your gaming communities.',
       about_desc2: 'Our mission is professional-grade tools at fair prices with exceptional support. Every product is tested, documented & comes with free updates.',
-      footer_rights: '© 2026 Nove Store. All rights reserved.',
+      footer_rights: '© 2026 NOVE STOR. All rights reserved.',
       your_cart: 'Your Cart',
       cart_selected: 'Your selected products',
       cart_empty: 'Your cart is empty',
       total: 'Total',
       pay_paypal: 'Pay with PayPal',
       remove: 'Remove',
-      signin_title: 'Welcome to Nove Store',
+      signin_title: 'Welcome to NOVE STOR',
       signin_desc: 'Sign in to make purchases and manage your orders',
       terms_note: 'By signing in, you agree to our Terms of Service and Privacy Policy',
       tab_login: 'Login',
@@ -437,7 +437,7 @@ const APP = {
       recent_orders: 'Recent Orders',
       no_orders: 'No orders yet',
       share: 'Share',
-      share_text: '{name} — now available at Nove Store',
+      share_text: '{name} — now available at NOVE STOR',
       copy_link: 'Copy Link',
       link_copied: 'Link copied!',
       customer: 'Customer',
@@ -1425,7 +1425,7 @@ const APP = {
         return actions.order.create({
           purchase_units: [{
             amount: { value: this.getCartTotal().toFixed(2) },
-            description: 'Nove Store Purchase'
+            description: 'NOVE STOR Purchase'
           }]
         });
       },
@@ -2570,7 +2570,7 @@ const APP = {
         </div>
         <div class="form-group">
           <label>${this.t('store_name')}</label>
-          <input type="text" value="${APP.STORE_NAME}" id="setting-store-name" placeholder="Nove Store">
+          <input type="text" value="${APP.STORE_NAME}" id="setting-store-name" placeholder="NOVE STOR">
         </div>
         <div class="form-group">
           <label>${this.t('owner_email')}</label>
@@ -2727,7 +2727,7 @@ const APP = {
   },
 
   saveSettings() {
-    APP.STORE_NAME = document.getElementById('setting-store-name').value || 'Nove Store';
+    APP.STORE_NAME = document.getElementById('setting-store-name').value || 'NOVE STOR';
     APP.PAYPAL_CLIENT_ID = document.getElementById('setting-paypal').value;
     const gid = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
     APP.SOCIAL_LINKS = {
@@ -2745,7 +2745,7 @@ const APP = {
       social: APP.SOCIAL_LINKS
     }));
     document.querySelectorAll('.nav-brand-text').forEach(el => {
-      el.innerHTML = APP.STORE_NAME.toUpperCase().replace(' ', '') + ' <span>STORE</span>';
+      el.innerHTML = APP.STORE_NAME.toUpperCase().replace(/\s+(\S+)$/, ' <span>$1</span>');
     });
     this.applyLogo();
     this.renderSocialIcons();
