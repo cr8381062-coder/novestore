@@ -132,8 +132,54 @@ const APP = {
       ai_api_key: 'API Key',
       ai_model: 'الموديل (Model)',
       ai_settings_hint: 'بدون مفتاح يحاول المساعد استخدام الخدمة المجانية — إن كانت متاحة. للأمان: المفتاح يبقى في متصفحك فقط.',
-      designai_manage: 'برمجة التصميم',
-      designai_sub: 'مساعد ذكي لتعديل شكل المتجر والألوان',
+      customizer_manage: 'اختيار',
+      customizer_sub: 'ادخل على متجرك واختر أي عنصر لتغيير لونه وشكله ولمعان حوافه',
+      cz_live_preview: 'معاينة حية للمتجر',
+      cz_refresh: 'تحديث',
+      cz_pick_target: 'اختر العنصر الذي تريد تعديله',
+      cz_all: 'كل المتجر',
+      cz_navbar: 'شريط التنقل',
+      cz_hero: 'الواجهة (Hero)',
+      cz_products: 'قسم المنتجات',
+      cz_features: 'المزايا',
+      cz_about: 'من نحن',
+      cz_footer: 'الفوتر',
+      cz_buttons: 'الأزرار',
+      cz_cards: 'البطاقات',
+      cz_modals: 'النوافذ',
+      cz_primary: 'اللون الأساسي',
+      cz_secondary: 'اللون الثانوي',
+      cz_radius: 'استدارة الحواف',
+      cz_border_glow: 'قوة لمعان الحواف',
+      cz_font: 'حجم الخط',
+      cz_open_store: 'افتح المتجر',
+      cz_add_page: 'إضافة صفحة',
+      cz_add_text: 'إضافة نص',
+      cz_pages: 'الصفحات المخصصة',
+      cz_pages_note: 'الصفحات المخصصة تظهر في قائمة المتجر العلوية وتفتح بأيقونة داخل المتجر.',
+      cz_no_pages: 'لا توجد صفحات مخصصة بعد. اضغط "إضافة صفحة".',
+      back_to_customizer: 'رجوع للاختيار',
+      cz_page_new: 'صفحة جديدة',
+      cz_page_title: 'اسم الصفحة',
+      cz_page_title_ph: 'مثال: الأسئلة الشائعة',
+      cz_page_title_required: 'اكتب اسم الصفحة',
+      cz_page_icon: 'أيقونة',
+      cz_page_content: 'محتوى الصفحة (نص يظهر داخل المتجر)',
+      cz_page_content_ph: 'اكتب محتوى الصفحة هنا…',
+      cz_save_page: 'حفظ الصفحة',
+      cz_page_added: 'تمت إضافة الصفحة',
+      cz_note_new: 'نص مخصص على المتجر',
+      cz_note_text: 'نص البانر',
+      cz_note_ph: 'مثال: 🎉 خصم 20% دلوقتي بكود NOVE20',
+      cz_note_color: 'لون النص',
+      cz_note_show: 'أين يظهر',
+      cz_note_show_all: 'فوق كل أقسام المتجر',
+      cz_note_show_top: 'فوق شريط التنقل فقط',
+      cz_save_note: 'حفظ النص',
+      cz_note_saved: 'تم حفظ النص',
+      cz_remove_note: 'حذف النص المخصص',
+      cz_note_removed: 'تم حذف النص',
+      cz_note_empty: 'اكتب النص أولاً',
       design_ai_title: 'المساعد الذكي للتصميم',
       design_placeholder: 'اكتب أي شيء... مثل: خلّي المتجر أزرق داكن أو وش تنصحني بالتصميم؟',
       run_design: 'إرسال',
@@ -505,8 +551,54 @@ const APP = {
       ai_api_key: 'API Key',
       ai_model: 'Model',
       ai_settings_hint: 'Without a key, the assistant tries the free service — not guaranteed. The key stays only in your browser.',
-      designai_manage: 'Design AI',
-      designai_sub: 'Smart assistant to restyle the store and colors',
+      customizer_manage: 'Customizer',
+      customizer_sub: 'Open your store and pick any element to change its color, shape, and glow',
+      cz_live_preview: 'Live store preview',
+      cz_refresh: 'Refresh',
+      cz_pick_target: 'Pick the element you want to edit',
+      cz_all: 'Whole store',
+      cz_navbar: 'Navbar',
+      cz_hero: 'Hero',
+      cz_products: 'Products',
+      cz_features: 'Features',
+      cz_about: 'About',
+      cz_footer: 'Footer',
+      cz_buttons: 'Buttons',
+      cz_cards: 'Cards',
+      cz_modals: 'Modals',
+      cz_primary: 'Primary color',
+      cz_secondary: 'Secondary color',
+      cz_radius: 'Corner radius',
+      cz_border_glow: 'Border glow',
+      cz_font: 'Font size',
+      cz_open_store: 'Open store',
+      cz_add_page: 'Add page',
+      cz_add_text: 'Add text',
+      cz_pages: 'Custom pages',
+      cz_pages_note: 'Custom pages appear in the store navbar and open inside the store.',
+      cz_no_pages: 'No custom pages yet. Click "Add page".',
+      back_to_customizer: 'Back to Customizer',
+      cz_page_new: 'New page',
+      cz_page_title: 'Page title',
+      cz_page_title_ph: 'e.g. FAQs',
+      cz_page_title_required: 'Enter a page title',
+      cz_page_icon: 'Icon',
+      cz_page_content: 'Page content (text shown in the store)',
+      cz_page_content_ph: 'Write your page content here…',
+      cz_save_page: 'Save page',
+      cz_page_added: 'Page added',
+      cz_note_new: 'Custom banner',
+      cz_note_text: 'Banner text',
+      cz_note_ph: 'e.g. 🎉 Get 20% off now with code NOVE20',
+      cz_note_color: 'Text color',
+      cz_note_show: 'Where to show',
+      cz_note_show_all: 'Above every store section',
+      cz_note_show_top: 'Above the navbar only',
+      cz_save_note: 'Save text',
+      cz_note_saved: 'Text saved',
+      cz_remove_note: 'Remove custom text',
+      cz_note_removed: 'Custom text removed',
+      cz_note_empty: 'Enter text first',
       design_ai_title: 'Design Smart Assistant',
       design_placeholder: 'Ask anything... e.g. make the store dark blue or what do you recommend?',
       run_design: 'Send',
@@ -924,7 +1016,8 @@ const APP = {
     if (d.primary) {
       root.style.setProperty('--primary', d.primary);
       root.style.setProperty('--primary-light', this.tintColor(d.primary, 45));
-      root.style.setProperty('--glow', '0 0 30px ' + this.rgba(d.primary, 0.3));
+      const g = Math.round((d.glowStrength || 30) / 100 * 30);
+      root.style.setProperty('--glow', '0 0 ' + g + 'px ' + this.rgba(d.primary, 0.35));
     }
     if (d.secondary) {
       root.style.setProperty('--secondary', d.secondary);
@@ -958,6 +1051,71 @@ const APP = {
         if (el) el.style.display = show ? '' : 'none';
       });
     }
+    this.applyCustomNote(d);
+    this.renderCustomPages();
+  },
+
+  applyCustomNote(d) {
+    if (!d) d = this.getDesign();
+    let bar = document.getElementById('cz-note-bar');
+    if (!d.note) {
+      if (bar) bar.remove();
+      return;
+    }
+    if (!bar) {
+      bar = document.createElement('div');
+      bar.id = 'cz-note-bar';
+      document.body.insertBefore(bar, document.body.firstChild);
+    }
+    bar.style.cssText = 'position:relative; z-index:1000; text-align:center; padding:0.7rem 1rem; font-weight:700; font-size:0.95rem; ' +
+      'color:' + (d.noteColor || '#f5c518') + '; background:rgba(0,0,0,0.55); border-bottom:1px solid rgba(255,255,255,0.08);';
+    bar.textContent = d.note;
+  },
+
+  renderCustomPages() {
+    const pages = this.getCustomPages();
+    let menu = document.querySelector('.nav-links');
+    if (menu) {
+      let added = 0;
+      pages.forEach(p => {
+        if (!document.getElementById('cpage-link-' + p.id)) {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.id = 'cpage-link-' + p.id;
+          a.href = '#cpage-sec-' + p.id;
+          a.innerHTML = (p.icon || '\u{1F4C4}') + ' ' + this.esc(p.title);
+          li.appendChild(a);
+          menu.appendChild(li);
+          added++;
+        }
+      });
+      if (added) this.logActivity('customizer', 'Custom pages linked in navbar', added + ' page(s)');
+    }
+    this.renderCustomPageSections();
+  },
+
+  renderCustomPageSections() {
+    const pages = this.getCustomPages();
+    let wrap = document.getElementById('cz-pages-wrap');
+    if (!pages.length) {
+      if (wrap) wrap.remove();
+      return;
+    }
+    if (!wrap) {
+      wrap = document.createElement('div');
+      wrap.id = 'cz-pages-wrap';
+      document.body.appendChild(wrap);
+    }
+    wrap.innerHTML = pages.map(p => `
+      <section class="section" id="cpage-sec-${p.id}" style="max-width:860px; margin:0 auto; padding-top:140px;">
+        <div class="admin-form-card" style="padding:2rem;">
+          <div class="form-card-header">
+            <div class="fc-icon">${p.icon || '\u{1F4C4}'}</div>
+            <h3>${this.esc(p.title)}</h3>
+          </div>
+          <div style="white-space:pre-line; line-height:2; color:var(--gray-200); font-size:0.95rem;">${this.esc(p.content)}</div>
+        </div>
+      </section>`).join('');
   },
 
   hexToRgb(hex) {
@@ -978,117 +1136,17 @@ const APP = {
     return '#' + [m(c.r, t), m(c.g, t), m(c.b, t)].map(x => x.toString(16).padStart(2, '0')).join('');
   },
 
-  normalizeCommand(t) {
-    return t.toLowerCase()
-      .replace(/ال/g, '')
-      .replace(/أ/g, 'ا')
-      .replace(/إ/g, 'ا')
-      .replace(/ة/g, 'ه')
-      .replace(/ى/g, 'ي')
-      .replace(/u0000/g, '');
-  },
-
-  parseColorFromCommand(raw) {
-    const t = this.normalizeCommand(raw);
-    const hex = t.match(/#[0-9a-f]{3,6}\b/);
-    if (hex) return { color: hex[0], target: t.includes('خلف') ? 'secondary' : t.includes('ثان') ? 'secondary' : 'primary' };
-    for (const key of Object.keys(this.DESIGN_COLORS)) {
-      if (t.includes(key)) {
-        const target = t.includes('خلف') ? 'secondary' : t.includes('ثان') ? 'secondary' : 'primary';
-        return { color: this.DESIGN_COLORS[key], target };
-      }
-    }
-    return null;
-  },
-
-  designReplyAr(text) {
-    const t = this.normalizeCommand(text);
-    let changes = [];
-    const d = this.getDesign();
-
-    const col = this.parseColorFromCommand(text);
-    if (col) {
-      if (col.target === 'secondary') d.secondary = col.color;
-      else d.primary = col.color;
-      changes.push('اللون ' + (col.target === 'secondary' ? 'الثانوي' : 'الأساسي') + ' -> ' + col.color);
-    }
-
-    if (t.includes('زجاج')) {
-      d.glass = !t.includes('اطف') && !t.includes('ايقف');
-      changes.push((d.glass ? 'تفعيل' : 'إيقاف') + ' الوضع الزجاجي');
-    }
-    if (t.includes('دائري')) {
-      const val = t.includes('كبير') ? 24 : t.includes('صغير') ? 6 : 14;
-      d.radius = val;
-      changes.push('الزوايا -> ' + val + 'px');
-    }
-    if (t.includes('خط') || t.includes('حرف')) {
-      const val = t.includes('كبير') ? 110 : t.includes('صغير') ? 92 : 100;
-      d.fontScale = val;
-      changes.push('حجم الخط -> ' + val + '%');
-    }
-    if (t.includes('استرجع') || t.includes('رجعت') || t.includes('رجع') || t.includes('مسح') || t.includes('افتراضي') || t.includes('اصلي') || t.includes('reset')) {
-      this.resetDesign();
-      return 'تم استرجاع التصميم الافتراضي بالكامل.';
-    }
-    if (t.includes('محوه') || t.includes('موقع') || t.includes('حذف')) {
-      changes.push('لا يمكن حذف قسم: المساعد يعدّل الألوان والشكل فقط.');
-    }
-
-    if (changes.length === 0) {
-      if (t.includes('لون')) return 'حدد اللون الذي تريده، مثال: "خلي اللون الأساسي أزرق" أو "الخلفية ذهبية" أو اكتب رمز Hex مثل #ff0000';
-      return '💡 جرب:\n• "اللون الأساسي أزرق"\n• "الخلفية سوداء"\n• "الخط كبير"\n• "زوايا دائرية"\n• "وضع زجاجي"\n• "استرجاع التصميم"\nأو اكتب رمز لون مثل #8b5cf6';
-    }
-
-    this.saveDesign(d);
-    this.applyDesign();
-    return '✅ تم:\n' + changes.map(c => '• ' + c).join('\n');
-  },
-
-  designReplyEn(text) {
-    const t = text.toLowerCase();
-    let changes = [];
-    const d = this.getDesign();
-
-    const col = this.parseColorFromCommand(text);
-    if (col) {
-      if (col.target === 'secondary') d.secondary = col.color;
-      else d.primary = col.color;
-      changes.push((col.target === 'secondary' ? 'secondary' : 'primary') + ' color -> ' + col.color);
-    }
-
-    if (t.includes('glass')) { d.glass = true; changes.push('Glass mode ON'); }
-    if (t.includes('round')) {
-      const val = t.includes('big') ? 24 : t.includes('small') ? 6 : 14;
-      d.radius = val; changes.push('Radius -> ' + val + 'px');
-    }
-    if (t.includes('font') || t.includes('text')) {
-      const val = t.includes('big') ? 110 : t.includes('small') ? 92 : 100;
-      d.fontScale = val; changes.push('Font size -> ' + val + '%');
-    }
-    if (t.includes('reset') || t.includes('default') || t.includes('clear')) {
-      this.resetDesign();
-      return 'Design restored to default.';
-    }
-
-    if (changes.length === 0) {
-      if (t.includes('color')) return 'Which color? Try "make primary color blue" or enter a hex like #ff0000';
-      return '💡 Try:\n• "make primary color blue"\n• "background black"\n• "bigger font"\n• "glass mode"\n• "rounded corners"\n• "reset design"';
-    }
-    this.saveDesign(d);
-    this.applyDesign();
-    return '✅ Done:\n' + changes.map(c => '• ' + c).join('\n');
-  },
-
-  processDesignCommand(text) {
-    if (!text || !text.trim()) return { ok: false, reply: this.t('design_hint') };
-    const out = this.lang === 'en' ? this.designReplyEn(text) : this.designReplyAr(text);
-    this.logActivity('design', 'Design command executed', text);
-    return { ok: true, reply: out };
-  },
-
   resetDesign() {
     localStorage.removeItem('nove_design');
+    localStorage.removeItem('nove_pages');
+    const noteBar = document.getElementById('cz-note-bar');
+    if (noteBar) noteBar.remove();
+    const pagesWrap = document.getElementById('cz-pages-wrap');
+    if (pagesWrap) pagesWrap.remove();
+    document.querySelectorAll('[id^="cpage-link-"]').forEach(a => {
+      const li = a.parentElement;
+      if (li) li.remove();
+    });
     ['--primary', '--primary-light', '--secondary', '--secondary-light', '--gradient', '--gradient-soft', '--glow'].forEach(v => {
       document.documentElement.style.removeProperty(v);
     });
@@ -1096,305 +1154,326 @@ const APP = {
     document.documentElement.style.fontSize = '';
     document.querySelectorAll('.navbar, .product-card, .feature-card, .admin-panel-card, .modal').forEach(el => { el.style.background = ''; el.style.backdropFilter = ''; el.style.border = ''; });
     document.querySelectorAll('.hero, .features, .about, .site-footer').forEach(el => el.style.display = '');
-    this.logActivity('design', 'Design reset to default');
+    this.logActivity('customizer', 'Design reset to default');
   },
 
-  renderDesignAI(content) {
+  renderCustomizer(content) {
+    const d = this.getDesign();
+    const pick = d.pick || 'all';
+    const targets = this.CZ_TARGETS || {};
     content.innerHTML = `
       <div class="admin-topbar">
         <div>
           <h1>
-            <span class="tb-icon">\u{1F916}</span>
-            ${this.t('designai_manage')}
-            <div class="tb-sub">${this.t('designai_sub')}</div>
+            <span class="tb-icon">\u{1F3A8}</span>
+            ${this.t('customizer_manage')}
+            <div class="tb-sub">${this.t('customizer_sub')}</div>
           </h1>
         </div>
         <div class="admin-topbar-actions">
-          <button class="btn-admin btn-admin-ghost" onclick="APP.setAiDesignMode(!APP.getAiDesignMode())" id="ai-mode-btn" style="border-color:var(--secondary);">\u{1F916} ${this.t('ai_mode_on')}</button>
-          <button class="btn-admin btn-admin-ghost" onclick="APP.clearDesignChat()">\u{1F504} ${this.t('new_chat')}</button>
-          <button class="btn-admin btn-admin-ghost" onclick="APP.resetDesign(); APP.pushDesignChat('${this.t('design_reset_done')}', 'ai');">\u{1F5D1}\uFE0F ${this.t('reset_design')}</button>
+          <a class="btn-admin btn-admin-primary" href="../index.html" target="_blank" rel="noopener">\u{1F30D} ${this.t('cz_open_store')}</a>
+          <button class="btn-admin btn-admin-ghost" onclick="APP.resetDesign(); APP.showAdminSection('customizer');">\u{1F5D1}\uFE0F ${this.t('reset_design')}</button>
         </div>
       </div>
 
-      <div class="admin-form-card" style="max-width:820px;">
+      <div class="admin-form-card" style="max-width:860px;">
         <div class="form-card-header">
-          <div class="fc-icon">\u{1F4AC}</div>
-          <h3>${this.t('design_ai_title')}</h3>
+          <div class="fc-icon">\u{1F441}\uFE0F</div>
+          <h3>${this.t('cz_live_preview')}</h3>
         </div>
-        <div id="design-chat" class="design-chat" style="height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:0.6rem; padding:1rem; background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:12px; margin-bottom:1rem;"></div>
-        <div style="display:flex; gap:0.6rem;">
-          <input type="text" id="design-command" placeholder="${this.t('design_placeholder')}" style="flex:1; padding:0.8rem 1rem; border-radius:12px; border:1.5px solid var(--border); background:rgba(255,255,255,0.04); color:var(--gray-100); outline:none;" onkeydown="if(event.key==='Enter')APP.runDesignCommand()">
-          <button class="btn-admin btn-admin-primary" onclick="APP.runDesignCommand()">\u{1F680} ${this.t('run_design')}</button>
+        <div style="position:relative; border-radius:12px; overflow:hidden; border:1px solid var(--border); background:#0b0e13;">
+          <div style="display:flex; align-items:center; gap:0.6rem; padding:0.5rem 0.8rem; background:rgba(255,255,255,0.05); border-bottom:1px solid var(--border);">
+            <span style="width:10px; height:10px; border-radius:50%; background:#ff5f57;"></span>
+            <span style="width:10px; height:10px; border-radius:50%; background:#febc2e;"></span>
+            <span style="width:10px; height:10px; border-radius:50%; background:#28c840;"></span>
+            <span style="flex:1; font-size:0.72rem; color:var(--gray-400); text-align:center;">NOVE STOR</span>
+            <button class="btn-admin btn-admin-ghost" style="padding:0.2rem 0.6rem; font-size:0.7rem;" onclick="document.getElementById('cz-preview').src = '../index.html'">\u{1F504} ${this.t('cz_refresh')}</button>
+          </div>
+          <iframe id="cz-preview" src="../index.html" style="width:100%; height:420px; border:0; display:block; background:#0b0e13;"></iframe>
         </div>
+      </div>
+
+      <div class="admin-form-card" style="max-width:860px; margin-top:1.2rem;">
+        <div class="form-card-header">
+          <div class="fc-icon">\u{1F4C5}</div>
+          <h3>${this.t('cz_pick_target')}</h3>
+        </div>
+        <div id="cz-targets" style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
+          ${Object.keys(targets).map(k => `
+            <button class="design-chip ${pick === k ? 'cz-active' : ''}" id="czt-${k}" onclick="APP.pickTarget('${k}')" style="border:1.5px solid ${pick === k ? 'var(--secondary)' : 'var(--border)'}; background:${pick === k ? 'rgba(34,211,238,0.15)' : 'rgba(255,255,255,0.04)'};">
+              ${targets[k].icon} ${this.t('cz_' + k)}
+            </button>`).join('')}
+        </div>
+
+        <div class="admin-form-card" style="margin-top:0.5rem; padding:1rem;">
+          <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="form-group">
+              <label>${this.t('cz_primary')}</label>
+              <input type="color" id="cz-primary" value="${d.primary || '#7c3aed'}" onchange="APP.pickColor('primary', this.value)" style="width:100%; height:42px; border-radius:10px; border:1px solid var(--border); background:transparent; cursor:pointer;">
+              <div id="cz-primary-hex" style="font-size:0.7rem; color:var(--gray-400); margin-top:4px;">${d.primary || '#7c3aed'}</div>
+            </div>
+            <div class="form-group">
+              <label>${this.t('cz_secondary')}</label>
+              <input type="color" id="cz-secondary" value="${d.secondary || '#22d3ee'}" onchange="APP.pickColor('secondary', this.value)" style="width:100%; height:42px; border-radius:10px; border:1px solid var(--border); background:transparent; cursor:pointer;">
+              <div id="cz-secondary-hex" style="font-size:0.7rem; color:var(--gray-400); margin-top:4px;">${d.secondary || '#22d3ee'}</div>
+            </div>
+          </div>
+
+          <div class="form-group" style="margin-top:1rem;">
+            <label>${this.t('cz_radius')} — <span id="cz-radius-val">${d.radius || 14}</span>px</label>
+            <input type="range" id="cz-radius" min="0" max="30" value="${d.radius || 14}" oninput="APP.liveRange('radius', this.value); document.getElementById('cz-radius-val').textContent=this.value;">
+          </div>
+
+          <div class="form-group" style="margin-top:1rem;">
+            <label>${this.t('cz_border_glow')} — <span id="cz-glow-val">${d.glowStrength || 30}</span>%</label>
+            <input type="range" id="cz-glow" min="0" max="100" value="${d.glowStrength || 30}" oninput="APP.liveRange('glowStrength', this.value); document.getElementById('cz-glow-val').textContent=this.value;">
+          </div>
+
+          <div class="form-group" style="margin-top:1rem;">
+            <label>${this.t('cz_font')} — <span id="cz-font-val">${d.fontScale || 100}</span>%</label>
+            <input type="range" id="cz-font" min="85" max="120" value="${d.fontScale || 100}" oninput="APP.liveRange('fontScale', this.value); document.getElementById('cz-font-val').textContent=this.value;">
+          </div>
+
+          <div class="form-group" style="margin-top:1rem; display:flex; align-items:center; gap:0.7rem;">
+            <input type="checkbox" id="cz-glass" ${d.glass ? 'checked' : ''} onchange="APP.pickColor('glass', this.checked ? '1' : '0')">
+            <label for="cz-glass" style="margin:0; cursor:pointer;">\u{A76C} ${this.t('glass_mode')}</label>
+          </div>
+
+          <div style="margin-top:1.2rem; text-align:left;">
+            <button class="btn-admin btn-admin-primary" onclick="APP.showCustomPageForm()">+ ${this.t('cz_add_page')}</button>
+            <button class="btn-admin btn-admin-ghost" onclick="APP.showCustomNoteForm()">\u{1F4DD} ${this.t('cz_add_text')}</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-form-card" style="max-width:860px; margin-top:1.2rem;">
+        <div class="form-card-header">
+          <div class="fc-icon">\u{1F4C1}</div>
+          <h3>${this.t('cz_pages')}</h3>
+        </div>
+        <div id="cz-pages-list">${this.customPagesHTML()}</div>
+        <div style="margin-top:0.8rem; font-size:0.75rem; color:var(--gray-500);">\u{1F4E1} ${this.t('cz_pages_note')}</div>
       </div>
     `;
-    this.designChatInit();
+    this.currentPick = pick;
   },
 
-  designChatInit() {
-    const c = document.getElementById('design-chat');
-    if (!c) return;
+  // ===== CUSTOMIZER: سجل الشرائح style (بدءا من 0) =====
+  CZ_TARGETS: {
+    all: { icon: '\u{1F310}', sel: ':root' },
+    navbar: { icon: '\u{1F4CC}', sel: '.navbar' },
+    hero: { icon: '\u{1F305}', sel: '.hero' },
+    products: { icon: '\u{1F6D2}', sel: '#products' },
+    features: { icon: '\u2728', sel: '#features' },
+    about: { icon: '\u2139\uFE0F', sel: '#about' },
+    footer: { icon: '\u{1F9FE}', sel: '.site-footer, .footer' },
+    buttons: { icon: '\u{1F518}', sel: '.btn-primary, .btn-secondary, .auth-submit-btn, .btn-admin' },
+    cards: { icon: '\u{1F3B4}', sel: '.product-card, .feature-card' },
+    modals: { icon: '\u{1F5F3}', sel: '.modal' }
+  },
+
+  pickTarget(key) {
     const d = this.getDesign();
-    const status = d.primary ? '<span style="color:' + d.primary + ';">\u25CF</span> ' + d.primary : '\u25CB افتراضي';
-    c.innerHTML = '<div class="design-msg ai">\u{1F916} ' + this.t('design_welcome') + '<br><small>' + this.t('current_color') + ': ' + status + '</small></div>';
-    const modeBtn = document.getElementById('ai-mode-btn');
-    if (modeBtn) modeBtn.textContent = this.getAiDesignMode() ? '\u{1F916} ' + this.t('ai_mode_on') : '\u{1F47B} ' + this.t('ai_mode_off');
-  },
-
-  pushDesignChat(text, who) {
-    const c = document.getElementById('design-chat');
-    if (!c) return;
-    const div = document.createElement('div');
-    div.className = 'design-msg ' + who;
-    div.style.maxWidth = '85%';
-    div.style.padding = '0.7rem 1rem';
-    div.style.borderRadius = '12px';
-    div.style.fontSize = '0.88rem';
-    div.style.whiteSpace = 'pre-line';
-    div.style.lineHeight = '1.7';
-    if (who === 'user') {
-      div.style.background = 'var(--primary)';
-      div.style.color = '#fff';
-      div.style.alignSelf = 'flex-end';
-      div.style.marginRight = '1rem';
-    } else {
-      div.style.background = 'rgba(255,255,255,0.06)';
-      div.style.color = 'var(--gray-100)';
-      div.style.border = '1px solid var(--border)';
-      div.style.alignSelf = 'flex-start';
+    d.pick = key;
+    this.saveDesign(d);
+    this.currentPick = key;
+    document.querySelectorAll('#cz-targets .design-chip').forEach(b => {
+      b.classList.remove('cz-active');
+      b.style.border = '1.5px solid var(--border)';
+      b.style.background = 'rgba(255,255,255,0.04)';
+    });
+    const btn = document.getElementById('czt-' + key);
+    if (btn) {
+      btn.classList.add('cz-active');
+      btn.style.border = '1.5px solid var(--secondary)';
+      btn.style.background = 'rgba(34,211,238,0.15)';
     }
-    div.textContent = text;
-    c.appendChild(div);
-    c.scrollTop = c.scrollHeight;
+    this.logActivity('customizer', 'Customizer target selected', key);
   },
 
-  runDesignCommand() {
-    const input = document.getElementById('design-command');
-    if (!input) return;
-    const text = input.value.trim();
-    if (!text) return;
-    input.value = '';
-    this.pushDesignChat(text, 'user');
-    if (this.getAiDesignMode()) {
-      this.pushDesignChat('\u23F3 ' + this.t('design_typing') + '...', 'ai typing');
-      this.processDesignAI(text).then(res => {
-        this.removeTypingMsg();
-        if (res.design) this.applyAIDesign(res.design);
-        this.pushDesignChat(res.reply, 'ai');
-        this.logActivity('design', 'AI design command', text);
-      }).catch(() => {
-        this.removeTypingMsg();
-        const res = this.processDesignCommand(text);
-        this.pushDesignChat(this.t('design_fallback') + '\n' + res.reply, 'ai');
-        this.logActivity('design', 'Design command (fallback)', text);
-      });
+  pickColor(field, value, target) {
+    const d = this.getDesign();
+    if (field === 'glass') {
+      d.glass = value === '1' || value === true;
     } else {
-      const res = this.processDesignCommand(text);
-      this.pushDesignChat(res.reply, 'ai');
-      this.logActivity('design', 'Design command executed', text);
+      d[field] = value;
     }
+    this.saveDesign(d);
+    this.applyDesign();
+    if (field === 'primary') {
+      const hex = document.getElementById('cz-primary-hex');
+      if (hex) hex.textContent = value;
+    } else if (field === 'secondary') {
+      const hex = document.getElementById('cz-secondary-hex');
+      if (hex) hex.textContent = value;
+    }
+    this.logActivity('customizer', 'Color changed', field + ' -> ' + value);
   },
 
-  getAiDesignMode() {
-    const s = JSON.parse(localStorage.getItem('nove_settings') || '{}');
-    return s.designAi !== false;
+  liveRange(field, value) {
+    const d = this.getDesign();
+    d[field] = parseFloat(value);
+    this.saveDesign(d);
+    this.applyDesign();
   },
 
   getAiConfig() {
-    return (JSON.parse(localStorage.getItem('nove_settings') || '{}').ai) || {};
-  },
-
-  async aiFullChat(messages) {
-    const cfg = this.getAiConfig();
-    if (cfg.apiKey && cfg.baseUrl) {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 60000);
-      try {
-        const url = cfg.baseUrl.replace(/\/$/, '') + (cfg.baseUrl.includes('/chat/completions') ? '' : '/chat/completions');
-        const resp = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.apiKey },
-          body: JSON.stringify({ model: cfg.model || 'gpt-4o-mini', messages }),
-          signal: ctrl.signal
-        });
-        if (!resp.ok) throw new Error('HTTP ' + resp.status);
-        const data = await resp.json();
-        return (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
-          ? data.choices[0].message.content.trim()
-          : '';
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 60000);
     try {
-      const resp = await fetch('https://text.pollinations.ai/openai', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: 'openai-fast', messages, private: true }),
-        signal: ctrl.signal
-      });
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const data = await resp.json();
-      return (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
-        ? data.choices[0].message.content.trim()
-        : '';
-    } finally {
-      clearTimeout(timer);
+      return (JSON.parse(localStorage.getItem('nove_settings') || '{}').ai) || {};
+    } catch (e) {
+      return {};
     }
   },
 
-  setAiDesignMode(on) {
-    const s = JSON.parse(localStorage.getItem('nove_settings') || '{}');
-    s.designAi = !!on;
-    localStorage.setItem('nove_settings', JSON.stringify(s));
-    const btn = document.getElementById('ai-mode-btn');
-    if (btn) btn.textContent = on ? '\u{1F916} ' + this.t('ai_mode_on') : '\u{1F47B} ' + this.t('ai_mode_off');
+  customPagesHTML() {
+    const pages = this.getCustomPages();
+    if (!pages.length) return '<div style="font-size:0.8rem; color:var(--gray-500);">' + this.t('cz_no_pages') + '</div>';
+    return pages.map(p => `
+      <div style="display:flex; align-items:center; gap:0.7rem; padding:0.6rem 0; border-bottom:1px solid var(--border);">
+        <span style="font-size:1.2rem;">${p.icon || '\u{1F4C4}'}</span>
+        <strong style="flex:1;">${this.esc(p.title)}</strong>
+        <button class="btn-admin btn-admin-ghost" style="padding:0.25rem 0.6rem; font-size:0.72rem;" onclick="APP.deleteCustomPage('${p.id}')">\u{1F5D1}\uFE0F</button>
+      </div>`).join('');
   },
 
-  aiSystemPrompt() {
+  deleteCustomPage(id) {
+    const pages = this.getCustomPages().filter(p => p.id !== id);
+    localStorage.setItem('nove_pages', JSON.stringify(pages));
+    this.logActivity('customizer', 'Custom page deleted', String(id));
+    this.showAdminSection('customizer');
+  },
+
+  showCustomPageForm() {
+    const content = document.getElementById('admin-content');
+    if (!content) return;
+    content.innerHTML = `
+      <div class="admin-topbar">
+        <div>
+          <h1>
+            <span class="tb-icon">\u{1F4C4}</span>
+            ${this.t('cz_add_page')}
+          </h1>
+        </div>
+        <div class="admin-topbar-actions">
+          <button class="btn-admin btn-admin-ghost" onclick="APP.showAdminSection('customizer')">\u2190 ${this.t('back_to_customizer')}</button>
+        </div>
+      </div>
+      <div class="admin-form-card" style="max-width:720px;">
+        <div class="form-card-header">
+          <div class="fc-icon">\u{1F4C4}</div>
+          <h3>${this.t('cz_page_new')}</h3>
+        </div>
+        <form onsubmit="APP.saveCustomPage(event)">
+          <div class="form-group">
+            <label>${this.t('cz_page_title')}</label>
+            <input type="text" id="cpage-title" placeholder="${this.t('cz_page_title_ph')}" required>
+          </div>
+          <div class="form-group">
+            <label>${this.t('cz_page_icon')}</label>
+            <input type="text" id="cpage-icon" placeholder="\u{1F4C4}" maxlength="8">
+          </div>
+          <div class="form-group">
+            <label>${this.t('cz_page_content')}</label>
+            <textarea id="cpage-content" rows="10" placeholder="${this.t('cz_page_content_ph')}"></textarea>
+          </div>
+          <button type="submit" class="btn-admin btn-admin-primary">+ ${this.t('cz_save_page')}</button>
+        </form>
+      </div>
+    `;
+  },
+
+  getCustomPages() {
+    try {
+      return JSON.parse(localStorage.getItem('nove_pages')) || [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveCustomPage(e) {
+    e.preventDefault();
+    const title = document.getElementById('cpage-title').value.trim();
+    const icon = document.getElementById('cpage-icon').value.trim() || '\u{1F4C4}';
+    const content = document.getElementById('cpage-content').value.trim();
+    if (!title) { this.showToast(this.t('cz_page_title_required'), 'error'); return; }
+    const pages = this.getCustomPages();
+    const id = 'p' + Date.now();
+    pages.push({ id, title, icon, content });
+    localStorage.setItem('nove_pages', JSON.stringify(pages));
+    this.logActivity('customizer', 'Custom page added', title);
+    this.showToast(this.t('cz_page_added'), 'success');
+    this.showAdminSection('customizer');
+  },
+
+  showCustomNoteForm() {
+    const content = document.getElementById('admin-content');
+    if (!content) return;
     const d = this.getDesign();
-    return 'You are NOVE, a friendly smart assistant inside the admin panel of the NOVE STOR online store (a static website that sells FiveM & Discord scripts). ' +
-      'You have the ability to search the web: when the conversation includes a "[WEB RESULTS]" block, use it as the source of truth to answer the user. ' +
-      'The user talks to you in Arabic or English. You can change the store\'s design instantly. ' +
-      'Design settings you control:\n' +
-      '- primary: main theme color as hex (e.g. #7c3aed)\n' +
-      '- secondary: secondary gradient color as hex (e.g. #22d3ee)\n' +
-      '- radius: corner roundness in px (4 to 24)\n' +
-      '- fontScale: font size percentage (85 to 120)\n' +
-      '- glass: true or false (glassmorphism effect)\n' +
-      'Current design: primary=' + (d.primary || '#7c3aed') + ', secondary=' + (d.secondary || '#22d3ee') +
-      ', radius=' + (d.radius || 14) + ', fontScale=' + (d.fontScale || 100) + ', glass=' + (d.glass ? 'true' : 'false') + '.\n' +
-      'RULES:\n' +
-      '1. If the user asks to change the design, the look, the colors, the theme, the font, the corners/roundness, or the glass effect - respond with ONLY one valid JSON object, no markdown, no extra text, like this exactly:\n' +
-      '{"reply":"<short friendly confirmation in the user\'s language>","design":{"primary":"#hex"}}\n' +
-      'Put in "design" only the keys that must change. "reply" must be short and in the same language the user wrote (Arabic if Arabic, English if English).\n' +
-      '2. If the user asks any other question (general information, anything in the world, the store, recommendations, etc.), answer helpfully in the user\'s language, using any "[WEB RESULTS]" content provided. Plain text, maximum 4 short sentences. No JSON.\n' +
-      '3. Always reply in the same language the user uses. Be warm and helpful.';
+    content.innerHTML = `
+      <div class="admin-topbar">
+        <div>
+          <h1>
+            <span class="tb-icon">\u{1F4DD}</span>
+            ${this.t('cz_add_text')}
+          </h1>
+        </div>
+        <div class="admin-topbar-actions">
+          <button class="btn-admin btn-admin-ghost" onclick="APP.showAdminSection('customizer')">\u2190 ${this.t('back_to_customizer')}</button>
+        </div>
+      </div>
+      <div class="admin-form-card" style="max-width:720px;">
+        <div class="form-card-header">
+          <div class="fc-icon">\u{1F4DD}</div>
+          <h3>${this.t('cz_note_new')}</h3>
+        </div>
+        <form onsubmit="APP.saveCustomNote(event)">
+          <div class="form-group">
+            <label>${this.t('cz_note_text')}</label>
+            <textarea id="cnote-text" rows="4" placeholder="${this.t('cz_note_ph')}">${this.esc(d.note || '')}</textarea>
+          </div>
+          <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
+            <div class="form-group">
+              <label>${this.t('cz_note_color')}</label>
+              <input type="color" id="cnote-color" value="${d.noteColor || '#f5c518'}" style="width:100%; height:42px; border-radius:10px; border:1px solid var(--border); background:transparent;">
+            </div>
+            <div class="form-group">
+              <label>${this.t('cz_note_show')}</label>
+              <select id="cnote-show" style="width:100%; padding:0.6rem 0.8rem; border-radius:10px; border:1px solid var(--border); background:rgba(255,255,255,0.04); color:var(--gray-100);">
+                <option value="all">${this.t('cz_note_show_all')}</option>
+                <option value="top">${this.t('cz_note_show_top')}</option>
+              </select>
+            </div>
+          </div>
+          <button type="submit" class="btn-admin btn-admin-primary">\u{1F4BE} ${this.t('cz_save_note')}</button>
+          ${d.note ? '<button type="button" class="btn-admin btn-admin-ghost" onclick="APP.removeCustomNote()">\u{1F5D1}\uFE0F ' + this.t('cz_remove_note') + '</button>' : ''}
+        </form>
+      </div>
+    `;
   },
 
-  async aiWebSearch(query) {
-    const q = encodeURIComponent(query);
-    const sources = [];
-    const tryFetch = async (url, parser) => {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 8000);
-      try {
-        const r = await fetch(url, { signal: ctrl.signal });
-        if (!r.ok) return null;
-        const d = await r.json();
-        return parser(d);
-      } catch (e) {
-        return null;
-      } finally {
-        clearTimeout(timer);
-      }
-    };
-    const wiki = await tryFetch(
-      'https://ar.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + q + '&format=json&srlimit=3&utf8=1&origin=*',
-      d => (d.query && d.query.search || []).map(s => s.title)
-    );
-    if (wiki && wiki.length) {
-      const pages = await tryFetch(
-        'https://ar.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(wiki[0]) + '&prop=extracts&exintro=1&explaintext=1&format=json&utf8=1&origin=*',
-        d => {
-          const p = d.query && d.query.pages ? Object.values(d.query.pages)[0] : null;
-          return p && p.extract ? p.extract.slice(0, 400) : null;
-        }
-      );
-      if (pages) sources.push('● ' + wiki[0] + ': ' + pages);
-    }
-    const enWiki = await tryFetch(
-      'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + q + '&format=json&srlimit=3&utf8=1&origin=*',
-      d => (d.query && d.query.search || []).map(s => s.title)
-    );
-    if (enWiki && enWiki.length) {
-      const pages = await tryFetch(
-        'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(enWiki[0]) + '&prop=extracts&exintro=1&explaintext=1&format=json&utf8=1&origin=*',
-        d => {
-          const p = d.query && d.query.pages ? Object.values(d.query.pages)[0] : null;
-          return p && p.extract ? p.extract.slice(0, 400) : null;
-        }
-      );
-      if (pages) sources.push('● ' + enWiki[0] + ': ' + pages);
-    }
-    if (sources.length === 0) {
-      const ddg = await tryFetch(
-        'https://api.duckduckgo.com/?q=' + q + '&format=json&no_html=1&skip_disambig=1',
-        d => (d.AbstractText || (d.RelatedTopics && d.RelatedTopics[0] && d.RelatedTopics[0].Text)) || null
-      );
-      if (ddg) sources.push('● DDG: ' + ddg.slice(0, 400));
-    }
-    return sources.length ? '[WEB RESULTS]\n' + sources.join('\n') : '';
-  },
-
-  isWebQuestion(text) {
-    return /[؟?]/.test(text) ||
-      /^(ما|ماهو|ما هو|وش|وشو|كيف|كيفيه|كيفية|ليش|لماذا|متى|مين|من هو|أين|وين|عرفني|اشرح|شرح|بحث|ابحث|عن|معلومات|ايش|وش يعني|means|what|who|when|where|why|how|explain|tell me|search|about|definition)/i.test(this.normalizeCommand(text).trim());
-  },
-
-  async processDesignAI(text) {
-    const history = this.designChatHistory || [];
-    let webCtx = '';
-    if (this.isWebQuestion(text)) {
-      webCtx = await this.aiWebSearch(text);
-    }
-    const messages = [
-      { role: 'system', content: this.aiSystemPrompt() },
-      ...(webCtx ? [{ role: 'user', content: webCtx }] : []),
-      ...history.slice(-8),
-      { role: 'user', content: text }
-    ];
-    const raw = await this.aiFullChat(messages);
-    if (!raw) throw new Error('Empty AI response');
-    const m = raw.match(/\{[\s\S]*\}/);
-    let obj = null;
-    if (m) {
-      try { obj = JSON.parse(m[0]); } catch (e) { obj = null; }
-    }
-    this.designChatHistory = [...history, { role: 'user', content: text }, { role: 'assistant', content: raw }].slice(-12);
-    if (obj && (obj.design || obj.reply)) {
-      return { applied: !!obj.design, reply: obj.reply || 'OK', design: obj.design || null };
-    }
-    return { applied: false, reply: raw, design: null };
-  },
-
-  applyAIDesign(design) {
+  saveCustomNote(e) {
+    e.preventDefault();
     const d = this.getDesign();
-    if (design.primary) d.primary = design.primary;
-    if (design.secondary) d.secondary = design.secondary;
-    if (design.radius !== undefined && design.radius !== null) d.radius = parseInt(design.radius, 10);
-    if (design.fontScale !== undefined && design.fontScale !== null) d.fontScale = parseInt(design.fontScale, 10);
-    if (design.glass === true) d.glass = true;
-    if (design.glass === false) d.glass = false;
+    const text = document.getElementById('cnote-text').value.trim();
+    if (!text) { this.showToast(this.t('cz_note_empty'), 'error'); return; }
+    d.note = text;
+    d.noteColor = document.getElementById('cnote-color').value;
+    d.noteShow = document.getElementById('cnote-show').value === 'all' ? 'all' : 'top';
     this.saveDesign(d);
     this.applyDesign();
+    this.logActivity('customizer', 'Custom note saved', text.slice(0, 60));
+    this.showToast(this.t('cz_note_saved'), 'success');
+    this.showAdminSection('customizer');
   },
 
-  removeTypingMsg() {
-    const c = document.getElementById('design-chat');
-    if (!c) return;
-    c.querySelectorAll('.design-msg.typing').forEach(el => el.remove());
-  },
-
-  clearDesignChat() {
-    this.designChatHistory = [];
-    const c = document.getElementById('design-chat');
-    if (c) c.innerHTML = '';
-    this.designChatInit();
-    this.pushDesignChat(this.t('design_reset_done'), 'ai');
-  },
-
-  quickDesign(kind, val) {
+  removeCustomNote() {
     const d = this.getDesign();
-    if (kind === 'glass') d.glass = true;
-    else if (kind === 'radius') d.radius = parseInt(val, 10);
-    else if (kind === 'font') d.fontScale = parseInt(val, 10);
-    else d[kind] = val;
+    delete d.note; delete d.noteColor; delete d.noteShow;
     this.saveDesign(d);
     this.applyDesign();
-    this.pushDesignChat('\u2705 ' + this.t('design_applied') + ' (' + kind + ' = ' + val + ')', 'ai');
+    this.logActivity('customizer', 'Custom note removed');
+    this.showToast(this.t('cz_note_removed'), 'success');
+    this.showAdminSection('customizer');
   },
 
   // ===== DATA =====
@@ -2997,7 +3076,7 @@ const APP = {
       || (section === 'settings' && isOwnerTop)
       || (section === 'permissions' && isOwnerTop)
       || (section === 'logs' && isOwnerTop)
-      || (section === 'designai' && isOwnerTop)
+      || (section === 'customizer' && isOwnerTop)
       || (perm !== undefined && APP.can(email, perm));
     if (!allowed) {
       content.innerHTML = `
@@ -3016,7 +3095,7 @@ const APP = {
     else if (section === 'permissions') this.renderAdminPermissions(content);
     else if (section === 'settings') this.renderAdminSettings(content);
     else if (section === 'logs') this.renderAdminLogs(content);
-    else if (section === 'designai') this.renderDesignAI(content);
+    else if (section === 'customizer') this.renderCustomizer(content);
     else this.renderAdminDashboard();
 
     document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
@@ -3745,7 +3824,7 @@ const APP = {
       if (sec === 'permissions') { btn.style.display = isTop ? '' : 'none'; return; }
       if (sec === 'settings') { btn.style.display = isTop ? '' : 'none'; return; }
       if (sec === 'logs') { btn.style.display = isTop ? '' : 'none'; return; }
-      if (sec === 'designai') { btn.style.display = isTop ? '' : 'none'; return; }
+      if (sec === 'customizer') { btn.style.display = isTop ? '' : 'none'; return; }
       if (isTop) { btn.style.display = ''; return; }
       const permsOf = map[sec] || null;
       const ok = permsOf ? permsOf.some(p => this.can(email, p)) : false;
