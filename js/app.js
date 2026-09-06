@@ -988,19 +988,6 @@ const APP = {
     if (ordersEl) ordersEl.textContent = this.orders.length;
   },
 
-  createRainDrops() {
-    if (document.querySelectorAll('.rain-drop').length > 0) return;
-    for (let i = 0; i < 14; i++) {
-      const drop = document.createElement('div');
-      drop.className = 'rain-drop';
-      drop.style.left = (Math.random() * 100) + '%';
-      drop.style.animationDuration = (6 + Math.random() * 8) + 's';
-      drop.style.animationDelay = (Math.random() * 10) + 's';
-      drop.style.height = (30 + Math.random() * 70) + 'px';
-      document.body.appendChild(drop);
-    }
-  },
-
   loadSettings() {
     const settings = JSON.parse(localStorage.getItem('nove_settings')) || {};
     if (settings.storeName) this.STORE_NAME = settings.storeName;
