@@ -192,9 +192,18 @@ const APP = {
       cz_note_empty: 'اكتب النص أولاً',
       cz_pointer_on: 'إيقاف وضع الإشارة',
       cz_pointer_off: 'وضع الإشارة',
-      cz_pointer_hint: 'فعّل وضع الإشارة ثم مرّر الفأرة على أي عنصر في المتجر — أيقونة ✏️ و🗑️ تظهر لك لتعديل أو حذف.',
+      cz_pointer_hint: 'فعّل وضع الإشارة ثم اضغط على أي عنصر في المتجر — تفتح لوحة تعديل كاملة (نص، لون، حدود، توهج).',
       cz_edit_here: 'اكتب النص الجديد هنا:',
       cz_text_updated: 'تم تحديث النص',
+      cz_style_saved: 'تم تحديث التنسيق',
+      cz_style_reset: 'تم إرجاع التنسيق الافتراضي',
+      cz_field_style: 'التنسيق',
+      cz_field_color: 'لون النص',
+      cz_field_bg: 'لون الخلفية',
+      cz_field_border: 'لون الحدود',
+      cz_field_glow: 'التوهج',
+      cz_field_radius: 'انحناء الحواف',
+      cz_field_shadow: 'الظل',
       cz_text_deleted: 'تم إخفاء العنصر',
       cz_navbar_hidden: 'تم إخفاء شريط التنقل (من قائمة تعديل تنسيقه)',
       cz_section_hidden: 'تم إخفاء هذا القسم',
@@ -622,9 +631,18 @@ const APP = {
       confirm_delete: 'Are you sure you want to delete?',
       cz_pointer_on: 'Disable pointer mode',
       cz_pointer_off: 'Pointer mode',
-      cz_pointer_hint: 'Turn on pointer mode, then hover any element in the store — ✏️ and 🗑️ appear to edit or delete.',
+      cz_pointer_hint: 'Turn on pointer mode, then click any element in the store — a full edit panel opens (text, color, border, glow).',
       cz_edit_here: 'Type the new text here:',
       cz_text_updated: 'Text updated',
+      cz_style_saved: 'Style updated',
+      cz_style_reset: 'Style reset to default',
+      cz_field_style: 'Style',
+      cz_field_color: 'Text color',
+      cz_field_bg: 'Background',
+      cz_field_border: 'Border color',
+      cz_field_glow: 'Glow',
+      cz_field_radius: 'Corner radius',
+      cz_field_shadow: 'Shadow',
       cz_text_deleted: 'Element hidden',
       cz_navbar_hidden: 'Navbar hidden (restyle it from Edit List)',
       cz_section_hidden: 'Section hidden',
@@ -1300,7 +1318,7 @@ const APP = {
     `;
     const prevFrame = document.getElementById('cz-preview');
     if (prevFrame) {
-      prevFrame.addEventListener('load', () => { APP.applyHidden(); APP.applyTextEdits(); if (APP.pointerMode) APP.armPointerMode(); });
+      prevFrame.onload = () => { APP.applyHidden(); APP.applyTextEdits(); APP.applyElementStyles(); if (APP.pointerMode) APP.armPointerMode(); };
     }
     this.currentPick = pick;
   },
@@ -1338,24 +1356,28 @@ const APP = {
 
   pointerHover(e) {
     if (!this.pointerMode) return;
-    const t = e.target;
-    if (!t || !t.closest) return;
-    const el = t.closest('a, button, h1, h2, h3, h4, p, span, strong, li, .product-card, .feature-card, .hero-badge, .section-header, .navbar, .site-footer, #cz-note-bar, [id^="cpage-sec-"]');
-    if (!el) return;
-    if (this.pointerEl && this.pointerEl !== el) this.pointerEl.classList.remove('cz-pointer-hover');
-    this.pointerEl = el;
-    el.classList.add('cz-pointer-hover');
+    try {
+      const t = e.target;
+      if (!t || !t.closest) return;
+      const el = t.closest('a, button, h1, h2, h3, h4, p, span, strong, li, .product-card, .feature-card, .hero-badge, .section-header, .navbar, .site-footer, #cz-note-bar, [id^="cpage-sec-"]');
+      if (!el || el === this.pointerEl) return;
+      if (this.pointerEl && this.pointerEl.classList) this.pointerEl.classList.remove('cz-pointer-hover');
+      this.pointerEl = el;
+      el.classList.add('cz-pointer-hover');
+    } catch (err) {}
   },
 
   pointerClick(e) {
     if (!this.pointerMode) return;
-    const t = e.target;
-    if (!t || !t.closest) return;
-    const el = t.closest('a, button, h1, h2, h3, h4, p, span, strong, li, .product-card, .feature-card, .hero-badge, .section-header, .navbar, .site-footer, #cz-note-bar, [id^="cpage-sec-"]');
-    if (!el) return;
-    e.preventDefault();
-    e.stopPropagation();
-    this.showPointerBar(el);
+    try {
+      const t = e.target;
+      if (!t || !t.closest) return;
+      const el = t.closest('a, button, h1, h2, h3, h4, p, span, strong, li, .product-card, .feature-card, .hero-badge, .section-header, .navbar, .site-footer, #cz-note-bar, [id^="cpage-sec-"]');
+      if (!el) return;
+      e.preventDefault();
+      e.stopPropagation();
+      this.showPointerBar(el);
+    } catch (err) {}
   },
 
   showPointerBar(el) {
@@ -1408,23 +1430,162 @@ const APP = {
     if (!frame || !frame.contentDocument) return;
     const doc = frame.contentDocument;
     const wrap = doc.createElement('div');
-    wrap.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; z-index:99998; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;';
+    wrap.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; z-index:99998; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center;';
     const box = doc.createElement('div');
-    box.style.cssText = 'width:min(90%,520px); background:#0b0e13; border:1px solid #22d3ee; border-radius:14px; padding:1rem; color:#fff; font-family:inherit;';
-    box.innerHTML = '<div style="font-weight:700; margin-bottom:0.6rem;">\u270F\uFE0F ' + this.esc(this.t('cz_edit_here')) + '</div><textarea id="cz-pointer-editor" style="width:100%; height:130px; background:#131722; color:#fff; border:1px solid var(--border); border-radius:10px; padding:0.6rem; font-size:0.9rem; resize:vertical; font-family:inherit;">' + this.esc((el.textContent || '').trim()) + '</textarea>' +
-      '<div style="display:flex; gap:0.6rem; justify-content:flex-end; margin-top:0.6rem;"><button class="pb-cancel" style="border:0; border-radius:8px; padding:0.45rem 0.9rem; background:rgba(255,255,255,.08); color:#fff; cursor:pointer; font-weight:700;">' + this.t('cz_cancel') + '</button>' +
-      '<button class="pb-save" style="border:0; border-radius:8px; padding:0.45rem 0.9rem; background:var(--gradient, #22d3ee); color:#041016; cursor:pointer; font-weight:700;">' + this.t('cz_save') + '</button></div>';
-    box.querySelector('.pb-cancel').onclick = () => { wrap.remove(); };
-    box.querySelector('.pb-save').onclick = () => {
-      const val = box.querySelector('#cz-pointer-editor').value.trim();
-      this.applyPointerEdit(el, val);
-      wrap.remove();
+    box.style.cssText = 'width:min(92%,460px); max-height:86%; overflow-y:auto; background:#0b0e13; border:1px solid #22d3ee; border-radius:14px; padding:1rem; color:#fff; font-family:inherit;';
+    const st = this.czElementStyles();
+    const cur = st[this.czElementSelector(el)] || {};
+    const v = (x, fb) => x === undefined || x === null || x === '' ? fb : x;
+    const mkV = (prop, label, val, type) => {
+      const row = doc.createElement('div');
+      row.style.cssText = 'display:flex; align-items:center; gap:0.6rem; margin-top:0.6rem;';
+      const lab = doc.createElement('label');
+      lab.style.cssText = 'flex:1; font-size:0.78rem; color:var(--gray-300);';
+      lab.textContent = label;
+      const inp = doc.createElement('input');
+      inp.type = type || 'color';
+      inp.value = val;
+      inp.style.cssText = 'width:52px; height:30px; border-radius:8px; border:1px solid var(--border); background:transparent; cursor:pointer; padding:1px;';
+      inp.addEventListener('input', () => {
+        el.style[prop] = inp.value;
+        this.saveElementStyle(el, prop, inp.value);
+        this.refreshHex(inp, inp.value);
+      });
+      row.appendChild(lab);
+      row.appendChild(inp);
+      return row;
     };
+    const mkVr = (prop, label, val, min, max, step, unit) => {
+      const row = doc.createElement('div');
+      row.style.cssText = 'display:flex; align-items:center; gap:0.6rem; margin-top:0.6rem;';
+      const lab = doc.createElement('label');
+      lab.style.cssText = 'flex:1; font-size:0.78rem; color:var(--gray-300);';
+      lab.textContent = label;
+      const inp = doc.createElement('input');
+      inp.type = 'range';
+      inp.min = min; inp.max = max; inp.step = step || 1;
+      inp.value = val;
+      inp.style.cssText = 'flex:1; max-width:150px; cursor:pointer;';
+      const span = doc.createElement('span');
+      span.style.cssText = 'min-width:38px; text-align:right; font-size:0.75rem; color:var(--gray-400);';
+      span.textContent = val + (unit || '');
+      inp.addEventListener('input', () => {
+        const n = parseFloat(inp.value);
+        el.style[prop] = n + (unit || '');
+        this.saveElementStyle(el, prop, inp.value);
+        span.textContent = n + (unit || '');
+      });
+      row.appendChild(lab);
+      row.appendChild(inp);
+      row.appendChild(span);
+      return row;
+    };
+
+    box.innerHTML = '<div style="font-weight:800; margin-bottom:0.4rem; font-size:0.95rem;">\u{1F3A8} ' + this.esc(this.pointerName(el)) + '</div>';
+    box.appendChild(mkV('color', this.t('cz_field_color'), v(cur.color, '#ffffff')));
+    box.appendChild(mkV('background', this.t('cz_field_bg'), v(cur.background, '#111118')));
+    box.appendChild(mkV('borderColor', this.t('cz_field_border'), v(cur.borderColor, '#1e1e2a')));
+    box.appendChild(mkVr('borderWidth', this.t('cz_field_border') + ' (0-6)', v(cur.borderWidth, 0), 0, 6, 1, 'px'));
+    box.appendChild(mkVr('borderRadius', this.t('cz_field_radius') + ' (0-30)', v(cur.borderRadius, 0), 0, 30, 1, 'px'));
+    box.appendChild(mkVr('boxShadow', this.t('cz_field_glow') + ' (0-80)', v(cur.glow, 0), 0, 80, 1, 'px'));
+    box.appendChild(mkVr('gapW', this.t('cz_field_shadow'), v(cur.gapW, 0), 0, 0, 1, 'px'));
+
+    const textRow = doc.createElement('div');
+    textRow.style.cssText = 'margin-top:0.9rem;';
+    const tLab = doc.createElement('label');
+    tLab.style.cssText = 'font-size:0.78rem; color:var(--gray-300); display:block; margin-bottom:0.3rem;';
+    tLab.textContent = this.t('cz_edit_here');
+    const ta = doc.createElement('textarea');
+    ta.style.cssText = 'width:100%; height:74px; background:#131722; color:#fff; border:1px solid var(--border); border-radius:10px; padding:0.6rem; font-size:0.9rem; resize:vertical; font-family:inherit;';
+    ta.value = (el.textContent || '').trim();
+    textRow.appendChild(tLab);
+    textRow.appendChild(ta);
+
+    const btnRow = doc.createElement('div');
+    btnRow.style.cssText = 'display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.9rem;';
+    const hx = doc.createElement('div');
+    hx.style.cssText = 'flex:1; font-size:0.68rem; color:var(--gray-500); align-self:center;';
+    hx.textContent = this.t('cz_pointer_hint');
+    const reset = doc.createElement('button');
+    reset.textContent = this.t('reset_design');
+    reset.style.cssText = 'border:0; border-radius:8px; padding:0.45rem 0.8rem; background:rgba(239,68,68,.15); color:#f87171; cursor:pointer; font-weight:700;';
+    reset.addEventListener('click', () => {
+      this.resetElementStyle(el);
+      box.remove();
+    });
+    const save = doc.createElement('button');
+    save.textContent = this.t('cz_save');
+    save.style.cssText = 'border:0; border-radius:8px; padding:0.45rem 1rem; background:linear-gradient(135deg,#22d3ee,#7c3aed); color:#fff; cursor:pointer; font-weight:800;';
+    save.addEventListener('click', () => {
+      this.applyPointerEdit(el, ta.value.trim());
+      box.remove();
+    });
+    btnRow.appendChild(hx);
+    btnRow.appendChild(reset);
+    btnRow.appendChild(save);
+    box.appendChild(textRow);
+    box.appendChild(btnRow);
     wrap.appendChild(box);
     doc.body.appendChild(wrap);
-    const ta = box.querySelector('#cz-pointer-editor');
     ta.focus();
     ta.select();
+  },
+
+  refreshHex(inp, val) {
+    const par = inp.parentElement;
+    if (par && par.querySelector('.cz-hex')) {
+      par.querySelector('.cz-hex').textContent = val;
+    }
+  },
+
+  czElementStyles() {
+    try { return JSON.parse(localStorage.getItem('nove_estyles')) || {}; } catch (e) { return {}; }
+  },
+
+  saveElementStyle(el, prop, value) {
+    const sel = this.czElementSelector(el);
+    if (!sel) return;
+    const styles = this.czElementStyles();
+    if (!styles[sel]) styles[sel] = {};
+    if (prop === 'boxShadow') {
+      styles[sel].glow = parseFloat(value) || 0;
+      el.style.boxShadow = styles[sel].glow > 0 ? '0 0 ' + (styles[sel].glow) + 'px ' + this.rgba((styles[sel].color || '#22d3ee'), 0.35) : '';
+    } else {
+      styles[sel][prop] = value;
+    }
+    localStorage.setItem('nove_estyles', JSON.stringify(styles));
+  },
+
+  resetElementStyle(el) {
+    const sel = this.czElementSelector(el);
+    if (!sel) return;
+    const styles = this.czElementStyles();
+    if (styles[sel]) {
+      delete styles[sel];
+      localStorage.setItem('nove_estyles', JSON.stringify(styles));
+    }
+    ['color', 'background', 'borderColor', 'borderWidth', 'borderRadius', 'boxShadow'].forEach(p => {
+      el.style[p] = '';
+    });
+  },
+
+  applyElementStyles() {
+    const styles = this.czElementStyles();
+    const frame = document.getElementById('cz-preview');
+    const root = (frame && frame.contentDocument) ? frame.contentDocument : document;
+    Object.keys(styles).forEach(sel => {
+      try {
+        root.querySelectorAll(sel).forEach(el => {
+          const s = styles[sel];
+          if (s.color) el.style.color = s.color;
+          if (s.background) el.style.background = s.background;
+          if (s.borderColor) el.style.borderColor = s.borderColor;
+          if (s.borderWidth !== undefined) el.style.borderWidth = s.borderWidth + 'px';
+          if (s.borderRadius !== undefined) el.style.borderRadius = s.borderRadius + 'px';
+          if (s.glow) el.style.boxShadow = '0 0 ' + s.glow + 'px ' + this.rgba((s.color || '#22d3ee'), 0.35);
+        });
+      } catch (e) {}
+    });
   },
 
   applyPointerEdit(el, val) {
@@ -1615,6 +1776,7 @@ const APP = {
     }
     this.saveDesign(d);
     this.applyDesign();
+    this.applyElementStyles();
     if (field === 'primary') {
       const hex = document.getElementById('cz-primary-hex');
       if (hex) hex.textContent = value;
@@ -1630,6 +1792,7 @@ const APP = {
     d[field] = parseFloat(value);
     this.saveDesign(d);
     this.applyDesign();
+    this.applyElementStyles();
   },
 
   getAiConfig() {
