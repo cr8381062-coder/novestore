@@ -18,6 +18,11 @@ const APP = {
       serviceId: '',
       templateId: '',
       publicKey: ''
+    },
+    ai: {
+      baseUrl: '',
+      apiKey: '',
+      model: ''
     }
   },
 
@@ -121,12 +126,18 @@ const APP = {
       emailjs_template: 'Template ID',
       emailjs_public: 'Public Key',
       emailjs_hint: 'بدون هذه المفاتيح يظهر كود التحقق داخل المتجر للتجربة فقط.',
+      ai_settings: 'إعدادات الذكاء الاصطناعي (المساعد)',
+      ai_settings_desc: 'اربط مفتاحك ليشتغل المساعد بذكاء كامل ويفهم أي سؤال.',
+      ai_base_url: 'المقر (Base URL)',
+      ai_api_key: 'API Key',
+      ai_model: 'الموديل (Model)',
+      ai_settings_hint: 'بدون مفتاح يحاول المساعد استخدام الخدمة المجانية — إن كانت متاحة. للأمان: المفتاح يبقى في متصفحك فقط.',
       designai_manage: 'برمجة التصميم',
       designai_sub: 'مساعد ذكي لتعديل شكل المتجر والألوان',
       design_ai_title: 'المساعد الذكي للتصميم',
-      design_placeholder: 'اكتب أمر تصميم... مثل: اللون الأساسي أزرق',
-      run_design: 'تنفيذ',
-      design_welcome: 'أهلاً! أنا مساعد التصميم. أخبرني بما تريد تغييره — الألوان، الخطوط، الزوايا، الوضع الزجاجي... وسأنفذ فوراً.',
+      design_placeholder: 'اكتب أي شيء... مثل: خلّي المتجر أزرق داكن أو وش تنصحني بالتصميم؟',
+      run_design: 'إرسال',
+      design_welcome: 'أهلاً! أنا مساعد المتجر الذكي 🧠. اسألني أي شيء عن التصميم — الألوان، الأزرار، الفواصل، أو حتى اسأل عن رأيي. وسأنفذ التغييرات فوراً.',
       current_color: 'اللون الحالي',
       design_hint: 'اكتب أمر تصميم بالعربية أو الإنجليزية',
       design_applied: 'تم تطبيق التغيير على المتجر',
@@ -141,6 +152,11 @@ const APP = {
       glass_mode: 'وضع زجاجي',
       rounded: 'زوايا دائرية',
       bigger_font: 'خط أكبر',
+      ai_mode_on: 'ذكاء متصل',
+      ai_mode_off: 'وضع محلي',
+      new_chat: 'محادثة جديدة',
+      design_typing: 'يكتب',
+      design_fallback: '⚠️ الذكاء مشغول الآن — طبقت الوضع المحلي:',
       added_cart: 'تمت الإضافة للسلة',
       already_cart: 'المنتج موجود بالفعل في السلة',
       order_confirmed: 'تم تأكيد الطلب!',
@@ -483,12 +499,18 @@ const APP = {
       emailjs_template: 'Template ID',
       emailjs_public: 'Public Key',
       emailjs_hint: 'Without these keys, the code is shown in the store for testing only.',
+      ai_settings: 'AI (Assistant) settings',
+      ai_settings_desc: 'Connect your own key so the assistant works at full intelligence and understands any question.',
+      ai_base_url: 'Base URL',
+      ai_api_key: 'API Key',
+      ai_model: 'Model',
+      ai_settings_hint: 'Without a key, the assistant tries the free service — not guaranteed. The key stays only in your browser.',
       designai_manage: 'Design AI',
       designai_sub: 'Smart assistant to restyle the store and colors',
       design_ai_title: 'Design Smart Assistant',
-      design_placeholder: 'Type a design command... e.g. make primary color blue',
-      run_design: 'Run',
-      design_welcome: 'Hi! I am the design assistant. Tell me what to change — colors, fonts, corners, glass mode... I will apply it instantly.',
+      design_placeholder: 'Ask anything... e.g. make the store dark blue or what do you recommend?',
+      run_design: 'Send',
+      design_welcome: 'Hi! I am the store\'s smart assistant 🧠. Ask me anything about design — colors, buttons, sections, or even my opinion. I will apply changes instantly.',
       current_color: 'Current color',
       design_hint: 'Type a design command in Arabic or English',
       design_applied: 'Change applied to the store',
@@ -503,6 +525,11 @@ const APP = {
       glass_mode: 'Glass mode',
       rounded: 'Rounded corners',
       bigger_font: 'Bigger font',
+      ai_mode_on: 'AI connected',
+      ai_mode_off: 'Local mode',
+      new_chat: 'New chat',
+      design_typing: 'typing',
+      design_fallback: '⚠️ AI is busy — used local mode:',
       added_cart: 'added to cart',
       already_cart: 'Product already in cart',
       order_confirmed: 'Order Confirmed!',
@@ -844,6 +871,7 @@ const APP = {
     if (settings.paypal && settings.paypal !== 'YOUR_PAYPAL_CLIENT_ID') this.PAYPAL_CLIENT_ID = settings.paypal;
     if (settings.social) this.SOCIAL_LINKS = Object.assign({}, this.SOCIAL_LINKS, settings.social);
     if (settings.emailjs) this.SETTINGS.emailjs = settings.emailjs;
+    if (settings.ai) this.SETTINGS.ai = settings.ai;
     localStorage.setItem('nove_settings', JSON.stringify(settings));
     this.applyDesign();
   },
@@ -1082,6 +1110,8 @@ const APP = {
           </h1>
         </div>
         <div class="admin-topbar-actions">
+          <button class="btn-admin btn-admin-ghost" onclick="APP.setAiDesignMode(!APP.getAiDesignMode())" id="ai-mode-btn" style="border-color:var(--secondary);">\u{1F916} ${this.t('ai_mode_on')}</button>
+          <button class="btn-admin btn-admin-ghost" onclick="APP.clearDesignChat()">\u{1F504} ${this.t('new_chat')}</button>
           <button class="btn-admin btn-admin-ghost" onclick="APP.resetDesign(); APP.pushDesignChat('${this.t('design_reset_done')}', 'ai');">\u{1F5D1}\uFE0F ${this.t('reset_design')}</button>
         </div>
       </div>
@@ -1120,6 +1150,8 @@ const APP = {
     const d = this.getDesign();
     const status = d.primary ? '<span style="color:' + d.primary + ';">\u25CF</span> ' + d.primary : '\u25CB افتراضي';
     c.innerHTML = '<div class="design-msg ai">\u{1F916} ' + this.t('design_welcome') + '<br><small>' + this.t('current_color') + ': ' + status + '</small></div>';
+    const modeBtn = document.getElementById('ai-mode-btn');
+    if (modeBtn) modeBtn.textContent = this.getAiDesignMode() ? '\u{1F916} ' + this.t('ai_mode_on') : '\u{1F47B} ' + this.t('ai_mode_off');
   },
 
   pushDesignChat(text, who) {
@@ -1156,8 +1188,149 @@ const APP = {
     if (!text) return;
     input.value = '';
     this.pushDesignChat(text, 'user');
-    const res = this.processDesignCommand(text);
-    this.pushDesignChat(res.reply, 'ai');
+    if (this.getAiDesignMode()) {
+      this.pushDesignChat('\u23F3 ' + this.t('design_typing') + '...', 'ai typing');
+      this.processDesignAI(text).then(res => {
+        this.removeTypingMsg();
+        if (res.design) this.applyAIDesign(res.design);
+        this.pushDesignChat(res.reply, 'ai');
+        this.logActivity('design', 'AI design command', text);
+      }).catch(() => {
+        this.removeTypingMsg();
+        const res = this.processDesignCommand(text);
+        this.pushDesignChat(this.t('design_fallback') + '\n' + res.reply, 'ai');
+        this.logActivity('design', 'Design command (fallback)', text);
+      });
+    } else {
+      const res = this.processDesignCommand(text);
+      this.pushDesignChat(res.reply, 'ai');
+      this.logActivity('design', 'Design command executed', text);
+    }
+  },
+
+  getAiDesignMode() {
+    const s = JSON.parse(localStorage.getItem('nove_settings') || '{}');
+    return s.designAi !== false;
+  },
+
+  getAiConfig() {
+    return (JSON.parse(localStorage.getItem('nove_settings') || '{}').ai) || {};
+  },
+
+  async aiFullChat(messages) {
+    const cfg = this.getAiConfig();
+    if (cfg.apiKey && cfg.baseUrl) {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 60000);
+      try {
+        const url = cfg.baseUrl.replace(/\/$/, '') + (cfg.baseUrl.includes('/chat/completions') ? '' : '/chat/completions');
+        const resp = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + cfg.apiKey },
+          body: JSON.stringify({ model: cfg.model || 'gpt-4o-mini', messages }),
+          signal: ctrl.signal
+        });
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const data = await resp.json();
+        return (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
+          ? data.choices[0].message.content.trim()
+          : '';
+      } finally {
+        clearTimeout(timer);
+      }
+    }
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 60000);
+    try {
+      const resp = await fetch('https://text.pollinations.ai/openai', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ model: 'openai-fast', messages, private: true }),
+        signal: ctrl.signal
+      });
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const data = await resp.json();
+      return (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content)
+        ? data.choices[0].message.content.trim()
+        : '';
+    } finally {
+      clearTimeout(timer);
+    }
+  },
+
+  setAiDesignMode(on) {
+    const s = JSON.parse(localStorage.getItem('nove_settings') || '{}');
+    s.designAi = !!on;
+    localStorage.setItem('nove_settings', JSON.stringify(s));
+    const btn = document.getElementById('ai-mode-btn');
+    if (btn) btn.textContent = on ? '\u{1F916} ' + this.t('ai_mode_on') : '\u{1F47B} ' + this.t('ai_mode_off');
+  },
+
+  aiSystemPrompt() {
+    const d = this.getDesign();
+    return 'You are NOVE, a friendly smart assistant inside the admin panel of the NOVE STOR online store (a static website that sells FiveM & Discord scripts). ' +
+      'The user talks to you in Arabic or English. You can change the store\'s design instantly. ' +
+      'Design settings you control:\n' +
+      '- primary: main theme color as hex (e.g. #7c3aed)\n' +
+      '- secondary: secondary gradient color as hex (e.g. #22d3ee)\n' +
+      '- radius: corner roundness in px (4 to 24)\n' +
+      '- fontScale: font size percentage (85 to 120)\n' +
+      '- glass: true or false (glassmorphism effect)\n' +
+      'Current design: primary=' + (d.primary || '#7c3aed') + ', secondary=' + (d.secondary || '#22d3ee') +
+      ', radius=' + (d.radius || 14) + ', fontScale=' + (d.fontScale || 100) + ', glass=' + (d.glass ? 'true' : 'false') + '.\n' +
+      'RULES:\n' +
+      '1. If the user asks to change the design, the look, the colors, the theme, the font, the corners/roundness, or the glass effect - respond with ONLY one valid JSON object, no markdown, no extra text, like this exactly:\n' +
+      '{"reply":"<short friendly confirmation in the user\'s language>","design":{"primary":"#hex"}}\n' +
+      'Put in "design" only the keys that must change. "reply" must be short and in the same language the user wrote (Arabic if Arabic, English if English).\n' +
+      '2. If the user asks any other question about the store, how something works, recommendations, words of encouragement, etc., just answer helpfully and briefly in the user\'s language. Plain text, maximum 4 short sentences. No JSON.\n' +
+      '3. Always reply in the same language the user uses. Be warm and helpful.';
+  },
+
+  async processDesignAI(text) {
+    const history = this.designChatHistory || [];
+    const messages = [
+      { role: 'system', content: this.aiSystemPrompt() },
+      ...history.slice(-8),
+      { role: 'user', content: text }
+    ];
+    const raw = await this.aiFullChat(messages);
+    if (!raw) throw new Error('Empty AI response');
+    const m = raw.match(/\{[\s\S]*\}/);
+    let obj = null;
+    if (m) {
+      try { obj = JSON.parse(m[0]); } catch (e) { obj = null; }
+    }
+    this.designChatHistory = [...history, { role: 'user', content: text }, { role: 'assistant', content: raw }].slice(-12);
+    if (obj && (obj.design || obj.reply)) {
+      return { applied: !!obj.design, reply: obj.reply || 'OK', design: obj.design || null };
+    }
+    return { applied: false, reply: raw, design: null };
+  },
+
+  applyAIDesign(design) {
+    const d = this.getDesign();
+    if (design.primary) d.primary = design.primary;
+    if (design.secondary) d.secondary = design.secondary;
+    if (design.radius !== undefined && design.radius !== null) d.radius = parseInt(design.radius, 10);
+    if (design.fontScale !== undefined && design.fontScale !== null) d.fontScale = parseInt(design.fontScale, 10);
+    if (design.glass === true) d.glass = true;
+    if (design.glass === false) d.glass = false;
+    this.saveDesign(d);
+    this.applyDesign();
+  },
+
+  removeTypingMsg() {
+    const c = document.getElementById('design-chat');
+    if (!c) return;
+    c.querySelectorAll('.design-msg.typing').forEach(el => el.remove());
+  },
+
+  clearDesignChat() {
+    this.designChatHistory = [];
+    const c = document.getElementById('design-chat');
+    if (c) c.innerHTML = '';
+    this.designChatInit();
+    this.pushDesignChat(this.t('design_reset_done'), 'ai');
   },
 
   quickDesign(kind, val) {
@@ -1168,7 +1341,7 @@ const APP = {
     else d[kind] = val;
     this.saveDesign(d);
     this.applyDesign();
-    this.pushDesignChat('✅ ' + this.t('design_applied') + ' (' + kind + ' = ' + val + ')', 'ai');
+    this.pushDesignChat('\u2705 ' + this.t('design_applied') + ' (' + kind + ' = ' + val + ')', 'ai');
   },
 
   // ===== DATA =====
@@ -3650,6 +3823,35 @@ const APP = {
         <div style="font-size:0.7rem; color:var(--gray-500);">${this.t('emailjs_hint')}</div>
       </div>
 
+      <div class="admin-form-card" style="margin-top:1.5rem; max-width:760px;">
+        <div class="form-card-header">
+          <div class="fc-icon">\u{1F916}</div>
+          <h3>${this.t('ai_settings')}</h3>
+        </div>
+        <div style="font-size:0.8rem; color:var(--gray-300); line-height:1.7; margin-bottom:1rem;">
+          \u{1F4E1} ${this.t('ai_settings_desc')}
+          <ol style="margin:0.6rem 0; padding-right:1.2rem; font-size:0.75rem; color:var(--gray-400); line-height:1.8;">
+            <li>\u{1F50D} سجّل مجاناً في <a href="https://console.groq.com/keys" target="_blank" style="color:#8ab4f8;">Groq</a> (مجاني بدون بطاقة) وانسخ مفتاحاً</li>
+            <li>\u{1F4DD} الصق هنا: <strong style="color:var(--gray-200);">https://api.groq.com/openai/v1</strong> كمقر، واسم الموديل <strong style="color:var(--gray-200);">llama-3.3-70b-versatile</strong></li>
+            <li>\u{1F511} الصق المفتاح في حقل API Key</li>
+            <li>\u{1F4BE} احفظ — وإذا تركته فارغاً سأحاول الخدمة المجانية (غير مضمونة)</li>
+          </ol>
+        </div>
+        <div class="form-group">
+          <label>${this.t('ai_base_url')}</label>
+          <input type="text" id="setting-ai-base" value="${(APP.getAiConfig().baseUrl) || 'https://api.groq.com/openai/v1'}" placeholder="https://api.groq.com/openai/v1">
+        </div>
+        <div class="form-group">
+          <label>${this.t('ai_api_key')}</label>
+          <input type="password" id="setting-ai-key" value="${APP.getAiConfig().apiKey || ''}" placeholder="gsk_xxxxxxxx" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label>${this.t('ai_model')}</label>
+          <input type="text" id="setting-ai-model" value="${APP.getAiConfig().model || 'llama-3.3-70b-versatile'}" placeholder="llama-3.3-70b-versatile">
+        </div>
+        <div style="font-size:0.7rem; color:var(--gray-500);">${this.t('ai_settings_hint')}</div>
+      </div>
+
       <button class="btn-admin btn-admin-primary" style="margin-top:1.5rem;" onclick="APP.saveSettings()">\u{1F4BE} ${this.t('save_all')}</button>
     `;
   },
@@ -3742,12 +3944,18 @@ const APP = {
       templateId: gid('setting-emailjs-template'),
       publicKey: gid('setting-emailjs-public')
     };
+    APP.SETTINGS.ai = {
+      baseUrl: gid('setting-ai-base'),
+      apiKey: gid('setting-ai-key'),
+      model: gid('setting-ai-model')
+    };
     localStorage.setItem('nove_settings', JSON.stringify({
       storeName: APP.STORE_NAME,
       logo: APP.STORE_LOGO,
       paypal: APP.PAYPAL_CLIENT_ID,
       social: APP.SOCIAL_LINKS,
-      emailjs: APP.SETTINGS.emailjs
+      emailjs: APP.SETTINGS.emailjs,
+      ai: APP.SETTINGS.ai
     }));
     document.querySelectorAll('.nav-brand-text').forEach(el => {
       el.innerHTML = APP.STORE_NAME.toUpperCase().replace(/\s+(\S+)$/, ' <span>$1</span>');
