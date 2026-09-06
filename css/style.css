@@ -3544,14 +3544,12 @@ body::before {
 
 /* ===== PREMIUM REVEAL / CONSISTENT MOTION ===== */
 .reveal {
-  opacity: 0;
-  transform: translateY(14px);
-  will-change: opacity, transform;
-  transition: opacity 0.35s ease-out,
-              transform 0.35s ease-out;
+  opacity: 1;
+  transform: translateY(22px);
+  will-change: transform;
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
 }
 .reveal.visible {
-  opacity: 1;
   transform: none;
 }
 
@@ -3566,11 +3564,11 @@ body::before {
 }
 
 .hero-content {
-  animation: heroPremiumIn 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: heroPremiumIn 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 @keyframes heroPremiumIn {
-  from { opacity: 0; transform: translateY(18px); }
-  to { opacity: 1; transform: none; }
+  from { transform: translateY(18px); }
+  to { transform: none; }
 }
 
 .btn-primary, .btn-nav, .auth-submit-btn, .btn-admin {
@@ -3597,11 +3595,11 @@ body::before {
 }
 
 .modal-overlay.active .modal {
-  animation: modalPremiumIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: modalPremiumIn 0.28s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 @keyframes modalPremiumIn {
-  from { opacity: 0; transform: translateY(14px) scale(0.97); }
-  to { opacity: 1; transform: none; }
+  from { transform: translateY(14px) scale(0.97); }
+  to { transform: none; }
 }
 
 .navbar.scrolled {
