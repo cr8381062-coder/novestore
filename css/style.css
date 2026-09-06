@@ -3545,33 +3545,20 @@ body::before {
 /* ===== PREMIUM REVEAL / CONSISTENT MOTION ===== */
 .reveal {
   opacity: 0;
-  transform: translateY(28px) scale(0.97);
-  will-change: opacity, transform, filter;
-  transition: opacity 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
-              transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1),
-              filter 0.7s ease;
-  filter: blur(3px);
+  transform: translateY(14px);
+  will-change: opacity, transform;
+  transition: opacity 0.35s ease-out,
+              transform 0.35s ease-out;
 }
 .reveal.visible {
   opacity: 1;
   transform: none;
-  filter: blur(0);
 }
-
-.product-card,
-.feature-card,
-.about-card {
-  perspective: 1200px;
-}
-.product-card .reveal-delay-1, .feature-card .reveal-delay-1 { transition-delay: 0.05s; }
-.product-card .reveal-delay-2, .feature-card .reveal-delay-2 { transition-delay: 0.1s; }
-.product-card .reveal-delay-3, .feature-card .reveal-delay-3 { transition-delay: 0.15s; }
-.product-card .reveal-delay-4, .feature-card .reveal-delay-4 { transition-delay: 0.2s; }
 
 .product-card:hover,
 .feature-card:hover,
 .about-card:hover {
-  transform: translateY(-6px) scale(1.015);
+  transform: translateY(-4px) scale(1.01);
   box-shadow:
     0 0 0 1px rgba(124, 58, 237, 0.12),
     0 28px 60px rgba(0, 0, 0, 0.65),
@@ -3579,19 +3566,19 @@ body::before {
 }
 
 .hero-content {
-  animation: heroPremiumIn 1s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: heroPremiumIn 0.55s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 @keyframes heroPremiumIn {
-  from { opacity: 0; transform: translateY(34px) scale(0.97); filter: blur(6px); }
-  to { opacity: 1; transform: none; filter: blur(0); }
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: none; }
 }
 
 .btn-primary, .btn-nav, .auth-submit-btn, .btn-admin {
   position: relative;
   overflow: hidden;
-  transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1),
-              box-shadow 0.35s ease,
-              background 0.3s ease;
+  transition: transform 0.2s cubic-bezier(0.2, 0.8, 0.2, 1),
+              box-shadow 0.25s ease,
+              background 0.25s ease;
 }
 .btn-primary::after, .auth-submit-btn::after {
   content: '';
@@ -3599,7 +3586,7 @@ body::before {
   inset: 0;
   background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.22) 50%, transparent 70%);
   transform: translateX(-120%);
-  transition: transform 0.6s ease;
+  transition: transform 0.4s ease;
 }
 .btn-primary:hover::after, .auth-submit-btn:hover::after {
   transform: translateX(120%);
@@ -3610,11 +3597,11 @@ body::before {
 }
 
 .modal-overlay.active .modal {
-  animation: modalPremiumIn 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  animation: modalPremiumIn 0.3s cubic-bezier(0.2, 0.8, 0.2, 1) both;
 }
 @keyframes modalPremiumIn {
-  from { opacity: 0; transform: translateY(30px) scale(0.94); filter: blur(4px); }
-  to { opacity: 1; transform: none; filter: blur(0); }
+  from { opacity: 0; transform: translateY(14px) scale(0.97); }
+  to { opacity: 1; transform: none; }
 }
 
 .navbar.scrolled {

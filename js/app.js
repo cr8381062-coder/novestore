@@ -2858,23 +2858,13 @@ const APP = {
   },
 
   initReveal() {
-    if (this._revealObs) this._revealObs.disconnect();
     const targets = document.querySelectorAll('.product-card, .feature-card, .about-card, .section-header, .hero-content');
-    if (!('IntersectionObserver' in window)) {
-      targets.forEach(el => el.classList.add('visible'));
-      return;
-    }
-    this._revealObs = new IntersectionObserver((entries) => {
-      entries.forEach(en => {
-        if (en.isIntersecting) {
-          en.target.classList.add('visible');
-          this._revealObs.unobserve(en.target);
-        }
+    requestAnimationFrame(() => {
+      targets.forEach((el, i) => {
+        el.classList.add('reveal');
+        el.style.transitionDelay = Math.min((i % 8) * 0.03, 0.18) + 's';
+        requestAnimationFrame(() => el.classList.add('visible'));
       });
-    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
-    targets.forEach(el => {
-      if (!el.classList.contains('reveal')) el.classList.add('reveal');
-      this._revealObs.observe(el);
     });
   },
 
