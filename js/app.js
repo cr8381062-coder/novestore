@@ -1435,19 +1435,21 @@ const APP = {
     wrap.id = 'cz-style-modal';
     wrap.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; z-index:99998; background:rgba(0,0,0,.6); display:flex; align-items:flex-start; justify-content:center; padding:6vh 1rem; overflow:auto;';
     const box = document.createElement('div');
-    box.style.cssText = 'width:min(94%,520px); background:#0b0e13; border:1px solid #22d3ee; border-radius:16px; padding:1.1rem; color:#fff; font-family:inherit; box-shadow:0 24px 70px rgba(0,0,0,.7);';
+    box.style.cssText = 'width:min(94%,520px); background:#0b0e13; border:1px solid #22d3ee; border-radius:16px; padding:1.1rem; color:#fff; font-family:inherit; box-shadow:0 24px 70px rgba(0,0,0,.7); position:relative;';
     const st = this.czElementStyles();
     const cur = st[this.czElementSelector(el)] || {};
     const v = (x, fb) => x === undefined || x === null || x === '' ? fb : x;
 
     const head = document.createElement('div');
-    head.style.cssText = 'display:flex; align-items:center; justify-content:space-between; margin-bottom:0.7rem;';
+    head.style.cssText = 'display:flex; align-items:center; justify-content:space-between; margin-bottom:0.7rem; cursor:grab; user-select:none;';
+    head.addEventListener('mousedown', (ev) => this.startDragPanel(ev, box, wrap));
     const title = document.createElement('div');
     title.style.cssText = 'font-weight:800; font-size:1rem;';
     title.textContent = '\u{1F3A8} ' + this.esc(this.pointerName(el));
     const xBtn = document.createElement('button');
     xBtn.textContent = '\u2715';
     xBtn.style.cssText = 'border:0; background:none; color:#a3a3a3; font-size:1.2rem; cursor:pointer; padding:0.2rem 0.5rem;';
+    xBtn.addEventListener('mousedown', (ev) => ev.stopPropagation());
     xBtn.addEventListener('click', () => wrap.remove());
     head.appendChild(title);
     head.appendChild(xBtn);
@@ -1550,6 +1552,30 @@ const APP = {
     document.body.appendChild(wrap);
     ta.focus();
     ta.select();
+  },
+
+  startDragPanel(ev, box, wrap) {
+    ev.preventDefault();
+    ev.stopPropagation();
+    if (ev.button !== 0) return;
+    const startX = ev.clientX, startY = ev.clientY;
+    const rect = box.getBoundingClientRect();
+    const offX = startX - rect.left, offY = startY - rect.top;
+    wrap.style.alignItems = 'flex-start';
+    wrap.style.justifyContent = 'flex-start';
+    box.style.left = rect.left + 'px';
+    box.style.top = rect.top + 'px';
+    box.style.margin = '0';
+    const move = (me) => {
+      box.style.left = Math.max(8, Math.min(window.innerWidth - 120, me.clientX - offX)) + 'px';
+      box.style.top = Math.max(8, Math.min(window.innerHeight - 60, me.clientY - offY)) + 'px';
+    };
+    const up = () => {
+      document.removeEventListener('mousemove', move);
+      document.removeEventListener('mouseup', up);
+    };
+    document.addEventListener('mousemove', move);
+    document.addEventListener('mouseup', up);
   },
 
   czElementStyles() {

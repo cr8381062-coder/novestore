@@ -179,14 +179,12 @@ body::before {
 .admin-panel-card,
 .admin-form-card,
 .admin-table {
-  animation: floatCard 9s ease-in-out infinite;
   box-shadow:
     0 0 0 1px rgba(124,58,237,0.04),
     0 20px 50px rgba(0,0,0,0.6),
     inset 0 1px 0 rgba(255,255,255,0.05),
     0 0 40px rgba(124,58,237,0.03);
   position: relative;
-  will-change: transform;
 }
 
 .product-card {
@@ -215,11 +213,6 @@ body::before {
 
 .product-card:nth-child(odd) { animation-delay: 0.06s; }
 
-@keyframes floatCard {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
-}
-
 .product-card:hover {
   transform: translateY(-4px);
 }
@@ -237,18 +230,7 @@ body::before {
   background: linear-gradient(120deg, transparent, rgba(124,58,237,0.08), transparent);
   transform: skewX(-20deg);
   pointer-events: none;
-  animation: shineSweep 9s ease-in-out infinite;
-  will-change: transform;
-}
-
-.admin-panel-card::before {
-  animation: none;
-}
-
-@keyframes shineSweep {
-  0% { left: -100%; }
-  45% { left: 200%; }
-  100% { left: 200%; }
+  visibility: hidden;
 }
 
 /* Buttons get a soft glow too */
@@ -267,7 +249,6 @@ body::before {
 /* Modal glows softly */
 .modal {
   box-shadow: 0 0 0 1px rgba(124,58,237,0.1), 0 30px 80px rgba(0,0,0,0.8), 0 0 60px rgba(124,58,237,0.08);
-  animation: floatCard 5s ease-in-out infinite;
 }
 
 /* Shimmering brand */
@@ -594,12 +575,6 @@ body::before {
   width: 200%;
   height: 200%;
   background: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.02) 0%, transparent 50%);
-  animation: heroGlow 8s ease-in-out infinite;
-}
-
-@keyframes heroGlow {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(-5%, 5%); }
 }
 
 .hero-content {
@@ -3204,13 +3179,8 @@ body::before {
   overflow: hidden;
   background: linear-gradient(135deg, #7c3aed 0%, #6d28d9 50%, #22d3ee 130%) !important;
   background-size: 200% 200% !important;
-  animation: luxGradientShift 6s ease infinite;
   border: none;
   transition: transform 0.25s ease, box-shadow 0.35s ease;
-}
-@keyframes luxGradientShift {
-  0%,100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 .btn-primary::after,
 .btn-admin-primary::after {
@@ -3220,12 +3190,11 @@ body::before {
   width: 60%; height: 100%;
   background: linear-gradient(110deg, transparent, rgba(255,255,255,0.4), transparent);
   transform: skewX(-22deg);
-  animation: luxShine 3.4s ease-in-out infinite;
+  opacity: 0;
 }
-@keyframes luxShine {
-  0% { left: -120%; }
-  55% { left: 220%; }
-  100% { left: 220%; }
+.btn-primary:hover::after,
+.btn-admin-primary:hover::after {
+  opacity: 1;
 }
 .btn-primary:hover,
 .btn-admin-primary:hover {
@@ -3249,12 +3218,7 @@ body::before {
     radial-gradient(circle 10px at 75% 65%, rgba(34,211,238,0.32) 0%, transparent 60%),
     radial-gradient(circle 18px at 60% 25%, rgba(245,197,24,0.18) 0%, transparent 60%);
   filter: blur(6px);
-  animation: auroraFloat 12s ease-in-out infinite alternate;
   pointer-events: none;
-}
-@keyframes auroraFloat {
-  0% { transform: translate(0,0) scale(1); opacity: 0.7; }
-  100% { transform: translate(3%, -4%) scale(1.15); opacity: 1; }
 }
 
 .hero h1 {
@@ -3263,11 +3227,6 @@ body::before {
   background-clip: text;
   -webkit-text-fill-color: transparent;
   filter: drop-shadow(0 6px 40px rgba(124,58,237,0.35));
-  animation: titleShimmer 8s ease-in-out infinite;
-}
-@keyframes titleShimmer {
-  0%,100% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
 }
 
 .hero-badge {
@@ -3411,11 +3370,6 @@ body::before {
   font-weight: 700;
   text-align: center;
   letter-spacing: 0.04em;
-  animation: countdownPulse 1.6s ease infinite;
-}
-@keyframes countdownPulse {
-  0%,100% { box-shadow: 0 0 0 0 rgba(245,197,24,0.25); }
-  50% { box-shadow: 0 0 22px 4px rgba(245,197,24,0.28); }
 }
 
 /* --- Modal refinements --- */
