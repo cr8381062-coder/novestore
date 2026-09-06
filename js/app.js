@@ -132,7 +132,7 @@ const APP = {
       ai_api_key: 'API Key',
       ai_model: 'الموديل (Model)',
       ai_settings_hint: 'بدون مفتاح يحاول المساعد استخدام الخدمة المجانية — إن كانت متاحة. للأمان: المفتاح يبقى في متصفحك فقط.',
-      customizer_manage: 'اختيار',
+      customizer_manage: 'قائمة تعديل',
       customizer_sub: 'ادخل على متجرك واختر أي عنصر لتغيير لونه وشكله ولمعان حوافه',
       cz_live_preview: 'معاينة حية للمتجر',
       cz_refresh: 'تحديث',
@@ -157,9 +157,15 @@ const APP = {
       cz_add_text: 'إضافة نص',
       cz_pages: 'الصفحات المخصصة',
       cz_pages_note: 'الصفحات المخصصة تظهر في قائمة المتجر العلوية وتفتح بأيقونة داخل المتجر.',
+      cz_notes: 'النصوص المخصصة',
+      cz_notes_note: 'اضغط تعديل لتغيير النص، أو حذف لإزالته.',
+      cz_no_notes: 'لا يوجد نص مخصص. اضغط "إضافة نص".',
       cz_no_pages: 'لا توجد صفحات مخصصة بعد. اضغط "إضافة صفحة".',
       back_to_customizer: 'رجوع للاختيار',
       cz_page_new: 'صفحة جديدة',
+      cz_page_edit: 'تعديل الصفحة',
+      cz_update_page: 'حفظ التعديلات',
+      cz_page_updated: 'تم تحديث الصفحة',
       cz_page_title: 'اسم الصفحة',
       cz_page_title_ph: 'مثال: الأسئلة الشائعة',
       cz_page_title_required: 'اكتب اسم الصفحة',
@@ -551,7 +557,7 @@ const APP = {
       ai_api_key: 'API Key',
       ai_model: 'Model',
       ai_settings_hint: 'Without a key, the assistant tries the free service — not guaranteed. The key stays only in your browser.',
-      customizer_manage: 'Customizer',
+      customizer_manage: 'Edit List',
       customizer_sub: 'Open your store and pick any element to change its color, shape, and glow',
       cz_live_preview: 'Live store preview',
       cz_refresh: 'Refresh',
@@ -576,9 +582,15 @@ const APP = {
       cz_add_text: 'Add text',
       cz_pages: 'Custom pages',
       cz_pages_note: 'Custom pages appear in the store navbar and open inside the store.',
+      cz_notes: 'Custom texts',
+      cz_notes_note: 'Click Edit to change the text, or Delete to remove it.',
+      cz_no_notes: 'No custom text. Click "Add text".',
       cz_no_pages: 'No custom pages yet. Click "Add page".',
       back_to_customizer: 'Back to Customizer',
       cz_page_new: 'New page',
+      cz_page_edit: 'Edit page',
+      cz_update_page: 'Save changes',
+      cz_page_updated: 'Page updated',
       cz_page_title: 'Page title',
       cz_page_title_ph: 'e.g. FAQs',
       cz_page_title_required: 'Enter a page title',
@@ -1254,8 +1266,29 @@ const APP = {
         <div id="cz-pages-list">${this.customPagesHTML()}</div>
         <div style="margin-top:0.8rem; font-size:0.75rem; color:var(--gray-500);">\u{1F4E1} ${this.t('cz_pages_note')}</div>
       </div>
+
+      <div class="admin-form-card" style="max-width:860px; margin-top:1.2rem;">
+        <div class="form-card-header">
+          <div class="fc-icon">\u{1F4DD}</div>
+          <h3>${this.t('cz_notes')}</h3>
+        </div>
+        <div id="cz-notes-list">${this.customNotesHTML()}</div>
+        <div style="margin-top:0.8rem; font-size:0.75rem; color:var(--gray-500);">\u{1F4E1} ${this.t('cz_notes_note')}</div>
+      </div>
     `;
     this.currentPick = pick;
+  },
+
+  customNotesHTML() {
+    const d = this.getDesign();
+    if (!d.note) return '<div style="font-size:0.8rem; color:var(--gray-500);">' + this.t('cz_no_notes') + '</div>';
+    return `
+      <div style="display:flex; align-items:center; gap:0.7rem; padding:0.6rem 0; border-bottom:1px solid var(--border);">
+        <span style="font-size:1.2rem; color:${this.esc(d.noteColor || '#f5c518')};">\u{1F4DD}</span>
+        <span style="flex:1; font-size:0.85rem; color:var(--gray-200); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${this.esc(d.note)}</span>
+        <button class="btn-admin btn-admin-ghost" style="padding:0.25rem 0.6rem; font-size:0.72rem; border-color:var(--secondary);" onclick="APP.showCustomNoteForm()">\u270F\uFE0F ${this.t('edit')}</button>
+        <button class="btn-admin btn-admin-ghost" style="padding:0.25rem 0.6rem; font-size:0.72rem;" onclick="APP.removeCustomNote()">\u{1F5D1}\uFE0F ${this.t('delete')}</button>
+      </div>`;
   },
 
   // ===== CUSTOMIZER: سجل الشرائح style (بدءا من 0) =====
@@ -1332,9 +1365,11 @@ const APP = {
       <div style="display:flex; align-items:center; gap:0.7rem; padding:0.6rem 0; border-bottom:1px solid var(--border);">
         <span style="font-size:1.2rem;">${p.icon || '\u{1F4C4}'}</span>
         <strong style="flex:1;">${this.esc(p.title)}</strong>
-        <button class="btn-admin btn-admin-ghost" style="padding:0.25rem 0.6rem; font-size:0.72rem;" onclick="APP.deleteCustomPage('${p.id}')">\u{1F5D1}\uFE0F</button>
+        <button class="btn-admin btn-admin-ghost" style="padding:0.25rem 0.6rem; font-size:0.72rem; border-color:var(--secondary);" onclick="APP.editCustomPage('${p.id}')">\u270F\uFE0F ${this.t('edit')}</button>
+        <button class="btn-admin btn-admin-ghost" style="padding:0.25rem 0.6rem; font-size:0.72rem;" onclick="APP.deleteCustomPage('${p.id}')">\u{1F5D1}\uFE0F ${this.t('delete')}</button>
       </div>`).join('');
   },
+
 
   deleteCustomPage(id) {
     const pages = this.getCustomPages().filter(p => p.id !== id);
@@ -1343,15 +1378,26 @@ const APP = {
     this.showAdminSection('customizer');
   },
 
-  showCustomPageForm() {
+  editCustomPage(id) {
+    const p = this.getCustomPages().find(x => x.id === id);
+    if (!p) return;
+    this.showCustomPageForm(id, p);
+  },
+
+  showCustomPageForm(id, existing) {
     const content = document.getElementById('admin-content');
     if (!content) return;
+    const p = existing || {};
+    const title = p.title || '';
+    const icon = p.icon || '\u{1F4C4}';
+    const body = p.content || '';
+    const isEdit = !!id;
     content.innerHTML = `
       <div class="admin-topbar">
         <div>
           <h1>
             <span class="tb-icon">\u{1F4C4}</span>
-            ${this.t('cz_add_page')}
+            ${isEdit ? this.t('cz_page_edit') : this.t('cz_add_page')}
           </h1>
         </div>
         <div class="admin-topbar-actions">
@@ -1361,22 +1407,22 @@ const APP = {
       <div class="admin-form-card" style="max-width:720px;">
         <div class="form-card-header">
           <div class="fc-icon">\u{1F4C4}</div>
-          <h3>${this.t('cz_page_new')}</h3>
+          <h3>${isEdit ? this.t('cz_page_edit') : this.t('cz_page_new')}</h3>
         </div>
-        <form onsubmit="APP.saveCustomPage(event)">
+        <form onsubmit="APP.saveCustomPage(event, '${id || ''}')">
           <div class="form-group">
             <label>${this.t('cz_page_title')}</label>
-            <input type="text" id="cpage-title" placeholder="${this.t('cz_page_title_ph')}" required>
+            <input type="text" id="cpage-title" value="${this.esc(title)}" placeholder="${this.t('cz_page_title_ph')}" required>
           </div>
           <div class="form-group">
             <label>${this.t('cz_page_icon')}</label>
-            <input type="text" id="cpage-icon" placeholder="\u{1F4C4}" maxlength="8">
+            <input type="text" id="cpage-icon" value="${this.esc(icon)}" placeholder="\u{1F4C4}" maxlength="8">
           </div>
           <div class="form-group">
             <label>${this.t('cz_page_content')}</label>
-            <textarea id="cpage-content" rows="10" placeholder="${this.t('cz_page_content_ph')}"></textarea>
+            <textarea id="cpage-content" rows="10" placeholder="${this.t('cz_page_content_ph')}">${this.esc(body)}</textarea>
           </div>
-          <button type="submit" class="btn-admin btn-admin-primary">+ ${this.t('cz_save_page')}</button>
+          <button type="submit" class="btn-admin btn-admin-primary">\u{1F4BE} ${isEdit ? this.t('cz_update_page') : this.t('cz_save_page')}</button>
         </form>
       </div>
     `;
@@ -1390,18 +1436,29 @@ const APP = {
     }
   },
 
-  saveCustomPage(e) {
+  saveCustomPage(e, id) {
     e.preventDefault();
     const title = document.getElementById('cpage-title').value.trim();
     const icon = document.getElementById('cpage-icon').value.trim() || '\u{1F4C4}';
     const content = document.getElementById('cpage-content').value.trim();
     if (!title) { this.showToast(this.t('cz_page_title_required'), 'error'); return; }
     const pages = this.getCustomPages();
-    const id = 'p' + Date.now();
-    pages.push({ id, title, icon, content });
-    localStorage.setItem('nove_pages', JSON.stringify(pages));
-    this.logActivity('customizer', 'Custom page added', title);
-    this.showToast(this.t('cz_page_added'), 'success');
+    if (id) {
+      const idx = pages.findIndex(p => p.id === id);
+      if (idx !== -1) {
+        pages[idx].title = title;
+        pages[idx].icon = icon;
+        pages[idx].content = content;
+      }
+      localStorage.setItem('nove_pages', JSON.stringify(pages));
+      this.logActivity('customizer', 'Custom page edited', title);
+      this.showToast(this.t('cz_page_updated'), 'success');
+    } else {
+      pages.push({ id: 'p' + Date.now(), title, icon, content });
+      localStorage.setItem('nove_pages', JSON.stringify(pages));
+      this.logActivity('customizer', 'Custom page added', title);
+      this.showToast(this.t('cz_page_added'), 'success');
+    }
     this.showAdminSection('customizer');
   },
 
