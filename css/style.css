@@ -3468,3 +3468,54 @@ body::before {
   .step-card,
   .about-card { animation: none; }
 }
+
+/* ===== EMAIL VERIFICATION STEP ===== */
+#verify-step .modal-section-title h3 {
+  font-size: 1.25rem;
+  background: linear-gradient(90deg, var(--gold, #f5c518), #e9a000);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 0;
+}
+#verify-step input {
+  width: 100%;
+  padding: 0.8rem 0.5rem;
+  border-radius: 12px;
+  border: 1.5px solid var(--gray-600, #4b5563);
+  background: rgba(255,255,255,0.04);
+  outline: none;
+  color: var(--gray-100, #f3f4f6);
+  text-transform: uppercase;
+}
+#verify-step input:focus {
+  border-color: var(--gold, #f5c518);
+  box-shadow: 0 0 0 3px rgba(245,197,24,0.15);
+}
+#verify-step .auth-submit-btn {
+  width: 100%;
+  padding: 0.85rem;
+  border-radius: 14px;
+  border: none;
+  font-weight: 700;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: 0.25s;
+}
+#verify-step .auth-submit-btn:hover {
+  box-shadow: 0 8px 24px rgba(var(--gold-rgb, 245,197,24), 0.25);
+  transform: translateY(-2px);
+}
+.code-highlight {
+  display: inline-block;
+  padding: 0.1rem 0.6rem;
+  background: rgba(245,197,24,0.15);
+  border: 1px dashed rgba(245,197,24,0.6);
+  border-radius: 8px;
+  color: #f5c518;
+  letter-spacing: 0.3em;
+  font-weight: 800;
+}
+#verify-fallback {
+  animation: cardUp 0.45s ease both;
+}

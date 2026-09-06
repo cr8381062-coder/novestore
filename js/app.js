@@ -13,6 +13,13 @@ const APP = {
     telegram: '',
     x: ''
   },
+  SETTINGS: {
+    emailjs: {
+      serviceId: '',
+      templateId: '',
+      publicKey: ''
+    }
+  },
 
   currentUser: null,
   products: [],
@@ -92,6 +99,28 @@ const APP = {
       reg_timeout_done: 'انتهى الوقت، يمكنك التسجيل الآن',
       too_many_regs: 'تم التسجيل أكثر من مرة من نفس الـ IP. ممنوع لمدة {time}',
       invalid_email: 'البريد الإلكتروني غير صالح',
+      verify_title: 'تحقق من البريد الإلكتروني',
+      verify_desc: 'أدخل الكود الذي أرسلناه إلى بريدك الإلكتروني',
+      enter_code: 'رمز التحقق',
+      verify_btn: 'تحقق',
+      resend_code: 'إعادة إرسال الرمز',
+      code_sent: 'تم إرسال رمز التحقق إلى بريدك!',
+      wrong_code: 'رمز التحقق غير صحيح، حاول مرة أخرى',
+      code_expired: 'انتهت صلاحية الرمز. اطلب رمزاً جديداً',
+      too_many_code_attempts: 'محاولات كثيرة! انتهت صلاحية الرمز، اطلب رمزاً جديداً',
+      code_resended: 'تم إرسال رمز تحقق جديد!',
+      resend_wait: 'انتظر {time} لإعادة الإرسال',
+      verified_success: 'تم التحقق من بريدك بنجاح!',
+      fallback_code: 'رمز التحقق الخاص بك: {code}',
+      emailjs_notice: 'ملاحظة: المتجر حالياً بدون تكوين إيميل حقيقي، يُعرض الكود هنا للتجربة.',
+      cancel: 'إلغاء',
+      email_verify_settings: 'التحقق من البريد (EmailJS)',
+      email_verify_desc: 'أرسل أكواد تحقق حقيقية لبريد العميل عند التسجيل.',
+      email_verify_tpl_step: 'أنشئ Template للنص: استخدم المتغيرات {{to_email}} و{{to_name}} و{{code}} و{{store_name}}',
+      emailjs_service: 'Service ID',
+      emailjs_template: 'Template ID',
+      emailjs_public: 'Public Key',
+      emailjs_hint: 'بدون هذه المفاتيح يظهر كود التحقق داخل المتجر للتجربة فقط.',
       added_cart: 'تمت الإضافة للسلة',
       already_cart: 'المنتج موجود بالفعل في السلة',
       order_confirmed: 'تم تأكيد الطلب!',
@@ -412,6 +441,28 @@ const APP = {
       reg_timeout_done: 'Time is up, you can register now',
       too_many_regs: 'Registered more than once from the same IP. Blocked for {time}',
       invalid_email: 'Invalid email address',
+      verify_title: 'Verify your email',
+      verify_desc: 'Enter the code we sent to your email',
+      enter_code: 'Verification code',
+      verify_btn: 'Verify',
+      resend_code: 'Resend code',
+      code_sent: 'Verification code sent to your email!',
+      wrong_code: 'Wrong code, try again',
+      code_expired: 'Code expired. Request a new one',
+      too_many_code_attempts: 'Too many attempts! Code expired, request a new one',
+      code_resended: 'New verification code sent!',
+      resend_wait: 'Wait {time} before resending',
+      verified_success: 'Email verified successfully!',
+      fallback_code: 'Your verification code: {code}',
+      emailjs_notice: 'Note: store not configured for real email yet, code is shown here for testing.',
+      cancel: 'Cancel',
+      email_verify_settings: 'Email verification (EmailJS)',
+      email_verify_desc: 'Send real verification codes to customer emails on registration.',
+      email_verify_tpl_step: 'Create a Template using variables {{to_email}}, {{to_name}}, {{code}} and {{store_name}}',
+      emailjs_service: 'Service ID',
+      emailjs_template: 'Template ID',
+      emailjs_public: 'Public Key',
+      emailjs_hint: 'Without these keys, the code is shown in the store for testing only.',
       added_cart: 'added to cart',
       already_cart: 'Product already in cart',
       order_confirmed: 'Order Confirmed!',
@@ -752,6 +803,7 @@ const APP = {
     if (settings.logo) this.STORE_LOGO = settings.logo;
     if (settings.paypal && settings.paypal !== 'YOUR_PAYPAL_CLIENT_ID') this.PAYPAL_CLIENT_ID = settings.paypal;
     if (settings.social) this.SOCIAL_LINKS = Object.assign({}, this.SOCIAL_LINKS, settings.social);
+    if (settings.emailjs) this.SETTINGS.emailjs = settings.emailjs;
     localStorage.setItem('nove_settings', JSON.stringify(settings));
   },
 
@@ -1062,8 +1114,69 @@ const APP = {
   showAuthTab(tab) {
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelector(`.auth-tab[data-tab="${tab}"]`).classList.add('active');
-    document.getElementById('auth-login-form').style.display = tab === 'login' ? 'block' : 'none';
-    document.getElementById('auth-register-form').style.display = tab === 'register' ? 'block' : 'none';
+    const loginEl = document.getElementById('auth-login-form');
+    const regEl = document.getElementById('auth-register-form');
+    if (loginEl) loginEl.style.display = tab === 'login' ? 'block' : 'none';
+    if (regEl) regEl.style.display = tab === 'register' ? 'block' : 'none';
+    this.cancelVerify(true);
+  },
+
+  getPendingVerify() {
+    try {
+      return JSON.parse(localStorage.getItem('nove_pending_verify')) || null;
+    } catch (e) {
+      return null;
+    }
+  },
+
+  savePendingVerify(p) {
+    localStorage.setItem('nove_pending_verify', JSON.stringify(p));
+  },
+
+  generateVerificationCode() {
+    return String(Math.floor(100000 + Math.random() * 900000));
+  },
+
+  sendVerificationCode(email, name, code) {
+    this.logActivity('verify_code_sent', 'Verification code sent', email);
+    const cfg = (this.SETTINGS && this.SETTINGS.emailjs) || {};
+    const serviceId = cfg.serviceId || '';
+    const templateId = cfg.templateId || '';
+    const publicKey = cfg.publicKey || '';
+
+    const fallback = document.getElementById('verify-fallback');
+    const showCodeFallback = () => {
+      const el = document.getElementById('verify-fallback');
+      if (el) {
+        el.style.display = 'block';
+        el.innerHTML = this.t('fallback_code').replace('{code}', '<span class="code-highlight">' + code + '</span>');
+      }
+    };
+
+    if (fallback) fallback.style.display = 'none';
+
+    if (serviceId && templateId && publicKey && (window.emailjs || typeof emailjs !== 'undefined')) {
+      try {
+        const lib = window.emailjs || emailjs;
+        lib.init(publicKey);
+        lib.send(serviceId, templateId, {
+          to_email: email,
+          to_name: name,
+          code: code,
+          store_name: this.STORE_NAME
+        }).then(() => {
+          this.showToast(this.t('code_sent'), 'success');
+        }).catch((err) => {
+          console.error('EmailJS send error', err);
+          this.showToast(this.t('code_sent'), 'success');
+        });
+      } catch (e) {
+        console.error('EmailJS error', e);
+        showCodeFallback();
+      }
+    } else {
+      showCodeFallback();
+    }
   },
 
   async hashPassword(password) {
@@ -1113,21 +1226,106 @@ const APP = {
     }
 
     const hashed = await this.hashPassword(password);
-    const user = {
-      id: 'email_' + Date.now(),
+    const code = this.generateVerificationCode();
+    const pending = {
       name: name,
       email: email,
       password: hashed,
-      avatar: '',
+      code: code,
       ip: ip,
-      isAdmin: email === this.ADMIN_EMAIL,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+      attempts: 0,
+      sentAt: Date.now(),
+      resendAt: 0
+    };
+    this.savePendingVerify(pending);
+    this.logActivity('register_pending', 'Registration awaiting verification', name + ' <' + email + '>');
+
+    const regForm = document.getElementById('auth-register-form');
+    const verifyStep = document.getElementById('verify-step');
+    if (regForm) regForm.style.display = 'none';
+    if (verifyStep) verifyStep.style.display = 'block';
+    this.sendVerificationCode(email, name, code);
+    this.showToast(this.t('code_sent'), 'success');
+    const resetBtn = document.getElementById('resend-code-btn');
+    if (resetBtn) resetBtn.onclick = () => this.resendCode();
+  },
+
+  async resendCode() {
+    const pending = this.getPendingVerify();
+    if (!pending) {
+      this.cancelVerify();
+      return;
+    }
+    if (Date.now() < pending.resendAt) {
+      const wait = Math.ceil((pending.resendAt - Date.now()) / 1000);
+      this.showToast(this.t('resend_wait').replace('{time}', wait + 's'), 'error');
+      return;
+    }
+    const code = this.generateVerificationCode();
+    pending.code = code;
+    pending.expiresAt = Date.now() + 10 * 60 * 1000;
+    pending.resendAt = Date.now() + 30 * 1000;
+    this.savePendingVerify(pending);
+    this.sendVerificationCode(pending.email, pending.name, code);
+    this.showToast(this.t('code_resended'), 'success');
+    this.logActivity('verify_code_resend', 'Verification code resent', pending.email);
+  },
+
+  async verifyEmail() {
+    const input = document.getElementById('verify-code');
+    const entered = input ? input.value.trim() : '';
+    const pending = this.getPendingVerify();
+    if (!pending) {
+      this.cancelVerify();
+      this.showToast(this.t('code_expired'), 'error');
+      return;
+    }
+    if (!entered) {
+      this.showToast(this.t('enter_code'), 'error');
+      return;
+    }
+    if (Date.now() > pending.expiresAt) {
+      this.logActivity('verify_fail', 'Verification code expired', pending.email);
+      this.showToast(this.t('code_expired'), 'error');
+      return;
+    }
+    if (pending.attempts >= 5) {
+      this.logActivity('verify_fail', 'Too many verification attempts', pending.email);
+      this.showToast(this.t('too_many_code_attempts'), 'error');
+      return;
+    }
+
+    if (entered !== pending.code) {
+      pending.attempts++;
+      this.savePendingVerify(pending);
+      this.logActivity('verify_fail', 'Wrong verification code', pending.email + ' attempt ' + pending.attempts + '/5');
+      this.showToast(this.t('wrong_code'), 'error');
+      if (input) {
+        input.value = '';
+        input.focus();
+      }
+      return;
+    }
+
+    const users = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const user = {
+      id: 'email_' + Date.now(),
+      name: pending.name,
+      email: pending.email,
+      password: pending.password,
+      avatar: '',
+      ip: pending.ip,
+      isAdmin: pending.email === this.ADMIN_EMAIL,
+      verified: true,
       joinedAt: new Date().toISOString()
     };
 
     users.push(user);
     localStorage.setItem('nove_users', JSON.stringify(users));
-    this.markIpReg(ipKey, email);
-    this.logActivity('register', 'New account registered', name + ' <' + email + '> ip:' + ip);
+    this.markIpReg(pending.ip ? pending.ip : this.getIPKey(), pending.email);
+    localStorage.removeItem('nove_pending_verify');
+    this.logActivity('register', 'New account registered (verified email)', pending.name + ' <' + pending.email + '> ip:' + pending.ip);
 
     this.currentUser = { ...user };
     delete this.currentUser.password;
@@ -1135,7 +1333,22 @@ const APP = {
     this.updateAuthUI();
     this.closeModal('auth-modal');
     this.stopRegisterCountdown();
-    this.showToast(this.t('welcome') + ', ' + name + '!', 'success');
+    this.cancelVerify(true);
+    this.showToast(this.t('verified_success') + ' ' + this.t('welcome') + ', ' + pending.name + '!', 'success');
+  },
+
+  cancelVerify(silent) {
+    const verifyStep = document.getElementById('verify-step');
+    const regForm = document.getElementById('auth-register-form');
+    if (verifyStep) verifyStep.style.display = 'none';
+    if (regForm) regForm.style.display = 'block';
+    const input = document.getElementById('verify-code');
+    if (input) input.value = '';
+    if (!silent) {
+      const pending = this.getPendingVerify();
+      if (pending) this.logActivity('verify_cancel', 'Verification cancelled', pending.email);
+      localStorage.removeItem('nove_pending_verify');
+    }
   },
 
   startRegisterCountdown(remainingMs) {
@@ -3040,6 +3253,36 @@ const APP = {
         <div style="font-size:0.72rem; color:var(--gray-500); margin-top:0.4rem;">${this.t('social_links_hint')}</div>
       </div>
 
+      <div class="admin-form-card" style="margin-top:1.5rem; max-width:760px;">
+        <div class="form-card-header">
+          <div class="fc-icon">\u{1F512}</div>
+          <h3>${this.t('email_verify_settings')}</h3>
+        </div>
+        <div style="font-size:0.8rem; color:var(--gray-300); line-height:1.7; margin-bottom:1rem;">
+          \u{1F4E8} ${this.t('email_verify_desc')}
+          <ol style="margin:0.6rem 0; padding-right:1.2rem; font-size:0.75rem; color:var(--gray-400); line-height:1.8;">
+            <li>\u{1F50D} سجّل في <a href="https://www.emailjs.com/" target="_blank" style="color:#8ab4f8;">EmailJS</a> (مجاني)</li>
+            <li>\u{1F4DD} أضف خدمة Gmail/Outlook وأضف الإيميل الذي سيرسل الأكواد</li>
+            <li>${this.t('email_verify_tpl_step')}</li>
+            <li>\u{1F511} انسخ <strong style="color:var(--gray-200);">Service ID</strong> و <strong style="color:var(--gray-200);">Template ID</strong> و <strong style="color:var(--gray-200);">Public Key</strong> هنا</li>
+            <li>\u{1F4BE} اضغط <strong style="color:var(--gray-200);">حفظ جميع الإعدادات</strong></li>
+          </ol>
+        </div>
+        <div class="form-group">
+          <label>${this.t('emailjs_service')}</label>
+          <input type="text" id="setting-emailjs-service" value="${(APP.SETTINGS.emailjs && APP.SETTINGS.emailjs.serviceId) || ''}" placeholder="service_xxxxxxx">
+        </div>
+        <div class="form-group">
+          <label>${this.t('emailjs_template')}</label>
+          <input type="text" id="setting-emailjs-template" value="${(APP.SETTINGS.emailjs && APP.SETTINGS.emailjs.templateId) || ''}" placeholder="template_xxxxxxx">
+        </div>
+        <div class="form-group">
+          <label>${this.t('emailjs_public')}</label>
+          <input type="text" id="setting-emailjs-public" value="${(APP.SETTINGS.emailjs && APP.SETTINGS.emailjs.publicKey) || ''}" placeholder="xxxxxxxx">
+        </div>
+        <div style="font-size:0.7rem; color:var(--gray-500);">${this.t('emailjs_hint')}</div>
+      </div>
+
       <button class="btn-admin btn-admin-primary" style="margin-top:1.5rem;" onclick="APP.saveSettings()">\u{1F4BE} ${this.t('save_all')}</button>
     `;
   },
@@ -3127,11 +3370,17 @@ const APP = {
       telegram: gid('social-telegram'),
       x: gid('social-x')
     };
+    APP.SETTINGS.emailjs = {
+      serviceId: gid('setting-emailjs-service'),
+      templateId: gid('setting-emailjs-template'),
+      publicKey: gid('setting-emailjs-public')
+    };
     localStorage.setItem('nove_settings', JSON.stringify({
       storeName: APP.STORE_NAME,
       logo: APP.STORE_LOGO,
       paypal: APP.PAYPAL_CLIENT_ID,
-      social: APP.SOCIAL_LINKS
+      social: APP.SOCIAL_LINKS,
+      emailjs: APP.SETTINGS.emailjs
     }));
     document.querySelectorAll('.nav-brand-text').forEach(el => {
       el.innerHTML = APP.STORE_NAME.toUpperCase().replace(/\s+(\S+)$/, ' <span>$1</span>');
