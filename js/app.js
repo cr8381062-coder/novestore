@@ -1579,6 +1579,7 @@ const APP = {
     navbar: { icon: '\u{1F4CC}', sel: '.navbar' },
     hero: { icon: '\u{1F305}', sel: '.hero' },
     products: { icon: '\u{1F6D2}', sel: '#products' },
+    features: { icon: '\u2728', sel: '#features' },
     about: { icon: '\u2139\uFE0F', sel: '#about' },
     footer: { icon: '\u{1F9FE}', sel: '.site-footer, .footer' },
     buttons: { icon: '\u{1F518}', sel: '.btn-primary, .btn-secondary, .auth-submit-btn, .btn-admin' },
@@ -2808,8 +2809,7 @@ const APP = {
   },
 
   applySubPage(page) {
-    if (page === 'features') page = 'about';
-    const sections = ['home', 'products', 'about'];
+    const sections = ['home', 'products', 'features', 'about'];
     sections.forEach(s => {
       const el = document.getElementById(s);
       if (!el) return;
