@@ -3519,3 +3519,25 @@ body::before {
 #verify-fallback {
   animation: cardUp 0.45s ease both;
 }
+
+/* ===== DESIGN AI ===== */
+.design-chat {
+  scrollbar-width: thin;
+}
+.design-msg {
+  animation: cardUp 0.3s ease both;
+}
+.design-chip {
+  border: none;
+  border-radius: 20px;
+  padding: 0.5rem 1rem;
+  color: #0a0a0a;
+  font-weight: 800;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.design-chip:hover {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+}

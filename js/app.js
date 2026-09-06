@@ -121,6 +121,26 @@ const APP = {
       emailjs_template: 'Template ID',
       emailjs_public: 'Public Key',
       emailjs_hint: 'بدون هذه المفاتيح يظهر كود التحقق داخل المتجر للتجربة فقط.',
+      designai_manage: 'برمجة التصميم',
+      designai_sub: 'مساعد ذكي لتعديل شكل المتجر والألوان',
+      design_ai_title: 'المساعد الذكي للتصميم',
+      design_placeholder: 'اكتب أمر تصميم... مثل: اللون الأساسي أزرق',
+      run_design: 'تنفيذ',
+      design_welcome: 'أهلاً! أنا مساعد التصميم. أخبرني بما تريد تغييره — الألوان، الخطوط، الزوايا، الوضع الزجاجي... وسأنفذ فوراً.',
+      current_color: 'اللون الحالي',
+      design_hint: 'اكتب أمر تصميم بالعربية أو الإنجليزية',
+      design_applied: 'تم تطبيق التغيير على المتجر',
+      reset_design: 'استرجاع الافتراضي',
+      design_reset_done: 'تم استرجاع التصميم الافتراضي بالكامل',
+      color_blue: 'أزرق',
+      color_purple: 'بنفسجي',
+      color_gold: 'ذهبي',
+      color_green: 'أخضر',
+      color_pink: 'وردي',
+      color_cyan: 'سماوي',
+      glass_mode: 'وضع زجاجي',
+      rounded: 'زوايا دائرية',
+      bigger_font: 'خط أكبر',
       added_cart: 'تمت الإضافة للسلة',
       already_cart: 'المنتج موجود بالفعل في السلة',
       order_confirmed: 'تم تأكيد الطلب!',
@@ -463,6 +483,26 @@ const APP = {
       emailjs_template: 'Template ID',
       emailjs_public: 'Public Key',
       emailjs_hint: 'Without these keys, the code is shown in the store for testing only.',
+      designai_manage: 'Design AI',
+      designai_sub: 'Smart assistant to restyle the store and colors',
+      design_ai_title: 'Design Smart Assistant',
+      design_placeholder: 'Type a design command... e.g. make primary color blue',
+      run_design: 'Run',
+      design_welcome: 'Hi! I am the design assistant. Tell me what to change — colors, fonts, corners, glass mode... I will apply it instantly.',
+      current_color: 'Current color',
+      design_hint: 'Type a design command in Arabic or English',
+      design_applied: 'Change applied to the store',
+      reset_design: 'Reset to default',
+      design_reset_done: 'Design fully restored to default',
+      color_blue: 'Blue',
+      color_purple: 'Purple',
+      color_gold: 'Gold',
+      color_green: 'Green',
+      color_pink: 'Pink',
+      color_cyan: 'Cyan',
+      glass_mode: 'Glass mode',
+      rounded: 'Rounded corners',
+      bigger_font: 'Bigger font',
       added_cart: 'added to cart',
       already_cart: 'Product already in cart',
       order_confirmed: 'Order Confirmed!',
@@ -805,6 +845,330 @@ const APP = {
     if (settings.social) this.SOCIAL_LINKS = Object.assign({}, this.SOCIAL_LINKS, settings.social);
     if (settings.emailjs) this.SETTINGS.emailjs = settings.emailjs;
     localStorage.setItem('nove_settings', JSON.stringify(settings));
+    this.applyDesign();
+  },
+
+  // ===== DESIGN AI =====
+  DESIGN_COLORS: {
+    azrao: '#3b82f6',
+    'blue': '#3b82f6',
+    'سماوي': '#22d3ee',
+    cyan: '#22d3ee',
+    'بنفسجي': '#8b5cf6',
+    purple: '#8b5cf6',
+    'فوشي': '#d946ef',
+    fuchsia: '#d946ef',
+    'وردي': '#ec4899',
+    pink: '#ec4899',
+    'احمر': '#ef4444',
+    red: '#ef4444',
+    'اخضر': '#22c55e',
+    green: '#22c55e',
+    'ازرق': '#3b82f6',
+    'ذهبي': '#f5b93e',
+    'ذهب': '#f5b93e',
+    gold: '#f5b93e',
+    'برتقالي': '#f97316',
+    orange: '#f97316',
+    'ابيض': '#ffffff',
+    white: '#ffffff',
+    'اسود': '#0a0a0a',
+    black: '#0a0a0a',
+    'فضي': '#c0c7d1',
+    silver: '#c0c7d1'
+  },
+
+  getDesign() {
+    try {
+      return JSON.parse(localStorage.getItem('nove_design')) || {};
+    } catch (e) {
+      return {};
+    }
+  },
+
+  saveDesign(d) {
+    localStorage.setItem('nove_design', JSON.stringify(d));
+  },
+
+  applyDesign() {
+    const d = this.getDesign();
+    const root = document.documentElement;
+    if (d.primary) {
+      root.style.setProperty('--primary', d.primary);
+      root.style.setProperty('--primary-light', this.tintColor(d.primary, 45));
+      root.style.setProperty('--glow', '0 0 30px ' + this.rgba(d.primary, 0.3));
+    }
+    if (d.secondary) {
+      root.style.setProperty('--secondary', d.secondary);
+      root.style.setProperty('--secondary-light', this.tintColor(d.secondary, 45));
+    }
+    if (d.primary && d.secondary) {
+      root.style.setProperty('--gradient', 'linear-gradient(135deg, ' + d.primary + ', ' + d.secondary + ')');
+      root.style.setProperty('--gradient-soft', 'linear-gradient(135deg, ' + this.rgba(d.primary, 0.15) + ', ' + this.rgba(d.secondary, 0.15) + ')');
+    }
+    if (d.radius) {
+      root.style.setProperty('--radius-xl', d.radius + 'px');
+      document.querySelectorAll('.product-card, .feature-card, .admin-panel-card, .modal, .auth-form, .btn-primary, .auth-submit-btn, .btn-admin').forEach(el => {
+        el.style.borderRadius = d.radius + 'px';
+      });
+    }
+    if (d.fontScale) {
+      root.style.fontSize = d.fontScale + '%';
+    }
+    if (d.glass) {
+      document.querySelectorAll('.navbar, .product-card, .feature-card, .admin-panel-card, .modal').forEach(el => {
+        el.style.background = 'rgba(255,255,255,0.06)';
+        el.style.backdropFilter = 'blur(14px)';
+        el.style.border = '1px solid rgba(255,255,255,0.12)';
+      });
+    }
+    if (d.sections) {
+      const secMap = { hero: '.hero', features: '.features', about: '.about', footer: '.site-footer' };
+      Object.keys(secMap).forEach(k => {
+        const show = d.sections[k] !== false;
+        const el = document.querySelector(secMap[k]);
+        if (el) el.style.display = show ? '' : 'none';
+      });
+    }
+  },
+
+  hexToRgb(hex) {
+    const h = hex.replace('#', '');
+    const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
+    return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 };
+  },
+
+  rgba(hex, a) {
+    const c = this.hexToRgb(hex);
+    return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + a + ')';
+  },
+
+  tintColor(hex, pct) {
+    const c = this.hexToRgb(hex);
+    const t = Math.round(255 * pct / 100);
+    const m = (v, x) => Math.round((255 - v) * x / 100 + v);
+    return '#' + [m(c.r, t), m(c.g, t), m(c.b, t)].map(x => x.toString(16).padStart(2, '0')).join('');
+  },
+
+  normalizeCommand(t) {
+    return t.toLowerCase()
+      .replace(/ال/g, '')
+      .replace(/أ/g, 'ا')
+      .replace(/إ/g, 'ا')
+      .replace(/ة/g, 'ه')
+      .replace(/ى/g, 'ي')
+      .replace(/u0000/g, '');
+  },
+
+  parseColorFromCommand(raw) {
+    const t = this.normalizeCommand(raw);
+    const hex = t.match(/#[0-9a-f]{3,6}\b/);
+    if (hex) return { color: hex[0], target: t.includes('خلف') ? 'secondary' : t.includes('ثان') ? 'secondary' : 'primary' };
+    for (const key of Object.keys(this.DESIGN_COLORS)) {
+      if (t.includes(key)) {
+        const target = t.includes('خلف') ? 'secondary' : t.includes('ثان') ? 'secondary' : 'primary';
+        return { color: this.DESIGN_COLORS[key], target };
+      }
+    }
+    return null;
+  },
+
+  designReplyAr(text) {
+    const t = this.normalizeCommand(text);
+    let changes = [];
+    const d = this.getDesign();
+
+    const col = this.parseColorFromCommand(text);
+    if (col) {
+      if (col.target === 'secondary') d.secondary = col.color;
+      else d.primary = col.color;
+      changes.push('اللون ' + (col.target === 'secondary' ? 'الثانوي' : 'الأساسي') + ' -> ' + col.color);
+    }
+
+    if (t.includes('زجاج')) {
+      d.glass = !t.includes('اطف') && !t.includes('ايقف');
+      changes.push((d.glass ? 'تفعيل' : 'إيقاف') + ' الوضع الزجاجي');
+    }
+    if (t.includes('دائري')) {
+      const val = t.includes('كبير') ? 24 : t.includes('صغير') ? 6 : 14;
+      d.radius = val;
+      changes.push('الزوايا -> ' + val + 'px');
+    }
+    if (t.includes('خط') || t.includes('حرف')) {
+      const val = t.includes('كبير') ? 110 : t.includes('صغير') ? 92 : 100;
+      d.fontScale = val;
+      changes.push('حجم الخط -> ' + val + '%');
+    }
+    if (t.includes('استرجع') || t.includes('رجعت') || t.includes('رجع') || t.includes('مسح') || t.includes('افتراضي') || t.includes('اصلي') || t.includes('reset')) {
+      this.resetDesign();
+      return 'تم استرجاع التصميم الافتراضي بالكامل.';
+    }
+    if (t.includes('محوه') || t.includes('موقع') || t.includes('حذف')) {
+      changes.push('لا يمكن حذف قسم: المساعد يعدّل الألوان والشكل فقط.');
+    }
+
+    if (changes.length === 0) {
+      if (t.includes('لون')) return 'حدد اللون الذي تريده، مثال: "خلي اللون الأساسي أزرق" أو "الخلفية ذهبية" أو اكتب رمز Hex مثل #ff0000';
+      return '💡 جرب:\n• "اللون الأساسي أزرق"\n• "الخلفية سوداء"\n• "الخط كبير"\n• "زوايا دائرية"\n• "وضع زجاجي"\n• "استرجاع التصميم"\nأو اكتب رمز لون مثل #8b5cf6';
+    }
+
+    this.saveDesign(d);
+    this.applyDesign();
+    return '✅ تم:\n' + changes.map(c => '• ' + c).join('\n');
+  },
+
+  designReplyEn(text) {
+    const t = text.toLowerCase();
+    let changes = [];
+    const d = this.getDesign();
+
+    const col = this.parseColorFromCommand(text);
+    if (col) {
+      if (col.target === 'secondary') d.secondary = col.color;
+      else d.primary = col.color;
+      changes.push((col.target === 'secondary' ? 'secondary' : 'primary') + ' color -> ' + col.color);
+    }
+
+    if (t.includes('glass')) { d.glass = true; changes.push('Glass mode ON'); }
+    if (t.includes('round')) {
+      const val = t.includes('big') ? 24 : t.includes('small') ? 6 : 14;
+      d.radius = val; changes.push('Radius -> ' + val + 'px');
+    }
+    if (t.includes('font') || t.includes('text')) {
+      const val = t.includes('big') ? 110 : t.includes('small') ? 92 : 100;
+      d.fontScale = val; changes.push('Font size -> ' + val + '%');
+    }
+    if (t.includes('reset') || t.includes('default') || t.includes('clear')) {
+      this.resetDesign();
+      return 'Design restored to default.';
+    }
+
+    if (changes.length === 0) {
+      if (t.includes('color')) return 'Which color? Try "make primary color blue" or enter a hex like #ff0000';
+      return '💡 Try:\n• "make primary color blue"\n• "background black"\n• "bigger font"\n• "glass mode"\n• "rounded corners"\n• "reset design"';
+    }
+    this.saveDesign(d);
+    this.applyDesign();
+    return '✅ Done:\n' + changes.map(c => '• ' + c).join('\n');
+  },
+
+  processDesignCommand(text) {
+    if (!text || !text.trim()) return { ok: false, reply: this.t('design_hint') };
+    const out = this.lang === 'en' ? this.designReplyEn(text) : this.designReplyAr(text);
+    this.logActivity('design', 'Design command executed', text);
+    return { ok: true, reply: out };
+  },
+
+  resetDesign() {
+    localStorage.removeItem('nove_design');
+    ['--primary', '--primary-light', '--secondary', '--secondary-light', '--gradient', '--gradient-soft', '--glow'].forEach(v => {
+      document.documentElement.style.removeProperty(v);
+    });
+    document.querySelectorAll('.product-card, .feature-card, .admin-panel-card, .modal, .auth-form, .btn-primary, .auth-submit-btn, .btn-admin').forEach(el => el.style.borderRadius = '');
+    document.documentElement.style.fontSize = '';
+    document.querySelectorAll('.navbar, .product-card, .feature-card, .admin-panel-card, .modal').forEach(el => { el.style.background = ''; el.style.backdropFilter = ''; el.style.border = ''; });
+    document.querySelectorAll('.hero, .features, .about, .site-footer').forEach(el => el.style.display = '');
+    this.logActivity('design', 'Design reset to default');
+  },
+
+  renderDesignAI(content) {
+    content.innerHTML = `
+      <div class="admin-topbar">
+        <div>
+          <h1>
+            <span class="tb-icon">\u{1F916}</span>
+            ${this.t('designai_manage')}
+            <div class="tb-sub">${this.t('designai_sub')}</div>
+          </h1>
+        </div>
+        <div class="admin-topbar-actions">
+          <button class="btn-admin btn-admin-ghost" onclick="APP.resetDesign(); APP.pushDesignChat('${this.t('design_reset_done')}', 'ai');">\u{1F5D1}\uFE0F ${this.t('reset_design')}</button>
+        </div>
+      </div>
+
+      <div class="admin-form-card" style="max-width:820px;">
+        <div class="form-card-header">
+          <div class="fc-icon">\u{1F4AC}</div>
+          <h3>${this.t('design_ai_title')}</h3>
+        </div>
+        <div id="design-chat" class="design-chat" style="height:320px; overflow-y:auto; display:flex; flex-direction:column; gap:0.6rem; padding:1rem; background:rgba(0,0,0,0.25); border:1px solid var(--border); border-radius:12px; margin-bottom:1rem;"></div>
+        <div style="display:flex; gap:0.6rem;">
+          <input type="text" id="design-command" placeholder="${this.t('design_placeholder')}" style="flex:1; padding:0.8rem 1rem; border-radius:12px; border:1.5px solid var(--border); background:rgba(255,255,255,0.04); color:var(--gray-100); outline:none;" onkeydown="if(event.key==='Enter')APP.runDesignCommand()">
+          <button class="btn-admin btn-admin-primary" onclick="APP.runDesignCommand()">\u{1F680} ${this.t('run_design')}</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1rem;">
+          <button class="design-chip" onclick="APP.quickDesign('primary','${this.DESIGN_COLORS.azrao}')" style="background:${this.DESIGN_COLORS.azrao};">\u{1F534} ${this.t('color_blue')}</button>
+          <button class="design-chip" onclick="APP.quickDesign('primary','${this.DESIGN_COLORS['بنفسجي']}')" style="background:${this.DESIGN_COLORS['بنفسجي']};">\u{1F7E3} ${this.t('color_purple')}</button>
+          <button class="design-chip" onclick="APP.quickDesign('primary','${this.DESIGN_COLORS.gold}')" style="background:${this.DESIGN_COLORS.gold};">\u{1F7E1} ${this.t('color_gold')}</button>
+          <button class="design-chip" onclick="APP.quickDesign('primary','${this.DESIGN_COLORS['اخضر']}')" style="background:${this.DESIGN_COLORS['اخضر']};">\u{1F7E2} ${this.t('color_green')}</button>
+          <button class="design-chip" onclick="APP.quickDesign('primary','${this.DESIGN_COLORS['وردي']}')" style="background:${this.DESIGN_COLORS['وردي']};">\u{1F7E8} ${this.t('color_pink')}</button>
+          <button class="design-chip" onclick="APP.quickDesign('secondary','${this.DESIGN_COLORS['سماوي']}')" style="background:${this.DESIGN_COLORS['سماوي']};">\u{1F7E6} ${this.t('color_cyan')}</button>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.7rem;">
+          <button class="btn-admin btn-admin-ghost" onclick="APP.quickDesign('glass','1')">\u{1F9D1}\u{200D}\u{1F9D0} ${this.t('glass_mode')}</button>
+          <button class="btn-admin btn-admin-ghost" onclick="APP.quickDesign('radius','14')">\u{2B50} ${this.t('rounded')}</button>
+          <button class="btn-admin btn-admin-ghost" onclick="APP.quickDesign('font','110')">\u{2705} ${this.t('bigger_font')}</button>
+        </div>
+      </div>
+    `;
+    this.designChatInit();
+  },
+
+  designChatInit() {
+    const c = document.getElementById('design-chat');
+    if (!c) return;
+    const d = this.getDesign();
+    const status = d.primary ? '<span style="color:' + d.primary + ';">\u25CF</span> ' + d.primary : '\u25CB افتراضي';
+    c.innerHTML = '<div class="design-msg ai">\u{1F916} ' + this.t('design_welcome') + '<br><small>' + this.t('current_color') + ': ' + status + '</small></div>';
+  },
+
+  pushDesignChat(text, who) {
+    const c = document.getElementById('design-chat');
+    if (!c) return;
+    const div = document.createElement('div');
+    div.className = 'design-msg ' + who;
+    div.style.maxWidth = '85%';
+    div.style.padding = '0.7rem 1rem';
+    div.style.borderRadius = '12px';
+    div.style.fontSize = '0.88rem';
+    div.style.whiteSpace = 'pre-line';
+    div.style.lineHeight = '1.7';
+    if (who === 'user') {
+      div.style.background = 'var(--primary)';
+      div.style.color = '#fff';
+      div.style.alignSelf = 'flex-end';
+      div.style.marginRight = '1rem';
+    } else {
+      div.style.background = 'rgba(255,255,255,0.06)';
+      div.style.color = 'var(--gray-100)';
+      div.style.border = '1px solid var(--border)';
+      div.style.alignSelf = 'flex-start';
+    }
+    div.textContent = text;
+    c.appendChild(div);
+    c.scrollTop = c.scrollHeight;
+  },
+
+  runDesignCommand() {
+    const input = document.getElementById('design-command');
+    if (!input) return;
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    this.pushDesignChat(text, 'user');
+    const res = this.processDesignCommand(text);
+    this.pushDesignChat(res.reply, 'ai');
+  },
+
+  quickDesign(kind, val) {
+    const d = this.getDesign();
+    if (kind === 'glass') d.glass = true;
+    else if (kind === 'radius') d.radius = parseInt(val, 10);
+    else if (kind === 'font') d.fontScale = parseInt(val, 10);
+    else d[kind] = val;
+    this.saveDesign(d);
+    this.applyDesign();
+    this.pushDesignChat('✅ ' + this.t('design_applied') + ' (' + kind + ' = ' + val + ')', 'ai');
   },
 
   // ===== DATA =====
@@ -2403,6 +2767,7 @@ const APP = {
       || (section === 'settings' && isOwnerTop)
       || (section === 'permissions' && isOwnerTop)
       || (section === 'logs' && isOwnerTop)
+      || (section === 'designai' && isOwnerTop)
       || (perm !== undefined && APP.can(email, perm));
     if (!allowed) {
       content.innerHTML = `
@@ -2421,6 +2786,7 @@ const APP = {
     else if (section === 'permissions') this.renderAdminPermissions(content);
     else if (section === 'settings') this.renderAdminSettings(content);
     else if (section === 'logs') this.renderAdminLogs(content);
+    else if (section === 'designai') this.renderDesignAI(content);
     else this.renderAdminDashboard();
 
     document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
@@ -3146,6 +3512,7 @@ const APP = {
       if (sec === 'permissions') { btn.style.display = isTop ? '' : 'none'; return; }
       if (sec === 'settings') { btn.style.display = isTop ? '' : 'none'; return; }
       if (sec === 'logs') { btn.style.display = isTop ? '' : 'none'; return; }
+      if (sec === 'designai') { btn.style.display = isTop ? '' : 'none'; return; }
       if (isTop) { btn.style.display = ''; return; }
       const permsOf = map[sec] || null;
       const ok = permsOf ? permsOf.some(p => this.can(email, p)) : false;
