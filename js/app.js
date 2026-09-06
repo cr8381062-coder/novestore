@@ -2799,33 +2799,12 @@ const APP = {
     } else if (successContent) {
       successContent.style.display = 'none';
     }
-    this.applySubPage(page);
     const params = new URLSearchParams(window.location.search);
     const sharedId = params.get('product');
     if (sharedId && page === 'home') {
       this.showProduct(parseInt(sharedId));
     }
     if (page === 'admin') this.renderAdminPage();
-  },
-
-  applySubPage(page) {
-    const sections = ['home', 'products', 'features', 'about'];
-    sections.forEach(s => {
-      const el = document.getElementById(s);
-      if (!el) return;
-      if (page === 'home') {
-        el.style.display = '';
-      } else if (s === page) {
-        el.style.display = '';
-        window.scrollTo(0, 0);
-      } else {
-        el.style.display = 'none';
-      }
-    });
-  },
-
-  goPage(page) {
-    window.location.href = '?page=' + page;
   },
 
   getPage() {
