@@ -976,7 +976,6 @@ const APP = {
     this.applyLogo();
     this.renderSocialIcons();
     this.updateHeroStats();
-    this.createRainDrops();
   },
 
   updateHeroStats() {
@@ -2858,14 +2857,6 @@ const APP = {
   },
 
   initReveal() {
-    const targets = document.querySelectorAll('.product-card, .feature-card, .about-card, .section-header, .hero-content');
-    requestAnimationFrame(() => {
-      targets.forEach((el, i) => {
-        el.classList.add('reveal');
-        el.style.transitionDelay = Math.min((i % 8) * 0.03, 0.18) + 's';
-        requestAnimationFrame(() => el.classList.add('visible'));
-      });
-    });
   },
 
   filterProducts(category) {
@@ -2966,10 +2957,12 @@ const APP = {
       </div>
     `;
     overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
   },
 
   closeModal(id) {
     document.getElementById(id).classList.remove('active');
+    document.body.style.overflow = '';
   },
 
   renderCart() {
@@ -3021,6 +3014,7 @@ const APP = {
   openCart() {
     this.renderCart();
     document.getElementById('cart-modal').classList.add('active');
+    document.body.style.overflow = 'hidden';
   },
 
   // ===== PAYPAL =====
