@@ -1126,19 +1126,6 @@ const APP = {
           <input type="text" id="design-command" placeholder="${this.t('design_placeholder')}" style="flex:1; padding:0.8rem 1rem; border-radius:12px; border:1.5px solid var(--border); background:rgba(255,255,255,0.04); color:var(--gray-100); outline:none;" onkeydown="if(event.key==='Enter')APP.runDesignCommand()">
           <button class="btn-admin btn-admin-primary" onclick="APP.runDesignCommand()">\u{1F680} ${this.t('run_design')}</button>
         </div>
-        <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:1rem;">
-          <button class="design-chip" onclick="APP.quickDesign('primary','${this.DESIGN_COLORS.azrao}')" style="background:${this.DESIGN_COLORS.azrao};">\u{1F534} ${this.t('color_blue')}</button>
-          <button class="design-chip" onclick="APP.quickDesign('primary','${this.DESIGN_COLORS['بنفسجي']}')" style="background:${this.DESIGN_COLORS['بنفسجي']};">\u{1F7E3} ${this.t('color_purple')}</button>
-          <button class="design-chip" onclick="APP.quickDesign('primary','${this.DESIGN_COLORS.gold}')" style="background:${this.DESIGN_COLORS.gold};">\u{1F7E1} ${this.t('color_gold')}</button>
-          <button class="design-chip" onclick="APP.quickDesign('primary','${this.DESIGN_COLORS['اخضر']}')" style="background:${this.DESIGN_COLORS['اخضر']};">\u{1F7E2} ${this.t('color_green')}</button>
-          <button class="design-chip" onclick="APP.quickDesign('primary','${this.DESIGN_COLORS['وردي']}')" style="background:${this.DESIGN_COLORS['وردي']};">\u{1F7E8} ${this.t('color_pink')}</button>
-          <button class="design-chip" onclick="APP.quickDesign('secondary','${this.DESIGN_COLORS['سماوي']}')" style="background:${this.DESIGN_COLORS['سماوي']};">\u{1F7E6} ${this.t('color_cyan')}</button>
-        </div>
-        <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.7rem;">
-          <button class="btn-admin btn-admin-ghost" onclick="APP.quickDesign('glass','1')">\u{1F9D1}\u{200D}\u{1F9D0} ${this.t('glass_mode')}</button>
-          <button class="btn-admin btn-admin-ghost" onclick="APP.quickDesign('radius','14')">\u{2B50} ${this.t('rounded')}</button>
-          <button class="btn-admin btn-admin-ghost" onclick="APP.quickDesign('font','110')">\u{2705} ${this.t('bigger_font')}</button>
-        </div>
       </div>
     `;
     this.designChatInit();
@@ -1269,6 +1256,7 @@ const APP = {
   aiSystemPrompt() {
     const d = this.getDesign();
     return 'You are NOVE, a friendly smart assistant inside the admin panel of the NOVE STOR online store (a static website that sells FiveM & Discord scripts). ' +
+      'You have the ability to search the web: when the conversation includes a "[WEB RESULTS]" block, use it as the source of truth to answer the user. ' +
       'The user talks to you in Arabic or English. You can change the store\'s design instantly. ' +
       'Design settings you control:\n' +
       '- primary: main theme color as hex (e.g. #7c3aed)\n' +
@@ -1282,14 +1270,79 @@ const APP = {
       '1. If the user asks to change the design, the look, the colors, the theme, the font, the corners/roundness, or the glass effect - respond with ONLY one valid JSON object, no markdown, no extra text, like this exactly:\n' +
       '{"reply":"<short friendly confirmation in the user\'s language>","design":{"primary":"#hex"}}\n' +
       'Put in "design" only the keys that must change. "reply" must be short and in the same language the user wrote (Arabic if Arabic, English if English).\n' +
-      '2. If the user asks any other question about the store, how something works, recommendations, words of encouragement, etc., just answer helpfully and briefly in the user\'s language. Plain text, maximum 4 short sentences. No JSON.\n' +
+      '2. If the user asks any other question (general information, anything in the world, the store, recommendations, etc.), answer helpfully in the user\'s language, using any "[WEB RESULTS]" content provided. Plain text, maximum 4 short sentences. No JSON.\n' +
       '3. Always reply in the same language the user uses. Be warm and helpful.';
+  },
+
+  async aiWebSearch(query) {
+    const q = encodeURIComponent(query);
+    const sources = [];
+    const tryFetch = async (url, parser) => {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 8000);
+      try {
+        const r = await fetch(url, { signal: ctrl.signal });
+        if (!r.ok) return null;
+        const d = await r.json();
+        return parser(d);
+      } catch (e) {
+        return null;
+      } finally {
+        clearTimeout(timer);
+      }
+    };
+    const wiki = await tryFetch(
+      'https://ar.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + q + '&format=json&srlimit=3&utf8=1&origin=*',
+      d => (d.query && d.query.search || []).map(s => s.title)
+    );
+    if (wiki && wiki.length) {
+      const pages = await tryFetch(
+        'https://ar.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(wiki[0]) + '&prop=extracts&exintro=1&explaintext=1&format=json&utf8=1&origin=*',
+        d => {
+          const p = d.query && d.query.pages ? Object.values(d.query.pages)[0] : null;
+          return p && p.extract ? p.extract.slice(0, 400) : null;
+        }
+      );
+      if (pages) sources.push('● ' + wiki[0] + ': ' + pages);
+    }
+    const enWiki = await tryFetch(
+      'https://en.wikipedia.org/w/api.php?action=query&list=search&srsearch=' + q + '&format=json&srlimit=3&utf8=1&origin=*',
+      d => (d.query && d.query.search || []).map(s => s.title)
+    );
+    if (enWiki && enWiki.length) {
+      const pages = await tryFetch(
+        'https://en.wikipedia.org/w/api.php?action=query&titles=' + encodeURIComponent(enWiki[0]) + '&prop=extracts&exintro=1&explaintext=1&format=json&utf8=1&origin=*',
+        d => {
+          const p = d.query && d.query.pages ? Object.values(d.query.pages)[0] : null;
+          return p && p.extract ? p.extract.slice(0, 400) : null;
+        }
+      );
+      if (pages) sources.push('● ' + enWiki[0] + ': ' + pages);
+    }
+    if (sources.length === 0) {
+      const ddg = await tryFetch(
+        'https://api.duckduckgo.com/?q=' + q + '&format=json&no_html=1&skip_disambig=1',
+        d => (d.AbstractText || (d.RelatedTopics && d.RelatedTopics[0] && d.RelatedTopics[0].Text)) || null
+      );
+      if (ddg) sources.push('● DDG: ' + ddg.slice(0, 400));
+    }
+    return sources.length ? '[WEB RESULTS]\n' + sources.join('\n') : '';
+  },
+
+  isWebQuestion(text) {
+    return /[؟?]/.test(text) ||
+      /^(ما|ماهو|ما هو|وش|وشو|كيف|كيفيه|كيفية|ليش|لماذا|متى|مين|من هو|أين|وين|عرفني|اشرح|شرح|بحث|ابحث|عن|معلومات|ايش|وش يعني|means|what|who|when|where|why|how|explain|tell me|search|about|definition)/i.test(this.normalizeCommand(text).trim());
   },
 
   async processDesignAI(text) {
     const history = this.designChatHistory || [];
+    let webCtx = '';
+    if (this.isWebQuestion(text)) {
+      webCtx = await this.aiWebSearch(text);
+    }
     const messages = [
       { role: 'system', content: this.aiSystemPrompt() },
+      ...(webCtx ? [{ role: 'user', content: webCtx }] : []),
       ...history.slice(-8),
       { role: 'user', content: text }
     ];
@@ -1607,6 +1660,8 @@ const APP = {
 
   logActivity(type, message, details) {
     try {
+      const u = this.currentUser;
+      const role = u ? this.getUserRole(u.email) : 'guest';
       const logs = this.getLogs();
       logs.push({
         ts: new Date().toISOString(),
@@ -1614,7 +1669,9 @@ const APP = {
         msg: String(message || ''),
         details: details || '',
         ip: this.getIPKey(),
-        user: this.currentUser ? this.currentUser.email : 'guest'
+        user: u ? (u.name || '') + ' <' + u.email + '>' : 'guest',
+        email: u ? u.email : 'guest',
+        role: role
       });
       if (logs.length > 500) logs.splice(0, logs.length - 500);
       localStorage.setItem('nove_logs', JSON.stringify(logs));
@@ -3162,7 +3219,8 @@ const APP = {
       this.products.push(data);
     }
     this.saveProducts();
-    this.logActivity(productId ? 'product_edit' : 'product_add', (productId ? 'Product edited' : 'Product added'), data.name);
+    const actor = this.currentUser ? (this.currentUser.name || '') + ' <' + this.currentUser.email + '>' : 'guest';
+    this.logActivity(productId ? 'product_edit' : 'product_add', (productId ? 'Product edited' : 'Product added'), data.name + ' by ' + actor);
     this.showToast(productId ? this.t('updated_toast') : this.t('added_toast'), 'success');
     this.showAdminSection('products');
   },
@@ -3173,9 +3231,11 @@ const APP = {
 
   deleteProduct(id) {
     if (!confirm(this.t('delete_confirm'))) return;
+    const victim = this.products.find(p => p.id === id);
+    const victimName = victim ? victim.name : '';
     this.products = this.products.filter(p => p.id !== id);
     this.saveProducts();
-    this.logActivity('product_delete', 'Product deleted', 'ID ' + id);
+    this.logActivity('product_delete', 'Product deleted', (victimName || 'ID ' + id) + ' by ' + (this.currentUser ? (this.currentUser.name || '') + ' <' + this.currentUser.email + '>' : 'guest'));
     this.showToast(this.t('deleted_toast'), 'success');
     this.showAdminSection('products');
   },
@@ -3310,7 +3370,7 @@ const APP = {
     }
     coupons.push({ code, type, value, expires, limit, used: 0 });
     this.saveCoupons(coupons);
-    this.logActivity('coupon_add', 'Coupon added', code + ' (' + value + ')');
+    this.logActivity('coupon_add', 'Coupon added', code + ' (' + (type === 'percent' ? value + '%' : '$' + value) + ') by ' + (this.currentUser ? (this.currentUser.name || '') + ' <' + this.currentUser.email + '>' : 'guest'));
     this.showToast('Coupon added', 'success');
     this.showAdminSection('coupons');
   },
@@ -3318,7 +3378,7 @@ const APP = {
     if (!confirm(this.t('delete_confirm'))) return;
     const coupons = this.loadCoupons().filter(c => c.code !== code);
     this.saveCoupons(coupons);
-    this.logActivity('coupon_delete', 'Coupon deleted', code);
+    this.logActivity('coupon_delete', 'Coupon deleted', code + ' by ' + (this.currentUser ? (this.currentUser.name || '') + ' <' + this.currentUser.email + '>' : 'guest'));
     this.showToast(this.t('deleted_toast'), 'success');
     this.showAdminSection('coupons');
   },
@@ -4006,7 +4066,7 @@ const APP = {
                   <td>${typeBadge(l.type)}</td>
                   <td>${this.esc(l.msg)}</td>
                   <td style="font-size:0.75rem; color:var(--gray-400);">${this.esc(l.details || '')}</td>
-                  <td style="font-size:0.75rem;">${this.esc(l.user || '')}</td>
+                  <td style="font-size:0.75rem;">${this.esc(l.user || '')}${l.role === 'owner' ? ' <span class="status-badge active" style="font-size:0.65rem; margin-inline-start:4px;">owner</span>' : (l.role && l.role !== 'user' ? ' <span class="status-badge" style="font-size:0.65rem; margin-inline-start:4px; background:rgba(34,211,238,0.15); color:#22d3ee;">' + this.esc(l.role) + '</span>' : '')}</td>
                   <td style="font-size:0.75rem; color:var(--gray-500);">${this.esc(l.ip || '')}</td>
                 </tr>
               `).join('')}
