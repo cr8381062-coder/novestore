@@ -86,6 +86,12 @@ const APP = {
       wrong_credentials: 'البريد أو كلمة المرور غير صحيحة',
       welcome_back: 'مرحباً بعودتك',
       welcome: 'مرحباً',
+      too_many_attempts: 'محاولات كثيرة! حاول بعد {time}',
+      try_again_in: 'حاول مجدداً بعد',
+      login_timeout_done: 'انتهى الوقت، يمكنك المحاولة الآن',
+      reg_timeout_done: 'انتهى الوقت، يمكنك التسجيل الآن',
+      too_many_regs: 'تم التسجيل أكثر من مرة من نفس الـ IP. ممنوع لمدة {time}',
+      invalid_email: 'البريد الإلكتروني غير صالح',
       added_cart: 'تمت الإضافة للسلة',
       already_cart: 'المنتج موجود بالفعل في السلة',
       order_confirmed: 'تم تأكيد الطلب!',
@@ -133,6 +139,26 @@ const APP = {
       orders_manage: 'الطلبات',
       users_manage: 'المستخدمون',
       settings_manage: 'الإعدادات',
+      logs_manage: 'السجلات',
+      logs_sub: 'سجل نشاط المتجر والعمليات',
+      log_time: 'الوقت',
+      log_type: 'النوع',
+      log_message: 'الرسالة',
+      log_details: 'التفاصيل',
+      log_user: 'المستخدم',
+      log_ip: 'IP',
+      clear_logs: 'مسح السجلات',
+      logs_cleared: 'تم مسح السجلات!',
+      empty_logs: 'لا توجد سجلات بعد',
+      security_status: 'حالة الحماية',
+      ip_protection: 'حماية الـ IP',
+      ip_protection_desc: 'منع التسجيل المتكرر بنفس الـ IP',
+      acct_per_ip: 'حساب لكل IP',
+      login_guard: 'حارس تسجيل الدخول',
+      login_guard_desc: 'قفل بعد 5 محاولات فاشلة',
+      attempts: 'محاولات',
+      activity_logs: 'سجل النشاط',
+      log_entries: 'سجل',
       total_revenue: 'إجمالي الإيرادات',
       total_orders: 'إجمالي الطلبات',
       products_count: 'المنتجات',
@@ -380,6 +406,12 @@ const APP = {
       wrong_credentials: 'Incorrect email or password',
       welcome_back: 'Welcome back',
       welcome: 'Welcome',
+      too_many_attempts: 'Too many attempts! Try again in {time}',
+      try_again_in: 'Try again in',
+      login_timeout_done: 'Time is up, you can try again now',
+      reg_timeout_done: 'Time is up, you can register now',
+      too_many_regs: 'Registered more than once from the same IP. Blocked for {time}',
+      invalid_email: 'Invalid email address',
       added_cart: 'added to cart',
       already_cart: 'Product already in cart',
       order_confirmed: 'Order Confirmed!',
@@ -427,6 +459,26 @@ const APP = {
       orders_manage: 'Orders',
       users_manage: 'Users',
       settings_manage: 'Settings',
+      logs_manage: 'Logs',
+      logs_sub: 'Store activity & operation log',
+      log_time: 'Time',
+      log_type: 'Type',
+      log_message: 'Message',
+      log_details: 'Details',
+      log_user: 'User',
+      log_ip: 'IP',
+      clear_logs: 'Clear Logs',
+      logs_cleared: 'Logs cleared!',
+      empty_logs: 'No logs yet',
+      security_status: 'Security Status',
+      ip_protection: 'IP Protection',
+      ip_protection_desc: 'Blocks repeated registrations from same IP',
+      acct_per_ip: 'account per IP',
+      login_guard: 'Login Guard',
+      login_guard_desc: 'Locks after 5 failed attempts',
+      attempts: 'attempts',
+      activity_logs: 'Activity Log',
+      log_entries: 'entries',
       total_revenue: 'Total Revenue',
       total_orders: 'Total Orders',
       products_count: 'Products',
@@ -807,6 +859,188 @@ const APP = {
     ];
   },
 
+  // ===== SECURITY & LOGGING =====
+  esc(input) {
+    return String(input == null ? '' : input)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  },
+
+  safeUrl(url) {
+    if (!url) return '';
+    const u = String(url).trim().toLowerCase();
+    if (/^(javascript|data|vbscript):/i.test(u)) return '';
+    return String(url).trim();
+  },
+
+  getIPKey() {
+    let ip = '';
+    try { ip = (sessionStorage.getItem('nove_ip') || '').trim(); } catch (e) {}
+    if (!ip) {
+      try {
+        ip = (localStorage.getItem('nove_ip') || '').trim();
+      } catch (e) {}
+    }
+    return ip || 'unknown-' + (this.currentUser ? this.currentUser.email : 'anon');
+  },
+
+  getClientIP() {
+    return new Promise(resolve => {
+      try {
+        if (sessionStorage.getItem('nove_ip')) {
+          resolve(sessionStorage.getItem('nove_ip'));
+          return;
+        }
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', 'https://api.ipify.org?format=json', true);
+        xhr.timeout = 6000;
+        xhr.onload = () => {
+          try {
+            const data = JSON.parse(xhr.responseText);
+            const ip = data && data.ip ? data.ip : '';
+            if (ip) {
+              try { sessionStorage.setItem('nove_ip', ip); } catch (e) {}
+              resolve(ip);
+            } else resolve('');
+          } catch (err) { resolve(''); }
+        };
+        xhr.onerror = () => resolve('');
+        xhr.ontimeout = () => resolve('');
+        xhr.send();
+      } catch (e) {
+        resolve('');
+      }
+    });
+  },
+
+  readIpLog() {
+    try { return JSON.parse(localStorage.getItem('nove_ip_regs')) || {}; } catch (e) { return {}; }
+  },
+
+  saveIpLog(data) {
+    try { localStorage.setItem('nove_ip_regs', JSON.stringify(data)); } catch (e) {}
+  },
+
+  isIpBlocked(ipKey) {
+    if (!ipKey) return false;
+    const regs = this.readIpLog();
+    const rec = regs[ipKey];
+    return !!(rec && rec.timeoutUntil && Date.now() < rec.timeoutUntil);
+  },
+
+  ipRemainingMs(ipKey) {
+    const regs = this.readIpLog();
+    const rec = regs[ipKey];
+    if (!rec || !rec.timeoutUntil) return 0;
+    return Math.max(0, rec.timeoutUntil - Date.now());
+  },
+
+  maxRegsPerIp() {
+    return 1;
+  },
+
+  ipBlockDuration() {
+    return 24 * 60 * 60 * 1000;
+  },
+
+  checkIpLimit(ipKey) {
+    const regs = this.readIpLog();
+    const rec = regs[ipKey] || { count: 0, lastReg: 0 };
+    if (rec.timeoutUntil && Date.now() < rec.timeoutUntil) {
+      return { blocked: true, remaining: rec.timeoutUntil - Date.now() };
+    }
+    if (rec.count >= this.maxRegsPerIp()) {
+      rec.timeoutUntil = Date.now() + this.ipBlockDuration();
+      regs[ipKey] = rec;
+      this.saveIpLog(regs);
+      this.logActivity('security', 'IP registration limit reached', ipKey + ' -> timed out 24h');
+      return { blocked: true, remaining: this.ipBlockDuration(), justBlocked: true };
+    }
+    return { blocked: false };
+  },
+
+  markIpReg(ipKey, email) {
+    const regs = this.readIpLog();
+    const rec = regs[ipKey] || { count: 0, lastReg: 0 };
+    rec.count = (rec.count || 0) + 1;
+    rec.lastReg = Date.now();
+    rec.emails = rec.emails || [];
+    if (email) rec.emails.push(email);
+    regs[ipKey] = rec;
+    this.saveIpLog(regs);
+  },
+
+  resetLoginAttempts(email) {
+    try {
+      const all = JSON.parse(localStorage.getItem('nove_login_attempts')) || {};
+      delete all[email];
+      localStorage.setItem('nove_login_attempts', JSON.stringify(all));
+    } catch (e) {}
+  },
+
+  recordLoginAttempt(email) {
+    try {
+      const all = JSON.parse(localStorage.getItem('nove_login_attempts')) || {};
+      const rec = all[email] || { count: 0, lockUntil: 0 };
+      if (Date.now() >= rec.lockUntil) {
+        rec.count = 0;
+        rec.lockUntil = 0;
+      }
+      rec.count = (rec.count || 0) + 1;
+      if (rec.count >= 5) {
+        rec.lockUntil = Date.now() + 15 * 60 * 1000;
+        rec.count = 0;
+      }
+      all[email] = rec;
+      localStorage.setItem('nove_login_attempts', JSON.stringify(all));
+      return rec;
+    } catch (e) { return { count: 0, lockUntil: 0 }; }
+  },
+
+  isLoginLocked(email) {
+    try {
+      const all = JSON.parse(localStorage.getItem('nove_login_attempts')) || {};
+      const rec = all[email];
+      if (!rec) return { locked: false, remaining: 0 };
+      if (rec.lockUntil && Date.now() < rec.lockUntil) {
+        return { locked: true, remaining: rec.lockUntil - Date.now() };
+      }
+      return { locked: false, remaining: 0 };
+    } catch (e) { return { locked: false, remaining: 0 }; }
+  },
+
+  getLogs() {
+    try { return JSON.parse(localStorage.getItem('nove_logs')) || []; } catch (e) { return []; }
+  },
+
+  logActivity(type, message, details) {
+    try {
+      const logs = this.getLogs();
+      logs.push({
+        ts: new Date().toISOString(),
+        type: type || 'info',
+        msg: String(message || ''),
+        details: details || '',
+        ip: this.getIPKey(),
+        user: this.currentUser ? this.currentUser.email : 'guest'
+      });
+      if (logs.length > 500) logs.splice(0, logs.length - 500);
+      localStorage.setItem('nove_logs', JSON.stringify(logs));
+    } catch (e) {}
+  },
+
+  formatCountdown(ms) {
+    const s = Math.ceil(ms / 1000);
+    const h = Math.floor(s / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    if (h > 0) return h + ':' + String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+    return m + ':' + String(sec).padStart(2, '0');
+  },
+
   // ===== AUTH =====
   checkAuth() {
     const userData = localStorage.getItem('nove_user');
@@ -847,16 +1081,34 @@ const APP = {
 
     if (!name || !email || !password) {
       this.showToast(this.t('fill_all_fields'), 'error');
+      this.logActivity('register_fail', 'Missing fields during registration');
       return;
     }
     if (password.length < 6) {
       this.showToast(this.t('password_short'), 'error');
+      this.logActivity('register_fail', 'Password too short during registration', email);
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) {
+      this.showToast(this.t('invalid_email'), 'error');
+      this.logActivity('register_fail', 'Invalid email format', email);
+      return;
+    }
+
+    const ip = await this.getClientIP();
+    const ipKey = ip ? ip : this.getIPKey();
+    const limit = ip ? this.checkIpLimit(ipKey) : { blocked: false };
+    if (limit.blocked) {
+      this.logActivity('register_blocked', 'Registration blocked by IP limit', ipKey + ' remaining ' + Math.round(limit.remaining / 60000) + 'm');
+      this.startRegisterCountdown(limit.remaining);
+      this.showToast(this.t('too_many_regs').replace('{time}', this.formatCountdown(limit.remaining)), 'error');
       return;
     }
 
     const users = JSON.parse(localStorage.getItem('nove_users')) || [];
     if (users.find(u => u.email === email)) {
       this.showToast(this.t('email_exists'), 'error');
+      this.logActivity('register_fail', 'Email already registered', email);
       return;
     }
 
@@ -867,19 +1119,55 @@ const APP = {
       email: email,
       password: hashed,
       avatar: '',
+      ip: ip,
       isAdmin: email === this.ADMIN_EMAIL,
       joinedAt: new Date().toISOString()
     };
 
     users.push(user);
     localStorage.setItem('nove_users', JSON.stringify(users));
+    this.markIpReg(ipKey, email);
+    this.logActivity('register', 'New account registered', name + ' <' + email + '> ip:' + ip);
 
     this.currentUser = { ...user };
     delete this.currentUser.password;
     localStorage.setItem('nove_user', JSON.stringify(this.currentUser));
     this.updateAuthUI();
     this.closeModal('auth-modal');
+    this.stopRegisterCountdown();
     this.showToast(this.t('welcome') + ', ' + name + '!', 'success');
+  },
+
+  startRegisterCountdown(remainingMs) {
+    this.stopRegisterCountdown();
+    const box = document.getElementById('reg-countdown');
+    if (box) {
+      box.style.display = 'block';
+      const update = () => {
+        const left = Math.max(0, remainingMs - (Date.now() - box.dataset.started));
+        if (left <= 0) {
+          if (box.dataset.final && box.dataset.final === '1') {
+            this.stopRegisterCountdown();
+            box.style.display = 'none';
+            this.showToast(this.t('reg_timeout_done'), 'success');
+          } else {
+            box.dataset.final = '1';
+          }
+        } else {
+          box.textContent = this.t('try_again_in') + ' ' + this.formatCountdown(left);
+        }
+      };
+      box.dataset.started = Date.now();
+      update();
+      this._regTimer = setInterval(update, 1000);
+    }
+  },
+
+  stopRegisterCountdown() {
+    clearInterval(this._regTimer);
+    this._regTimer = null;
+    const box = document.getElementById('reg-countdown');
+    if (box) box.style.display = 'none';
   },
 
   async loginWithEmail(e) {
@@ -892,24 +1180,73 @@ const APP = {
       return;
     }
 
+    const lock = this.isLoginLocked(email);
+    if (lock.locked) {
+      this.logActivity('login_blocked', 'Login blocked: too many attempts', email + ' remaining ' + Math.round(lock.remaining / 60000) + 'm');
+      this.startLoginCountdown(lock.remaining);
+      this.showToast(this.t('too_many_attempts').replace('{time}', this.formatCountdown(lock.remaining)), 'error');
+      return;
+    }
+
     const users = JSON.parse(localStorage.getItem('nove_users')) || [];
     const hashed = await this.hashPassword(password);
     const user = users.find(u => u.email === email && u.password === hashed);
 
     if (!user) {
-      this.showToast(this.t('wrong_credentials'), 'error');
+      const rec = this.recordLoginAttempt(email);
+      this.logActivity('login_fail', 'Failed login attempt', email + ' (attempt ' + rec.count + '/5)');
+      if (rec.lockUntil && Date.now() < rec.lockUntil) {
+        const remain = rec.lockUntil - Date.now();
+        this.startLoginCountdown(remain);
+        this.showToast(this.t('too_many_attempts').replace('{time}', this.formatCountdown(remain)), 'error');
+        this.logActivity('login_locked', 'Account locked after failed attempts', email);
+      } else {
+        this.showToast(this.t('wrong_credentials'), 'error');
+      }
       return;
     }
+
+    this.resetLoginAttempts(email);
+    this.logActivity('login', 'Login successful', email);
 
     this.currentUser = { ...user };
     delete this.currentUser.password;
     localStorage.setItem('nove_user', JSON.stringify(this.currentUser));
     this.updateAuthUI();
     this.closeModal('auth-modal');
+    this.stopLoginCountdown();
     this.showToast(this.t('welcome') + ', ' + user.name + '!', 'success');
   },
 
+  startLoginCountdown(remainingMs) {
+    this.stopLoginCountdown();
+    const box = document.getElementById('login-countdown');
+    if (box) {
+      box.style.display = 'block';
+      box.dataset.started = Date.now();
+      const update = () => {
+        const left = Math.max(0, remainingMs - (Date.now() - box.dataset.started));
+        box.textContent = this.t('try_again_in') + ' ' + this.formatCountdown(left);
+        if (left <= 0) {
+          this.stopLoginCountdown();
+          box.style.display = 'none';
+          this.showToast(this.t('login_timeout_done'), 'success');
+        }
+      };
+      update();
+      this._loginTimer = setInterval(update, 1000);
+    }
+  },
+
+  stopLoginCountdown() {
+    clearInterval(this._loginTimer);
+    this._loginTimer = null;
+    const box = document.getElementById('login-countdown');
+    if (box) box.style.display = 'none';
+  },
+
   logout() {
+    this.logActivity('logout', 'User logged out', this.currentUser ? this.currentUser.email : '');
     this.currentUser = null;
     localStorage.removeItem('nove_user');
     this.updateAuthUI();
@@ -1015,6 +1352,7 @@ const APP = {
         localStorage.setItem('nove_users', JSON.stringify(list));
       }
       this.updateAuthUI();
+      this.logActivity('avatar', 'Avatar updated', this.currentUser.email);
       this.showToast(this.t('avatar_uploaded'), 'success');
     };
     reader.readAsDataURL(file);
@@ -1032,11 +1370,11 @@ const APP = {
       ? `<div class="empty-orders"><h4>&#128230;</h4><p data-i18n="no_orders">${this.t('no_orders')}</p></div>`
       : orders.map(o => {
           const date = new Date(o.date).toLocaleDateString(this.lang === 'ar' ? 'ar-SA' : 'en-US');
-          const items = (o.items || []).map(i => i.name || i.id).join(', ');
+          const items = (o.items || []).map(i => this.esc(i.name || i.id)).join(', ');
           return `
             <div class="order-card">
               <div class="order-card-header">
-                <h4>${o.id}</h4>
+                <h4>${this.esc(o.id)}</h4>
                 <span class="order-status ${o.status}">${this.t('order_' + o.status) || o.status}</span>
               </div>
               <div class="order-items">${items}</div>
@@ -1220,12 +1558,12 @@ const APP = {
     grid.innerHTML = filtered.map(p => `
       <div class="product-card" onclick="APP.showProduct(${p.id})">
         <div class="product-image">
-          <span class="product-tag">${this.resolveCategoryLabel(p.category)}</span>
-          ${p.image ? `<img src="${p.image}" alt="${p.name}" style="width:100%; height:100%; object-fit:cover;">` : p.icon}
+          <span class="product-tag">${this.esc(this.resolveCategoryLabel(p.category))}</span>
+          ${p.image ? `<img src="${this.esc(p.image)}" alt="${this.esc(p.name)}" style="width:100%; height:100%; object-fit:cover;">` : p.icon}
         </div>
         <div class="product-info">
-          <h3>${p.name}</h3>
-          <p>${p.description}</p>
+          <h3>${this.esc(p.name)}</h3>
+          <p>${this.esc(p.description)}</p>
           <div class="product-footer">
             <div class="product-price">$${p.price} <span>${this.t('usd')}</span></div>
             <div style="display:flex; gap:0.4rem; align-items:center;">
@@ -1315,15 +1653,15 @@ const APP = {
     const body = overlay.querySelector('.modal-body');
     body.innerHTML = `
       <div class="product-detail">
-        <div class="product-detail-image">${product.image ? `<img src="${product.image}" alt="${product.name}" style="width:100%; height:100%; object-fit:cover;">` : product.icon}</div>
+        <div class="product-detail-image">${product.image ? `<img src="${this.esc(product.image)}" alt="${this.esc(product.name)}" style="width:100%; height:100%; object-fit:cover;">` : product.icon}</div>
         <div class="product-detail-body">
           <button class="modal-close" onclick="APP.closeModal('product-modal')">&times;</button>
-          <div class="category">${this.resolveCategoryLabel(product.category)}</div>
-          <h2>${product.name}</h2>
-          <p class="description">${product.description}</p>
+          <div class="category">${this.esc(this.resolveCategoryLabel(product.category))}</div>
+          <h2>${this.esc(product.name)}</h2>
+          <p class="description">${this.esc(product.description)}</p>
           <div class="product-detail-price">$${product.price}</div>
           <ul class="product-detail-features">
-            ${(product.features || []).map(f => `<li>${f}</li>`).join('')}
+            ${(product.features || []).map(f => `<li>${this.esc(f)}</li>`).join('')}
           </ul>
           <button class="btn-primary" style="width:100%" onclick="APP.addToCart(${product.id}); APP.closeModal('product-modal');">
             ${this.cart.find(c => c.id === product.id) ? this.t('in_cart') : this.t('add_to_cart')}
@@ -1363,10 +1701,10 @@ const APP = {
       this.cart.forEach(item => {
         html += `
           <div class="cart-item">
-            <div class="cart-item-icon">${item.icon}</div>
+            <div class="cart-item-icon">${this.esc(item.icon)}</div>
             <div class="cart-item-details">
-              <h4>${item.name}</h4>
-              <p>${this.resolveCategoryLabel(item.category)}</p>
+              <h4>${this.esc(item.name)}</h4>
+              <p>${this.esc(this.resolveCategoryLabel(item.category))}</p>
             </div>
             <div class="cart-item-price">$${item.price.toFixed(2)}</div>
             <button class="cart-item-remove" onclick="APP.removeFromCart(${item.id})">\u2715</button>
@@ -1486,6 +1824,7 @@ const APP = {
     };
     this.orders.push(order);
     this.saveOrders();
+    this.logActivity('order', 'New order placed', order.id + ' by ' + order.email + ' total $' + order.total.toFixed(2));
     this.cart = [];
     this.saveCart();
     this.closeModal('cart-modal');
@@ -1500,7 +1839,7 @@ const APP = {
     container.innerHTML = `
       <div class="success-icon">\u2713</div>
       <h1>${this.t('order_confirmed')}</h1>
-      <p>${this.t('order_success_desc')} <strong>${orderId}</strong></p>
+      <p>${this.t('order_success_desc')} <strong>${this.esc(orderId)}</strong></p>
       <p style="color: var(--gray-500); margin-bottom: 2rem;">
         ${this.t('order_success_extra1')}<br>${this.t('order_success_extra2')}
       </p>
@@ -1622,12 +1961,49 @@ const APP = {
                   <div class="activity-item">
                     <div class="a-icon">\u{1F4E6}</div>
                     <div class="a-text">
-                      <div class="a-title">${o.userName || this.t('guest')} - ${o.items.map(i => i.name).slice(0,2).join(', ')}</div>
+                      <div class="a-title">${this.esc(o.userName || this.t('guest'))} - ${o.items.map(i => this.esc(i.name)).slice(0,2).join(', ')}</div>
                       <div class="a-sub">${o.id} \u00b7 ${new Date(o.date).toLocaleString()}</div>
                     </div>
                     <div class="a-amount green">$${o.total.toFixed(2)}</div>
                   </div>
                 `).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="admin-grid-2">
+        <div class="admin-panel-card">
+          <div class="pc-header">
+            <h3>\u{1F6E1}\uFE0F ${this.t('security_status')}</h3>
+            <span class="pc-link" onclick="APP.showAdminSection('logs')">${this.t('view_all')} \u2190</span>
+          </div>
+          <div class="pc-body">
+            <div class="activity-list">
+              <div class="activity-item">
+                <div class="a-icon" style="background:rgba(124,58,237,0.15);">\u{1F512}</div>
+                <div class="a-text">
+                  <div class="a-title">${this.t('ip_protection')}</div>
+                  <div class="a-sub">${this.t('ip_protection_desc')}</div>
+                </div>
+                <div class="a-amount" style="color:#22d3ee; font-size:0.75rem;">1 ${this.t('acct_per_ip')}</div>
+              </div>
+              <div class="activity-item">
+                <div class="a-icon" style="background:rgba(34,211,238,0.15);">\u{1F511}</div>
+                <div class="a-text">
+                  <div class="a-title">${this.t('login_guard')}</div>
+                  <div class="a-sub">${this.t('login_guard_desc')}</div>
+                </div>
+                <div class="a-amount" style="color:#22d3ee; font-size:0.75rem;">5 ${this.t('attempts')}</div>
+              </div>
+              <div class="activity-item">
+                <div class="a-icon" style="background:rgba(245,197,24,0.15);">\u{1F4CB}</div>
+                <div class="a-text">
+                  <div class="a-title">${this.t('activity_logs')}</div>
+                  <div class="a-sub">${this.getLogs().length} ${this.t('log_entries')}</div>
+                </div>
+                <div class="a-amount">\u2190 ${this.t('view_all')}</div>
+              </div>
             </div>
           </div>
         </div>
@@ -1650,7 +2026,7 @@ const APP = {
                     <tr>
                       <td style="font-weight:600;">${o.id}</td>
                       <td>${o.userName || this.t('guest')}</td>
-                      <td>${o.items.map(i => i.name).slice(0,2).join(', ')}${o.items.length > 2 ? ' +' + (o.items.length-2) : ''}</td>
+                      <td>${o.items.map(i => this.esc(i.name)).slice(0,2).join(', ')}${o.items.length > 2 ? ' +' + (o.items.length-2) : ''}</td>
                       <td style="font-weight:700;">$${o.total.toFixed(2)}</td>
                       <td><span class="status-badge ${o.status === 'completed' ? 'active' : 'pending'}">${o.status === 'completed' ? this.t('completed') : this.t('pending')}</span></td>
                       <td>${new Date(o.date).toLocaleDateString()}</td>
@@ -1740,6 +2116,7 @@ const APP = {
     const key = 'cat_' + Date.now();
     this.categories.push({ key, name, icon });
     this.saveCategories();
+    this.logActivity('category_add', 'New category added', name);
     this.showToast(this.t('add_cat_toast'), 'success');
     this.showAdminSection('categories');
   },
@@ -1758,6 +2135,7 @@ const APP = {
     cat.name = newName.trim();
     cat.icon = newIcon;
     this.saveCategories();
+    this.logActivity('category_edit', 'Category edited', cat.name);
     this.showToast(this.t('updated_cat_toast'), 'success');
     this.showAdminSection('categories');
   },
@@ -1777,6 +2155,7 @@ const APP = {
     }
     this.saveCategories();
     this.saveProducts();
+    this.logActivity('category_delete', 'Category deleted', key);
     this.showToast(this.t('deleted_cat_toast'), 'success');
     this.showAdminSection('categories');
   },
@@ -1810,6 +2189,7 @@ const APP = {
     const allowed = section === 'dashboard'
       || (section === 'settings' && isOwnerTop)
       || (section === 'permissions' && isOwnerTop)
+      || (section === 'logs' && isOwnerTop)
       || (perm !== undefined && APP.can(email, perm));
     if (!allowed) {
       content.innerHTML = `
@@ -1827,6 +2207,7 @@ const APP = {
     else if (section === 'users') this.renderAdminUsers(content);
     else if (section === 'permissions') this.renderAdminPermissions(content);
     else if (section === 'settings') this.renderAdminSettings(content);
+    else if (section === 'logs') this.renderAdminLogs(content);
     else this.renderAdminDashboard();
 
     document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
@@ -1865,14 +2246,14 @@ const APP = {
               <tr>
                 <td>
                   <div class="cell-product">
-                    <div class="cp-icon">${p.image ? `<img src="${p.image}" alt="" style="width:34px;height:34px;border-radius:8px;object-fit:cover;">` : (p.icon || '\u{1F4E6}')}</div>
+                    <div class="cp-icon">${p.image ? `<img src="${this.esc(p.image)}" alt="" style="width:34px;height:34px;border-radius:8px;object-fit:cover;">` : (p.icon || '\u{1F4E6}')}</div>
                     <div>
-                      <div class="cp-name">${p.name} ${p.link ? '<span class="link-dot" title="' + this.t('account_link') + '">\u{1F517}</span>' : ''}</div>
+                      <div class="cp-name">${this.esc(p.name)} ${p.link ? '<span class="link-dot" title="' + this.t('account_link') + '">\u{1F517}</span>' : ''}</div>
                       <div class="cp-cat">#${p.id}</div>
                     </div>
                   </div>
                 </td>
-                <td><span class="status-badge ${p.category === 'fivem' ? 'active' : 'pending'}" style="background:rgba(255,255,255,0.05); color:var(--gray-200);">${this.resolveCategoryLabel(p.category)}</span></td>
+                <td><span class="status-badge ${p.category === 'fivem' ? 'active' : 'pending'}" style="background:rgba(255,255,255,0.05); color:var(--gray-200);">${this.esc(this.resolveCategoryLabel(p.category))}</span></td>
                 <td style="font-weight:700;">$${p.price.toFixed(2)}</td>
                 <td>${p.sales || 0}</td>
                 <td><span class="status-badge ${p.status === 'active' ? 'active' : 'inactive'}">${p.status === 'active' ? this.t('active') : this.t('inactive')}</span></td>
@@ -2029,6 +2410,7 @@ const APP = {
       this.products.push(data);
     }
     this.saveProducts();
+    this.logActivity(productId ? 'product_edit' : 'product_add', (productId ? 'Product edited' : 'Product added'), data.name);
     this.showToast(productId ? this.t('updated_toast') : this.t('added_toast'), 'success');
     this.showAdminSection('products');
   },
@@ -2041,6 +2423,7 @@ const APP = {
     if (!confirm(this.t('delete_confirm'))) return;
     this.products = this.products.filter(p => p.id !== id);
     this.saveProducts();
+    this.logActivity('product_delete', 'Product deleted', 'ID ' + id);
     this.showToast(this.t('deleted_toast'), 'success');
     this.showAdminSection('products');
   },
@@ -2175,6 +2558,7 @@ const APP = {
     }
     coupons.push({ code, type, value, expires, limit, used: 0 });
     this.saveCoupons(coupons);
+    this.logActivity('coupon_add', 'Coupon added', code + ' (' + value + ')');
     this.showToast('Coupon added', 'success');
     this.showAdminSection('coupons');
   },
@@ -2182,6 +2566,7 @@ const APP = {
     if (!confirm(this.t('delete_confirm'))) return;
     const coupons = this.loadCoupons().filter(c => c.code !== code);
     this.saveCoupons(coupons);
+    this.logActivity('coupon_delete', 'Coupon deleted', code);
     this.showToast(this.t('deleted_toast'), 'success');
     this.showAdminSection('coupons');
   },
@@ -2236,12 +2621,12 @@ const APP = {
                     <div class="cell-product">
                       <div class="cp-icon">\u{1F464}</div>
                       <div>
-                        <div class="cp-name">${o.userName || this.t('guest')}</div>
-                        <div class="cp-cat">${o.email}</div>
+                        <div class="cp-name">${this.esc(o.userName || this.t('guest'))}</div>
+                        <div class="cp-cat">${this.esc(o.email)}</div>
                       </div>
                     </div>
                   </td>
-                  <td>${o.items.map(i => i.name).slice(0,2).join(', ')}${o.items.length > 2 ? ' +' + (o.items.length-2) : ''}</td>
+                  <td>${o.items.map(i => this.esc(i.name)).slice(0,2).join(', ')}${o.items.length > 2 ? ' +' + (o.items.length-2) : ''}</td>
                   <td style="font-weight:700;">$${o.total.toFixed(2)}</td>
                   <td><span class="status-badge ${o.status === 'completed' ? 'active' : 'pending'}">${o.status === 'completed' ? this.t('completed') : this.t('pending')}</span></td>
                   <td>${new Date(o.date).toLocaleDateString()}</td>
@@ -2317,10 +2702,10 @@ const APP = {
                 return `
                   <div class="users-row">
                     <div class="users-id">
-                      <img class="users-avatar" src="${avatar}" alt="">
+                      <img class="users-avatar" src="${this.esc(avatar)}" alt="">
                       <div class="users-meta">
-                        <span class="users-name">${u.name || this.t('guest')}</span>
-                        <span class="users-email">${u.email}</span>
+                        <span class="users-name">${this.esc(u.name || this.t('guest'))}</span>
+                        <span class="users-email">${this.esc(u.email)}</span>
                       </div>
                     </div>
                     <div class="role-group">
@@ -2329,7 +2714,7 @@ const APP = {
                           || (rkey === 'owner' && (u.email === APP.ADMIN_EMAIL || u.email === me));
                         const isActive = role === rkey;
                         return `
-                        <button class="role-btn ${isActive ? 'active role-'+rkey : ''}" style="${isActive ? 'background:linear-gradient(135deg,'+rdef.color+',#8b5cf6); border-color:transparent; color:#fff;' : ''}" ${locked ? 'disabled' : ''} onclick="APP.__setUserRole('${u.email}', '${rkey}')">
+                        <button class="role-btn ${isActive ? 'active role-'+rkey : ''}" style="${isActive ? 'background:linear-gradient(135deg,'+rdef.color+',#8b5cf6); border-color:transparent; color:#fff;' : ''}" ${locked ? 'disabled' : ''} onclick="APP.__setUserRole('${this.esc(u.email).replace(/'/g, '&#39;')}', '${rkey}')">
                           ${rdef.icon} ${rdef.name}
                         </button>`;
                       }).join('')}
@@ -2398,6 +2783,7 @@ const APP = {
       perms: { products:false, orders:false, coupons:false, users:false, roles:false }
     };
     this.saveRoles(roles);
+    this.logActivity('role_add', 'Role created', name);
     this.showToast(this.t('role_added'), 'success');
     this.renderAdminPermissions(document.getElementById('admin-content'));
   },
@@ -2416,6 +2802,7 @@ const APP = {
     list.forEach(u => { if (u.role === roleKey) u.role = 'user'; });
     this.saveRoles(roles);
     localStorage.setItem('nove_users', JSON.stringify(list));
+    this.logActivity('role_delete', 'Role deleted', roleKey);
     this.showToast(this.t('deleted_toast'), 'success');
     this.renderAdminPermissions(document.getElementById('admin-content'));
   },
@@ -2427,6 +2814,7 @@ const APP = {
     if (!roles[roleKey]) return;
     roles[roleKey].perms[permKey] = !roles[roleKey].perms[permKey];
     this.saveRoles(roles);
+    this.logActivity('perms_toggle', 'Permission toggled', roleKey + '.' + permKey);
     this.showToast(this.t('perms_saved'), 'success');
   },
   setRoleColor(roleKey) {
@@ -2544,6 +2932,7 @@ const APP = {
       if (!sec) return;
       if (sec === 'permissions') { btn.style.display = isTop ? '' : 'none'; return; }
       if (sec === 'settings') { btn.style.display = isTop ? '' : 'none'; return; }
+      if (sec === 'logs') { btn.style.display = isTop ? '' : 'none'; return; }
       if (isTop) { btn.style.display = ''; return; }
       const permsOf = map[sec] || null;
       const ok = permsOf ? permsOf.some(p => this.can(email, p)) : false;
@@ -2720,7 +3109,7 @@ const APP = {
     ];
     const html = items
       .filter(it => this.SOCIAL_LINKS[it.key])
-      .map(it => `<a href="${this.SOCIAL_LINKS[it.key]}" target="_blank" rel="noopener" class="social-icon" title="${it.label}" style="--sc:${it.color};">${it.icon}</a>`)
+      .map(it => `<a href="${this.esc(this.safeUrl(this.SOCIAL_LINKS[it.key]))}" target="_blank" rel="noopener" class="social-icon" title="${it.label}" style="--sc:${it.color};">${it.icon}</a>`)
       .join('');
     container.innerHTML = html;
     container.style.display = html ? 'flex' : 'none';
@@ -2749,7 +3138,66 @@ const APP = {
     });
     this.applyLogo();
     this.renderSocialIcons();
+    this.logActivity('settings', 'Store settings updated');
     this.showToast(this.t('saved'), 'success');
+  },
+
+  renderAdminLogs(content) {
+    const logs = this.getLogs().slice().reverse();
+    const typeBadge = (t) => {
+      const cls = t === 'register' || t === 'order' || t === 'login' ? 'active' : t === 'settings' || t === 'avatar' ? 'pending' : 'inactive';
+      return `<span class="status-badge ${cls}">${this.esc(t)}</span>`;
+    };
+    content.innerHTML = `
+      <div class="admin-topbar">
+        <div>
+          <h1>
+            <span class="tb-icon">\u{1F4CB}</span>
+            ${this.t('logs_manage')}
+            <div class="tb-sub">${this.t('logs_sub')}</div>
+          </h1>
+        </div>
+        <div class="admin-topbar-actions">
+          <span class="status-badge active" style="background:rgba(255,255,255,0.05); color:var(--gray-200);">${logs.length} ${this.t('total_badge')}</span>
+          <button class="btn-admin btn-admin-ghost" onclick="APP.clearLogs()">\u{1F5D1}\uFE0F ${this.t('clear_logs')}</button>
+        </div>
+      </div>
+      <div class="admin-table">
+        <table>
+          <thead>
+            <tr>
+              <th>${this.t('log_time')}</th>
+              <th>${this.t('log_type')}</th>
+              <th>${this.t('log_message')}</th>
+              <th>${this.t('log_details')}</th>
+              <th>${this.t('log_user')}</th>
+              <th>${this.t('log_ip')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${logs.length === 0 ? `<tr><td colspan="6" style="text-align:center; color:var(--gray-500); padding:2rem;">${this.t('empty_logs')}</td></tr>` :
+              logs.map(l => `
+                <tr>
+                  <td style="white-space:nowrap; font-size:0.75rem; color:var(--gray-400);">${new Date(l.ts).toLocaleString(this.lang === 'ar' ? 'ar-SA' : 'en-US')}</td>
+                  <td>${typeBadge(l.type)}</td>
+                  <td>${this.esc(l.msg)}</td>
+                  <td style="font-size:0.75rem; color:var(--gray-400);">${this.esc(l.details || '')}</td>
+                  <td style="font-size:0.75rem;">${this.esc(l.user || '')}</td>
+                  <td style="font-size:0.75rem; color:var(--gray-500);">${this.esc(l.ip || '')}</td>
+                </tr>
+              `).join('')}
+          </tbody>
+        </table>
+      </div>
+    `;
+  },
+
+  clearLogs() {
+    if (!confirm(this.t('clear_logs') + '?')) return;
+    localStorage.setItem('nove_logs', '[]');
+    this.logActivity('logs', 'Logs cleared');
+    this.showToast(this.t('logs_cleared'), 'success');
+    this.renderAdminLogs(document.getElementById('admin-content'));
   },
 
   // ===== NAVBAR =====
