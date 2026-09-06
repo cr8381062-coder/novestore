@@ -1103,6 +1103,7 @@ const APP = {
     }
     this.applyCustomNote(d);
     this.renderCustomPages();
+    this.applyElementStyles();
   },
 
   applyCustomNote(d) {
@@ -1430,112 +1431,111 @@ const APP = {
     if (!frame || !frame.contentDocument) return;
     const doc = frame.contentDocument;
     const wrap = doc.createElement('div');
-    wrap.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; z-index:99998; background:rgba(0,0,0,.6); display:flex; align-items:center; justify-content:center;';
+    wrap.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; z-index:99998; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;';
     const box = doc.createElement('div');
-    box.style.cssText = 'width:min(92%,460px); max-height:86%; overflow-y:auto; background:#0b0e13; border:1px solid #22d3ee; border-radius:14px; padding:1rem; color:#fff; font-family:inherit;';
+    box.style.cssText = 'width:min(92%,420px); background:#0b0e13; border:1px solid #22d3ee; border-radius:14px; padding:0.9rem 1rem; color:#fff; font-family:inherit; box-shadow:0 20px 60px rgba(0,0,0,.6);';
     const st = this.czElementStyles();
     const cur = st[this.czElementSelector(el)] || {};
     const v = (x, fb) => x === undefined || x === null || x === '' ? fb : x;
-    const mkV = (prop, label, val, type) => {
-      const row = doc.createElement('div');
-      row.style.cssText = 'display:flex; align-items:center; gap:0.6rem; margin-top:0.6rem;';
-      const lab = doc.createElement('label');
-      lab.style.cssText = 'flex:1; font-size:0.78rem; color:var(--gray-300);';
-      lab.textContent = label;
-      const inp = doc.createElement('input');
-      inp.type = type || 'color';
-      inp.value = val;
-      inp.style.cssText = 'width:52px; height:30px; border-radius:8px; border:1px solid var(--border); background:transparent; cursor:pointer; padding:1px;';
-      inp.addEventListener('input', () => {
-        el.style[prop] = inp.value;
-        this.saveElementStyle(el, prop, inp.value);
-        this.refreshHex(inp, inp.value);
-      });
-      row.appendChild(lab);
-      row.appendChild(inp);
-      return row;
-    };
-    const mkVr = (prop, label, val, min, max, step, unit) => {
-      const row = doc.createElement('div');
-      row.style.cssText = 'display:flex; align-items:center; gap:0.6rem; margin-top:0.6rem;';
-      const lab = doc.createElement('label');
-      lab.style.cssText = 'flex:1; font-size:0.78rem; color:var(--gray-300);';
-      lab.textContent = label;
-      const inp = doc.createElement('input');
-      inp.type = 'range';
-      inp.min = min; inp.max = max; inp.step = step || 1;
-      inp.value = val;
-      inp.style.cssText = 'flex:1; max-width:150px; cursor:pointer;';
-      const span = doc.createElement('span');
-      span.style.cssText = 'min-width:38px; text-align:right; font-size:0.75rem; color:var(--gray-400);';
-      span.textContent = val + (unit || '');
-      inp.addEventListener('input', () => {
-        const n = parseFloat(inp.value);
-        el.style[prop] = n + (unit || '');
-        this.saveElementStyle(el, prop, inp.value);
-        span.textContent = n + (unit || '');
-      });
-      row.appendChild(lab);
-      row.appendChild(inp);
-      row.appendChild(span);
-      return row;
-    };
 
-    box.innerHTML = '<div style="font-weight:800; margin-bottom:0.4rem; font-size:0.95rem;">\u{1F3A8} ' + this.esc(this.pointerName(el)) + '</div>';
-    box.appendChild(mkV('color', this.t('cz_field_color'), v(cur.color, '#ffffff')));
-    box.appendChild(mkV('background', this.t('cz_field_bg'), v(cur.background, '#111118')));
-    box.appendChild(mkV('borderColor', this.t('cz_field_border'), v(cur.borderColor, '#1e1e2a')));
-    box.appendChild(mkVr('borderWidth', this.t('cz_field_border') + ' (0-6)', v(cur.borderWidth, 0), 0, 6, 1, 'px'));
-    box.appendChild(mkVr('borderRadius', this.t('cz_field_radius') + ' (0-30)', v(cur.borderRadius, 0), 0, 30, 1, 'px'));
-    box.appendChild(mkVr('boxShadow', this.t('cz_field_glow') + ' (0-80)', v(cur.glow, 0), 0, 80, 1, 'px'));
-    box.appendChild(mkVr('gapW', this.t('cz_field_shadow'), v(cur.gapW, 0), 0, 0, 1, 'px'));
+    const title = doc.createElement('div');
+    title.style.cssText = 'display:flex; align-items:center; gap:0.5rem; margin-bottom:0.7rem; font-weight:800; font-size:0.92rem;';
+    title.textContent = '\u{1F3A8} ' + this.esc(this.pointerName(el));
+    box.appendChild(title);
 
-    const textRow = doc.createElement('div');
-    textRow.style.cssText = 'margin-top:0.9rem;';
-    const tLab = doc.createElement('label');
-    tLab.style.cssText = 'font-size:0.78rem; color:var(--gray-300); display:block; margin-bottom:0.3rem;';
-    tLab.textContent = this.t('cz_edit_here');
     const ta = doc.createElement('textarea');
-    ta.style.cssText = 'width:100%; height:74px; background:#131722; color:#fff; border:1px solid var(--border); border-radius:10px; padding:0.6rem; font-size:0.9rem; resize:vertical; font-family:inherit;';
+    ta.style.cssText = 'width:100%; height:56px; background:#131722; color:#fff; border:1px solid var(--border); border-radius:10px; padding:0.55rem; font-size:0.85rem; resize:none; font-family:inherit;';
     ta.value = (el.textContent || '').trim();
-    textRow.appendChild(tLab);
-    textRow.appendChild(ta);
+    box.appendChild(ta);
+
+    const colors = [
+      ['color', this.t('cz_field_color'), v(cur.color, '#ffffff')],
+      ['background', this.t('cz_field_bg'), v(cur.background, '#111118')],
+      ['borderColor', this.t('cz_field_border'), v(cur.borderColor, '#1e1e2a')]
+    ];
+    const cRow = doc.createElement('div');
+    cRow.style.cssText = 'display:flex; gap:0.5rem; margin-top:0.7rem;';
+    colors.forEach(c => {
+      const lbl = doc.createElement('label');
+      lbl.style.cssText = 'flex:1; display:flex; flex-direction:column; align-items:center; gap:0.25rem; font-size:0.66rem; color:var(--gray-400); cursor:pointer;';
+      const inp = doc.createElement('input');
+      inp.type = 'color';
+      inp.value = c[2];
+      inp.style.cssText = 'width:100%; height:34px; border-radius:8px; border:1px solid var(--border); background:transparent; cursor:pointer; padding:1px;';
+      inp.addEventListener('input', () => {
+        el.style[c[0]] = inp.value;
+        this.saveElementStyle(el, c[0], inp.value);
+        if (cur.glow) {
+          el.style.boxShadow = '0 0 ' + cur.glow + 'px ' + this.rgba(inp.value, 0.35);
+        }
+      });
+      lbl.appendChild(inp);
+      lbl.appendChild(doc.createTextNode(c[1]));
+      cRow.appendChild(lbl);
+    });
+    box.appendChild(cRow);
+
+    const glowRow = doc.createElement('div');
+    glowRow.style.cssText = 'display:flex; align-items:center; gap:0.6rem; margin-top:0.65rem;';
+    const glowLab = doc.createElement('label');
+    glowLab.style.cssText = 'font-size:0.72rem; color:var(--gray-300); white-space:nowrap;';
+    glowLab.textContent = this.t('cz_field_glow') + ' (0-80)';
+    const glow = doc.createElement('input');
+    glow.type = 'range'; glow.min = 0; glow.max = 80; glow.step = 1;
+    glow.value = v(cur.glow, 0);
+    glow.style.cssText = 'flex:1; cursor:pointer;';
+    glow.addEventListener('input', () => {
+      const n = parseFloat(glow.value);
+      this.saveElementStyle(el, 'boxShadow', n);
+      el.style.boxShadow = n > 0 ? '0 0 ' + n + 'px ' + this.rgba((el.style.color || '#22d3ee'), 0.35) : '';
+    });
+    glowRow.appendChild(glowLab);
+    glowRow.appendChild(glow);
+    box.appendChild(glowRow);
+
+    const radiusRow = doc.createElement('div');
+    radiusRow.style.cssText = 'display:flex; align-items:center; gap:0.6rem; margin-top:0.4rem;';
+    const radLab = doc.createElement('label');
+    radLab.style.cssText = 'font-size:0.72rem; color:var(--gray-300); white-space:nowrap;';
+    radLab.textContent = this.t('cz_field_radius') + ' (0-30)';
+    const rad = doc.createElement('input');
+    rad.type = 'range'; rad.min = 0; rad.max = 30; rad.step = 1;
+    rad.value = v(cur.borderRadius, 0);
+    rad.style.cssText = 'flex:1; cursor:pointer;';
+    rad.addEventListener('input', () => {
+      const n = parseFloat(rad.value);
+      el.style.borderRadius = n + 'px';
+      this.saveElementStyle(el, 'borderRadius', n);
+    });
+    radiusRow.appendChild(radLab);
+    radiusRow.appendChild(rad);
+    box.appendChild(radiusRow);
 
     const btnRow = doc.createElement('div');
-    btnRow.style.cssText = 'display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.9rem;';
-    const hx = doc.createElement('div');
-    hx.style.cssText = 'flex:1; font-size:0.68rem; color:var(--gray-500); align-self:center;';
-    hx.textContent = this.t('cz_pointer_hint');
+    btnRow.style.cssText = 'display:flex; gap:0.5rem; justify-content:flex-end; margin-top:0.8rem;';
     const reset = doc.createElement('button');
-    reset.textContent = this.t('reset_design');
-    reset.style.cssText = 'border:0; border-radius:8px; padding:0.45rem 0.8rem; background:rgba(239,68,68,.15); color:#f87171; cursor:pointer; font-weight:700;';
+    reset.textContent = '\u{1F504}';
+    reset.title = this.t('reset_design');
+    reset.style.cssText = 'border:0; border-radius:10px; padding:0.45rem 0.8rem; background:rgba(239,68,68,.15); color:#f87171; cursor:pointer; font-weight:700; font-size:0.9rem;';
     reset.addEventListener('click', () => {
       this.resetElementStyle(el);
       box.remove();
     });
     const save = doc.createElement('button');
     save.textContent = this.t('cz_save');
-    save.style.cssText = 'border:0; border-radius:8px; padding:0.45rem 1rem; background:linear-gradient(135deg,#22d3ee,#7c3aed); color:#fff; cursor:pointer; font-weight:800;';
+    save.style.cssText = 'border:0; border-radius:10px; padding:0.5rem 1.4rem; background:linear-gradient(135deg,#22d3ee,#7c3aed); color:#fff; cursor:pointer; font-weight:800; font-size:0.85rem;';
     save.addEventListener('click', () => {
       this.applyPointerEdit(el, ta.value.trim());
       box.remove();
     });
-    btnRow.appendChild(hx);
     btnRow.appendChild(reset);
     btnRow.appendChild(save);
-    box.appendChild(textRow);
     box.appendChild(btnRow);
+
     wrap.appendChild(box);
     doc.body.appendChild(wrap);
     ta.focus();
     ta.select();
-  },
-
-  refreshHex(inp, val) {
-    const par = inp.parentElement;
-    if (par && par.querySelector('.cz-hex')) {
-      par.querySelector('.cz-hex').textContent = val;
-    }
   },
 
   czElementStyles() {
