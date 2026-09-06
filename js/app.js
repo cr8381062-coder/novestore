@@ -104,6 +104,9 @@ const APP = {
       reg_timeout_done: 'انتهى الوقت، يمكنك التسجيل الآن',
       too_many_regs: 'تم التسجيل أكثر من مرة من نفس الـ IP. ممنوع لمدة {time}',
       invalid_email: 'البريد الإلكتروني غير صالح',
+      email_disposable: 'هذا البريد مؤقت/وهمي — استخدم بريداً حقيقياً',
+      email_no_mx: 'هذا البريد لا يستقبل رسائل (غير حقيقي)',
+      reg_success: 'تم إنشاء حسابك بنجاح',
       verify_title: 'تحقق من البريد الإلكتروني',
       verify_desc: 'أدخل الكود الذي أرسلناه إلى بريدك الإلكتروني',
       enter_code: 'رمز التحقق',
@@ -174,6 +177,7 @@ const APP = {
       cz_page_content_ph: 'اكتب محتوى الصفحة هنا…',
       cz_save_page: 'حفظ الصفحة',
       cz_page_added: 'تمت إضافة الصفحة',
+      confirm_delete: 'متأكد تريد الحذف؟',
       cz_note_new: 'نص مخصص على المتجر',
       cz_note_text: 'نص البانر',
       cz_note_ph: 'مثال: 🎉 خصم 20% دلوقتي بكود NOVE20',
@@ -186,6 +190,19 @@ const APP = {
       cz_remove_note: 'حذف النص المخصص',
       cz_note_removed: 'تم حذف النص',
       cz_note_empty: 'اكتب النص أولاً',
+      cz_pointer_on: 'إيقاف وضع الإشارة',
+      cz_pointer_off: 'وضع الإشارة',
+      cz_pointer_hint: 'فعّل وضع الإشارة ثم مرّر الفأرة على أي عنصر في المتجر — أيقونة ✏️ و🗑️ تظهر لك لتعديل أو حذف.',
+      cz_edit_here: 'اكتب النص الجديد هنا:',
+      cz_text_updated: 'تم تحديث النص',
+      cz_text_deleted: 'تم إخفاء العنصر',
+      cz_navbar_hidden: 'تم إخفاء شريط التنقل (من قائمة تعديل تنسيقه)',
+      cz_section_hidden: 'تم إخفاء هذا القسم',
+      cz_save: 'حفظ',
+      cz_cancel: 'إلغاء',
+      products: 'المنتجات',
+      features: 'المميزات',
+      navbar: 'شريط التنقل',
       design_ai_title: 'المساعد الذكي للتصميم',
       design_placeholder: 'اكتب أي شيء... مثل: خلّي المتجر أزرق داكن أو وش تنصحني بالتصميم؟',
       run_design: 'إرسال',
@@ -529,6 +546,9 @@ const APP = {
       reg_timeout_done: 'Time is up, you can register now',
       too_many_regs: 'Registered more than once from the same IP. Blocked for {time}',
       invalid_email: 'Invalid email address',
+      email_disposable: 'This email is temporary/fake — use a real one',
+      email_no_mx: 'This email cannot receive mail (not real)',
+      reg_success: 'Account created successfully',
       verify_title: 'Verify your email',
       verify_desc: 'Enter the code we sent to your email',
       enter_code: 'Verification code',
@@ -599,6 +619,20 @@ const APP = {
       cz_page_content_ph: 'Write your page content here…',
       cz_save_page: 'Save page',
       cz_page_added: 'Page added',
+      confirm_delete: 'Are you sure you want to delete?',
+      cz_pointer_on: 'Disable pointer mode',
+      cz_pointer_off: 'Pointer mode',
+      cz_pointer_hint: 'Turn on pointer mode, then hover any element in the store — ✏️ and 🗑️ appear to edit or delete.',
+      cz_edit_here: 'Type the new text here:',
+      cz_text_updated: 'Text updated',
+      cz_text_deleted: 'Element hidden',
+      cz_navbar_hidden: 'Navbar hidden (restyle it from Edit List)',
+      cz_section_hidden: 'Section hidden',
+      cz_save: 'Save',
+      cz_cancel: 'Cancel',
+      products: 'Products',
+      features: 'Features',
+      navbar: 'Navbar',
       cz_note_new: 'Custom banner',
       cz_note_text: 'Banner text',
       cz_note_ph: 'e.g. 🎉 Get 20% off now with code NOVE20',
@@ -978,9 +1012,9 @@ const APP = {
     if (settings.ai) this.SETTINGS.ai = settings.ai;
     localStorage.setItem('nove_settings', JSON.stringify(settings));
     this.applyDesign();
+    this.applyHidden();
+    this.applyTextEdits();
   },
-
-  // ===== DESIGN AI =====
   DESIGN_COLORS: {
     azrao: '#3b82f6',
     'blue': '#3b82f6',
@@ -1056,7 +1090,7 @@ const APP = {
       });
     }
     if (d.sections) {
-      const secMap = { hero: '.hero', features: '.features', about: '.about', footer: '.site-footer' };
+      const secMap = { hero: '.hero', features: '.features', about: '.about', footer: '.site-footer', navbar: '.navbar' };
       Object.keys(secMap).forEach(k => {
         const show = d.sections[k] !== false;
         const el = document.querySelector(secMap[k]);
@@ -1199,8 +1233,10 @@ const APP = {
             <span style="width:10px; height:10px; border-radius:50%; background:#febc2e;"></span>
             <span style="width:10px; height:10px; border-radius:50%; background:#28c840;"></span>
             <span style="flex:1; font-size:0.72rem; color:var(--gray-400); text-align:center;">NOVE STOR</span>
+            <button id="cz-pointer-toggle" class="btn-admin btn-admin-ghost cz-toggle-on" style="padding:0.2rem 0.6rem; font-size:0.7rem; border-color:var(--secondary);" onclick="APP.togglePointerMode()">\u{1F5B2}\uFE0F ${this.t('cz_pointer_off')}</button>
             <button class="btn-admin btn-admin-ghost" style="padding:0.2rem 0.6rem; font-size:0.7rem;" onclick="document.getElementById('cz-preview').src = '../index.html'">\u{1F504} ${this.t('cz_refresh')}</button>
           </div>
+          <div style="padding:0.5rem 0.8rem; font-size:0.72rem; color:var(--gray-400); background:rgba(34,211,238,0.08); border-bottom:1px solid var(--border);">\u{1F4E1} ${this.t('cz_pointer_hint')}</div>
           <iframe id="cz-preview" src="../index.html" style="width:100%; height:420px; border:0; display:block; background:#0b0e13;"></iframe>
         </div>
       </div>
@@ -1276,7 +1312,267 @@ const APP = {
         <div style="margin-top:0.8rem; font-size:0.75rem; color:var(--gray-500);">\u{1F4E1} ${this.t('cz_notes_note')}</div>
       </div>
     `;
+    const prevFrame = document.getElementById('cz-preview');
+    if (prevFrame) {
+      prevFrame.addEventListener('load', () => { APP.applyHidden(); APP.applyTextEdits(); if (APP.pointerMode) APP.armPointerMode(); });
+    }
     this.currentPick = pick;
+  },
+
+  // ===== CUSTOMIZER: وضع الإشارة بالماوس على المتجر (تعديل/حذف) =====
+  pointerMode: false,
+  pointerEl: null,
+
+  togglePointerMode() {
+    this.pointerMode = !this.pointerMode;
+    const btn = document.getElementById('cz-pointer-toggle');
+    if (btn) btn.textContent = '\u{1F5B2}\uFE0F ' + (this.pointerMode ? this.t('cz_pointer_on') : this.t('cz_pointer_off'));
+    if (this.pointerMode) this.armPointerMode();
+  },
+
+  armPointerMode() {
+    const frame = document.getElementById('cz-preview');
+    if (!frame || !frame.contentDocument) return;
+    const doc = frame.contentDocument;
+    let styleEl = doc.getElementById('cz-pointer-style');
+    if (!styleEl) {
+      styleEl = doc.createElement('style');
+      styleEl.id = 'cz-pointer-style';
+      styleEl.textContent = '.cz-pointer-hover{outline:3px dashed #22d3ee !important; outline-offset:2px; cursor:pointer;} .cz-pointer-bar{position:fixed; z-index:99999; display:flex; gap:0.4rem; padding:0.4rem 0.6rem; border-radius:10px; background:#0b0e13; border:1px solid #22d3ee; box-shadow:0 6px 24px rgba(0,0,0,.6); font-family:inherit;} .cz-pointer-bar button{border:0; border-radius:8px; padding:0.35rem 0.7rem; font-size:0.75rem; font-weight:700; cursor:pointer;} .cz-pointer-bar .pb-edit{background:rgba(34,211,238,.15); color:#22d3ee;} .cz-pointer-bar .pb-del{background:rgba(239,68,68,.15); color:#f87171;}';
+      doc.head.appendChild(styleEl);
+    }
+    doc.removeEventListener('mouseover', this._ptHover);
+    doc.removeEventListener('click', this._ptClick);
+    this._ptHover = (e) => this.pointerHover(e);
+    this._ptClick = (e) => this.pointerClick(e);
+    doc.addEventListener('mouseover', this._ptHover);
+    doc.addEventListener('click', this._ptClick);
+    if (this._ptMsg) { this._ptMsg.remove(); this._ptMsg = null; }
+  },
+
+  pointerHover(e) {
+    if (!this.pointerMode) return;
+    const t = e.target;
+    if (!t || !t.closest) return;
+    const el = t.closest('a, button, h1, h2, h3, h4, p, span, strong, li, .product-card, .feature-card, .hero-badge, .section-header, .navbar, .site-footer, #cz-note-bar, [id^="cpage-sec-"]');
+    if (!el) return;
+    if (this.pointerEl && this.pointerEl !== el) this.pointerEl.classList.remove('cz-pointer-hover');
+    this.pointerEl = el;
+    el.classList.add('cz-pointer-hover');
+  },
+
+  pointerClick(e) {
+    if (!this.pointerMode) return;
+    const t = e.target;
+    if (!t || !t.closest) return;
+    const el = t.closest('a, button, h1, h2, h3, h4, p, span, strong, li, .product-card, .feature-card, .hero-badge, .section-header, .navbar, .site-footer, #cz-note-bar, [id^="cpage-sec-"]');
+    if (!el) return;
+    e.preventDefault();
+    e.stopPropagation();
+    this.showPointerBar(el);
+  },
+
+  showPointerBar(el) {
+    const frame = document.getElementById('cz-preview');
+    if (!frame || !frame.contentDocument) return;
+    const doc = frame.contentDocument;
+    this.removePointerBar();
+    if (this.pointerEl && this.pointerEl.classList) this.pointerEl.classList.remove('cz-pointer-hover');
+    this.pointerEl = el;
+    const rect = el.getBoundingClientRect();
+    const bar = doc.createElement('div');
+    bar.className = 'cz-pointer-bar';
+    const title = this.pointerName(el);
+    bar.innerHTML = '<span style="color:#fff; font-size:0.72rem; font-weight:700; align-self:center;">' + this.esc(title) + '</span>' +
+      '<button class="pb-edit" data-act="edit">\u270F\uFE0F ' + this.t('edit') + '</button>' +
+      '<button class="pb-del" data-act="del">\u{1F5D1}\uFE0F ' + this.t('delete') + '</button>';
+    bar.style.left = Math.min(Math.max(8, rect.left), (doc.defaultView.innerWidth - 190)) + 'px';
+    bar.style.top = (rect.top + rect.height + 8 > doc.defaultView.innerHeight - 50 ? Math.max(8, rect.top - 48) : rect.top + rect.height + 8) + 'px';
+    bar.addEventListener('click', (ev) => {
+      const b = ev.target.closest('button');
+      if (!b) return;
+      ev.preventDefault();
+      ev.stopPropagation();
+      const act = b.getAttribute('data-act');
+      if (act === 'edit') this.pointerEdit(el);
+      else if (act === 'del') this.pointerDelete(el);
+    });
+    doc.body.appendChild(bar);
+  },
+
+  removePointerBar() {
+    const frame = document.getElementById('cz-preview');
+    if (!frame || !frame.contentDocument) return;
+    const old = frame.contentDocument.querySelector('.cz-pointer-bar');
+    if (old) old.remove();
+  },
+
+  pointerName(el) {
+    if (el.closest('#cz-note-bar')) return this.t('cz_notes');
+    if (el.hasAttribute('id') && el.id.indexOf('cpage-sec-') === 0) return this.t('cz_pages');
+    if (el.classList && el.classList.contains('product-card')) return this.t('products');
+    if (el.classList && el.classList.contains('feature-card')) return this.t('features');
+    if (el.classList && el.classList.contains('navbar')) return this.t('navbar');
+    if (el.classList && el.classList.contains('section-header')) return this.t('cz_pick_target');
+    return (el.textContent || '').trim().slice(0, 28) || el.tagName;
+  },
+
+  pointerEdit(el) {
+    const frame = document.getElementById('cz-preview');
+    if (!frame || !frame.contentDocument) return;
+    const doc = frame.contentDocument;
+    const wrap = doc.createElement('div');
+    wrap.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; z-index:99998; background:rgba(0,0,0,.55); display:flex; align-items:center; justify-content:center;';
+    const box = doc.createElement('div');
+    box.style.cssText = 'width:min(90%,520px); background:#0b0e13; border:1px solid #22d3ee; border-radius:14px; padding:1rem; color:#fff; font-family:inherit;';
+    box.innerHTML = '<div style="font-weight:700; margin-bottom:0.6rem;">\u270F\uFE0F ' + this.esc(this.t('cz_edit_here')) + '</div><textarea id="cz-pointer-editor" style="width:100%; height:130px; background:#131722; color:#fff; border:1px solid var(--border); border-radius:10px; padding:0.6rem; font-size:0.9rem; resize:vertical; font-family:inherit;">' + this.esc((el.textContent || '').trim()) + '</textarea>' +
+      '<div style="display:flex; gap:0.6rem; justify-content:flex-end; margin-top:0.6rem;"><button class="pb-cancel" style="border:0; border-radius:8px; padding:0.45rem 0.9rem; background:rgba(255,255,255,.08); color:#fff; cursor:pointer; font-weight:700;">' + this.t('cz_cancel') + '</button>' +
+      '<button class="pb-save" style="border:0; border-radius:8px; padding:0.45rem 0.9rem; background:var(--gradient, #22d3ee); color:#041016; cursor:pointer; font-weight:700;">' + this.t('cz_save') + '</button></div>';
+    box.querySelector('.pb-cancel').onclick = () => { wrap.remove(); };
+    box.querySelector('.pb-save').onclick = () => {
+      const val = box.querySelector('#cz-pointer-editor').value.trim();
+      this.applyPointerEdit(el, val);
+      wrap.remove();
+    };
+    wrap.appendChild(box);
+    doc.body.appendChild(wrap);
+    const ta = box.querySelector('#cz-pointer-editor');
+    ta.focus();
+    ta.select();
+  },
+
+  applyPointerEdit(el, val) {
+    if (el.closest('#cz-note-bar')) {
+      const d = this.getDesign();
+      d.note = val || d.note;
+      this.saveDesign(d);
+      this.logActivity('customizer', 'Pointer note edited', val);
+      this.showToast(this.t('cz_note_saved'), 'success');
+      this.showAdminSection('customizer');
+      return;
+    }
+    if (el.hasAttribute('id') && el.id.indexOf('cpage-sec-') === 0) {
+      const pages = this.getCustomPages();
+      const page = pages.find(p => p.id === el.id.replace('cpage-sec-', ''));
+      if (page && val) { page.content = val; localStorage.setItem('nove_pages', JSON.stringify(pages)); }
+      this.logActivity('customizer', 'Pointer page edited', el.id);
+      this.showToast(this.t('cz_page_updated'), 'success');
+      this.showAdminSection('customizer');
+      return;
+    }
+    if (el.style) el.textContent = val;
+    const sel = this.czElementSelector(el);
+    if (sel) {
+      const edits = this.czTextEdits();
+      edits[sel] = val;
+      localStorage.setItem('nove_edits', JSON.stringify(edits));
+    }
+    this.logActivity('customizer', 'Pointer text edited', this.pointerName(el));
+    this.showToast(this.t('cz_text_updated'), 'success');
+  },
+
+  pointerDelete(el) {
+    if (el.closest('#cz-note-bar')) {
+      if (!confirm(this.t('confirm_delete'))) return;
+      this.removeCustomNote();
+      return;
+    }
+    if (el.hasAttribute('id') && el.id.indexOf('cpage-sec-') === 0) {
+      if (!confirm(this.t('confirm_delete'))) return;
+      this.deleteCustomPage(el.id.replace('cpage-sec-', ''));
+      return;
+    }
+    if (el.classList && el.classList.contains('product-card')) {
+      const delBtn = el.querySelector('button[onclick^="APP.deleteProduct"]');
+      if (delBtn) { const id = (delBtn.getAttribute('onclick') || '').match(/\d+/); if (id && confirm(this.t('confirm_delete'))) this.deleteProduct(parseInt(id[0])); }
+      return;
+    }
+    if (el.classList && el.classList.contains('navbar')) {
+      const d = this.getDesign();
+      if (!d.sections) d.sections = {};
+      d.sections.navbar = false;
+      this.saveDesign(d);
+      this.logActivity('customizer', 'Pointer hide navbar');
+      this.showToast(this.t('cz_navbar_hidden'), 'success');
+      this.showAdminSection('customizer');
+      return;
+    }
+    if (el.classList && el.classList.contains('section-header')) {
+      const sec = el.closest('section, .hero, .features, .about');
+      if (sec) {
+        const map = { hero: 'hero', features: 'features', about: 'about' };
+        const key = sec.classList.contains('hero') ? 'hero' : (sec.classList.contains('features') ? 'features' : (sec.classList.contains('about') ? 'about' : null));
+        if (key) {
+          const d = this.getDesign();
+          if (!d.sections) d.sections = {};
+          d.sections[key] = false;
+          this.saveDesign(d);
+          this.logActivity('customizer', 'Pointer hide section ' + key);
+          this.showToast(this.t('cz_section_hidden'), 'success');
+          this.showAdminSection('customizer');
+          return;
+        }
+      }
+    }
+    if (el.style) {
+      if (!confirm(this.t('confirm_delete'))) return;
+      el.style.display = 'none';
+      const sel = this.czElementSelector(el);
+      const list = this.czHiddenList();
+      if (sel && list.indexOf(sel) === -1) list.push(sel);
+      localStorage.setItem('nove_hidden', JSON.stringify(list));
+      this.logActivity('customizer', 'Pointer hide element', this.pointerName(el));
+      this.showToast(this.t('cz_text_deleted'), 'success');
+    }
+  },
+
+  czElementSelector(el) {
+    if (!el || !el.tagName) return '';
+    if (el.id) return '#' + el.id;
+    let path = [];
+    let node = el;
+    while (node && node.tagName && node.tagName.toLowerCase() !== 'body' && node !== node.ownerDocument.documentElement) {
+      let part = node.tagName.toLowerCase();
+      if (node.classList && node.classList.length) part += '.' + Array.prototype.slice.call(node.classList).slice(0, 2).join('.');
+      const parent = node.parentElement;
+      if (parent) {
+        const same = Array.prototype.slice.call(parent.children).filter(c => c.tagName === node.tagName);
+        if (same.length > 1) part += ':nth-of-type(' + (Array.prototype.indexOf.call(parent.children, node) + 1) + ')';
+      }
+      path.unshift(part);
+      node = parent;
+    }
+    return path.join(' > ');
+  },
+
+  czHiddenList() {
+    try { return JSON.parse(localStorage.getItem('nove_hidden')) || []; } catch (e) { return []; }
+  },
+
+  czTextEdits() {
+    try { return JSON.parse(localStorage.getItem('nove_edits')) || {}; } catch (e) { return {}; }
+  },
+
+  applyTextEdits() {
+    const edits = this.czTextEdits();
+    const frame = document.getElementById('cz-preview');
+    const root = (frame && frame.contentDocument) ? frame.contentDocument : document;
+    Object.keys(edits).forEach(sel => {
+      try {
+        root.querySelectorAll(sel).forEach(el => { el.textContent = edits[sel]; });
+      } catch (e) {}
+    });
+  },
+
+  applyHidden() {
+    const list = this.czHiddenList();
+    const frame = document.getElementById('cz-preview');
+    const root = (frame && frame.contentDocument) ? frame.contentDocument : document;
+    list.forEach(sel => {
+      try {
+        root.querySelectorAll(sel).forEach(el => { el.style.display = 'none'; });
+      } catch (e) {}
+    });
   },
 
   customNotesHTML() {
@@ -1955,30 +2251,68 @@ const APP = {
       return;
     }
 
+    const real = await this.isRealEmail(email);
+    if (!real.ok) {
+      this.logActivity('register_blocked', 'Fake email blocked', email + ' (' + real.reason + ')');
+      this.showToast(real.msg || this.t('invalid_email'), 'error');
+      return;
+    }
+
     const hashed = await this.hashPassword(password);
-    const code = this.generateVerificationCode();
-    const pending = {
+    const user = {
+      id: 'email_' + Date.now(),
       name: name,
       email: email,
       password: hashed,
-      code: code,
+      avatar: '',
       ip: ip,
-      expiresAt: Date.now() + 10 * 60 * 1000,
-      attempts: 0,
-      sentAt: Date.now(),
-      resendAt: 0
+      isAdmin: email === this.ADMIN_EMAIL,
+      verified: true,
+      joinedAt: new Date().toISOString()
     };
-    this.savePendingVerify(pending);
-    this.logActivity('register_pending', 'Registration awaiting verification', name + ' <' + email + '>');
 
-    const regForm = document.getElementById('auth-register-form');
-    const verifyStep = document.getElementById('verify-step');
-    if (regForm) regForm.style.display = 'none';
-    if (verifyStep) verifyStep.style.display = 'block';
-    this.sendVerificationCode(email, name, code);
-    this.showToast(this.t('code_sent'), 'success');
-    const resetBtn = document.getElementById('resend-code-btn');
-    if (resetBtn) resetBtn.onclick = () => this.resendCode();
+    users.push(user);
+    localStorage.setItem('nove_users', JSON.stringify(users));
+    this.markIpReg(ip ? ip : this.getIPKey(), email);
+    localStorage.removeItem('nove_pending_verify');
+    this.logActivity('register', 'New account registered (real email)', name + ' <' + email + '> ip:' + ip);
+
+    this.currentUser = { ...user };
+    delete this.currentUser.password;
+    localStorage.setItem('nove_user', JSON.stringify(this.currentUser));
+    this.updateAuthUI();
+    this.closeModal('auth-modal');
+    this.stopRegisterCountdown();
+    this.cancelVerify(true);
+    this.showToast(this.t('reg_success') + ', ' + name + '!', 'success');
+  },
+
+  async isRealEmail(email) {
+    const domain = String(email.split('@')[1] || '').toLowerCase();
+    if (!domain || domain.indexOf('.') < 0) return { ok: false, reason: 'format', msg: this.t('invalid_email') };
+    if (this.EMAIL_BLOCKLIST[domain]) return { ok: false, reason: 'disposable', msg: this.t('email_disposable') };
+    try {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 6000);
+      const res = await fetch('https://dns.google/resolve?name=' + encodeURIComponent(domain) + '&type=MX', { signal: ctrl.signal });
+      clearTimeout(t);
+      const data = await res.json();
+      const mx = data && data.Answer && data.Answer.filter(a => a.type === 15).length > 0;
+      return mx ? { ok: true } : { ok: false, reason: 'no_mx', msg: this.t('email_no_mx') };
+    } catch (e) {
+      return { ok: true };
+    }
+  },
+
+  EMAIL_BLOCKLIST: {
+    'mailinator.com': 1, '10-minute-mail.com': 1, '10minutemail.com': 1,
+    'guerrillamail.com': 1, 'sharklasers.com': 1, 'guerrillamail.net': 1,
+    'tempmail.com': 1, 'temp-mail.org': 1, 'throwawaymail.com': 1,
+    'getnada.com': 1, 'yopmail.com': 1, 'maildrop.cc': 1, 'dispostable.com': 1,
+    'trashmail.com': 1, 'fakeinbox.com': 1, 'mintemail.com': 1, 'spam4.me': 1,
+    'mohmal.com': 1, 'emailondeck.com': 1, 'inboxkitten.com': 1, 'cock.li': 1,
+    'dumpmail.de': 1, 'burnermail.io': 1, 'tmpmail.org': 1, 'spambox.us': 1,
+    'mailexpire.com': 1, 'mailcatch.com': 1, 'mailnesia.com': 1
   },
 
   async resendCode() {
@@ -2520,6 +2854,28 @@ const APP = {
       </div>
     `).join('');
     this.updateAddToCartButtons();
+    this.initReveal();
+  },
+
+  initReveal() {
+    if (this._revealObs) this._revealObs.disconnect();
+    const targets = document.querySelectorAll('.product-card, .feature-card, .about-card, .section-header, .hero-content');
+    if (!('IntersectionObserver' in window)) {
+      targets.forEach(el => el.classList.add('visible'));
+      return;
+    }
+    this._revealObs = new IntersectionObserver((entries) => {
+      entries.forEach(en => {
+        if (en.isIntersecting) {
+          en.target.classList.add('visible');
+          this._revealObs.unobserve(en.target);
+        }
+      });
+    }, { threshold: 0.08, rootMargin: '0px 0px -30px 0px' });
+    targets.forEach(el => {
+      if (!el.classList.contains('reveal')) el.classList.add('reveal');
+      this._revealObs.observe(el);
+    });
   },
 
   filterProducts(category) {
