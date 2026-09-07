@@ -7,5 +7,5 @@
 const NOVE_BACKEND = {
   enabled: true,
   url: 'https://spkowmoatjbfxebbgfky.supabase.co',
-  anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNwa293bW9hdGpiZnhlYmJnZmt5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3OTEwMjYsImV4cCI6MjEwNDM2NzAyNn0._H5Fh7gvGK8Tv8eDeKpkODXMXMiLmOVGx30xwWl9Tbg'
+  anonKey: 'sb_publishable_JFaliFX1Hcb7_41s86CgOQ_l6hLN9Y0'
 };
