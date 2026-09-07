@@ -134,9 +134,13 @@ create policy categories_write on public.categories for all using (
   exists (select 1 from public.profiles p where p.id = auth.uid() and p.role in ('owner','admin') and p.blocked = 0)
 );
 
--- --- coupons: read public (needed at checkout), write owner/admin ---
+-- --- coupons: HIDDEN from public (discount codes are secrets).
+--     Only owner/admin can read or write. Checkout uses local coupons. ---
 drop policy if exists coupons_read on public.coupons;
-create policy coupons_read on public.coupons for select using (true);
+drop policy if exists coupons_read_owner on public.coupons;
+create policy coupons_read_owner on public.coupons for select using (
+  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role in ('owner','admin') and p.blocked = 0)
+);
 drop policy if exists coupons_write on public.coupons;
 create policy coupons_write on public.coupons for all using (
   exists (select 1 from public.profiles p where p.id = auth.uid() and p.role in ('owner','admin') and p.blocked = 0)
@@ -144,9 +148,12 @@ create policy coupons_write on public.coupons for all using (
   exists (select 1 from public.profiles p where p.id = auth.uid() and p.role in ('owner','admin') and p.blocked = 0)
 );
 
--- --- orders: anyone can insert (checkout), only owner/admin read ---
+-- --- orders: anyone can insert a REAL checkout order (sanity-checked),
+--     only owner/admin can read ---
 drop policy if exists orders_insert on public.orders;
-create policy orders_insert on public.orders for insert with check (true);
+create policy orders_insert on public.orders for insert with check (
+  coalesce(email,'') <> '' and total >= 0 and coalesce(payment_id,'') <> ''
+);
 drop policy if exists orders_read on public.orders;
 create policy orders_read on public.orders for select using (
   exists (select 1 from public.profiles p where p.id = auth.uid() and p.role in ('owner','admin') and p.blocked = 0)
@@ -187,9 +194,13 @@ create policy profiles_update_admin on public.profiles for update using (
   exists (select 1 from public.profiles p where p.id = auth.uid() and p.role = 'owner' and p.blocked = 0)
 );
 
--- --- store_settings: everyone reads (logo/name), only owner/admin writes ---
+-- --- store_settings: HIDDEN from public (may contain secrets).
+--     Only owner/admin read; writes owner/admin. Logo/name come from browser. ---
 drop policy if exists settings_read on public.store_settings;
-create policy settings_read on public.store_settings for select using (true);
+drop policy if exists settings_read_owner on public.store_settings;
+create policy settings_read_owner on public.store_settings for select using (
+  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role in ('owner','admin') and p.blocked = 0)
+);
 drop policy if exists settings_write on public.store_settings;
 create policy settings_write on public.store_settings for all using (
   exists (select 1 from public.profiles p where p.id = auth.uid() and p.role in ('owner','admin') and p.blocked = 0)
