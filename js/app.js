@@ -4623,16 +4623,18 @@ const APP = {
     const navIcon = document.querySelector('.nav-brand-icon');
     const heroIcon = document.querySelector('.hero-logo-icon');
     if (APP.STORE_LOGO && heroIcon) {
-      heroIcon.style.background = 'transparent';
-      heroIcon.style.boxShadow = 'none';
-      heroIcon.style.border = '1px solid rgba(212,175,55,0.35)';
-      heroIcon.style.padding = '12px';
-      heroIcon.innerHTML = `<img src="${APP.STORE_LOGO}" alt="" style="width:100%; height:100%; object-fit:contain;">`;
+      heroIcon.style.background = '#0b0e13';
+      heroIcon.style.boxShadow = 'inset 0 0 0 2px rgba(212,175,55,0.4), 0 0 60px rgba(212,175,55,0.35)';
+      heroIcon.style.border = '1px solid rgba(212,175,55,0.45)';
+      heroIcon.style.padding = '0';
+      heroIcon.style.overflow = 'hidden';
+      heroIcon.innerHTML = `<img src="${APP.STORE_LOGO}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
     } else if (heroIcon) {
       heroIcon.style.background = '';
       heroIcon.style.boxShadow = '';
       heroIcon.style.border = '';
       heroIcon.style.padding = '';
+      heroIcon.style.overflow = '';
       heroIcon.textContent = 'N';
     }
     if (navIcon) {
