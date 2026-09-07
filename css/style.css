@@ -593,38 +593,44 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1rem;
-  margin-bottom: 2.2rem;
+  gap: 1.4rem;
+  margin-bottom: 2.5rem;
+  animation: logoEntrance 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes logoEntrance {
+  from { opacity: 0; transform: scale(0.8) translateY(22px); }
+  to { opacity: 1; transform: none; }
 }
 
 .hero-logo-icon {
-  width: 96px;
-  height: 96px;
+  width: 180px;
+  height: 180px;
   background: var(--gradient);
-  border-radius: 24px;
+  border-radius: 42px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 900;
-  font-size: 2.6rem;
+  font-size: 5rem;
   color: #000;
   box-shadow:
     0 0 0 1px rgba(212,175,55,0.35),
-    0 18px 50px rgba(0,0,0,0.6),
-    0 0 60px rgba(212,175,55,0.35);
+    0 24px 70px rgba(0,0,0,0.65),
+    0 0 90px rgba(212,175,55,0.45);
 }
 
 .hero-logo-name {
-  font-size: 2.6rem;
+  font-size: 4.2rem;
   font-weight: 900;
-  letter-spacing: 0.12em;
+  letter-spacing: 0.14em;
   color: var(--white);
-  text-shadow: 0 0 30px rgba(212,175,55,0.5);
+  text-shadow: 0 0 40px rgba(212,175,55,0.55);
 }
 
 .hero-logo-name span {
   color: var(--primary);
-  text-shadow: 0 0 30px rgba(212,175,55,0.6);
+  text-shadow: 0 0 40px rgba(212,175,55,0.65);
 }
 
 .hero-badge {
@@ -655,9 +661,9 @@ body::before {
 .hero-badge-dot {
   width: 6px;
   height: 6px;
-  background: var(--secondary);
+  background: var(--primary);
   border-radius: 50%;
-  animation: pulse 2s infinite;
+  box-shadow: 0 0 12px 2px rgba(212,175,55,0.7);
 }
 
 @keyframes pulse {
@@ -3622,4 +3628,16 @@ body::before {
   border-color: var(--secondary, #f5c518);
   box-shadow: 0 0 0 3px rgba(245,197,24,0.15);
   background: rgba(255,255,255,0.07);
+}
+
+@media (max-width: 600px) {
+  .hero-logo-icon {
+    width: 120px;
+    height: 120px;
+    border-radius: 30px;
+    font-size: 3.2rem;
+  }
+  .hero-logo-name {
+    font-size: 2.6rem;
+  }
 }
