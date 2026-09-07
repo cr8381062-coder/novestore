@@ -1000,17 +1000,17 @@ const APP = {
     const customersEl = document.getElementById('stat-customers');
     const productsEl = document.getElementById('stat-products');
     const ordersEl = document.getElementById('stat-orders');
-    const users = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const users = APP.safeParse('nove_users', [], 20000);
     if (customersEl) customersEl.textContent = users.length;
     if (productsEl) productsEl.textContent = this.products.filter(p => p.status === 'active').length || 9;
     if (ordersEl) ordersEl.textContent = this.orders.length;
   },
 
   loadSettings() {
-    const settings = JSON.parse(localStorage.getItem('nove_settings')) || {};
+    const settings = APP.safeParse('nove_settings', {});
     if (settings.storeName) this.STORE_NAME = settings.storeName;
     if (settings.logo) this.STORE_LOGO = settings.logo;
-    if (!this.STORE_LOGO) document.body.setAttribute('data-static-logo', '1');
+    if (!this.STORE_LOGO && document.body.getAttribute('data-page') === 'store') document.body.setAttribute('data-static-logo', '1');
     if (settings.paypal && settings.paypal !== 'YOUR_PAYPAL_CLIENT_ID') this.PAYPAL_CLIENT_ID = settings.paypal;
     if (settings.social) this.SOCIAL_LINKS = Object.assign({}, this.SOCIAL_LINKS, settings.social);
     if (settings.emailjs) this.SETTINGS.emailjs = settings.emailjs;
@@ -1051,7 +1051,7 @@ const APP = {
 
   getDesign() {
     try {
-      return JSON.parse(localStorage.getItem('nove_design')) || {};
+      return APP.safeParse('nove_design', {});
     } catch (e) {
       return {};
     }
@@ -2021,9 +2021,9 @@ const APP = {
 
   // ===== DATA =====
   loadData() {
-    this.products = JSON.parse(localStorage.getItem('nove_products')) || this.getDefaultProducts();
-    this.cart = JSON.parse(localStorage.getItem('nove_cart')) || [];
-    this.orders = JSON.parse(localStorage.getItem('nove_orders')) || [];
+    this.products = APP.safeParse('nove_products', this.getDefaultProducts(), 5000);
+    this.cart = APP.safeParse('nove_cart', [], 2000);
+    this.orders = APP.safeParse('nove_orders', [], 20000);
     if (!localStorage.getItem('nove_products')) {
       this.saveProducts();
     }
@@ -2043,7 +2043,7 @@ const APP = {
   },
 
   loadCategories() {
-    this.categories = JSON.parse(localStorage.getItem('nove_categories')) || [];
+    this.categories = APP.safeParse('nove_categories', [], 5000);
     return this.categories;
   },
 
@@ -2131,6 +2131,19 @@ const APP = {
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;')
       .replace(/'/g, '&#39;');
+  },
+
+  safeParse(key, fb, maxItems) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return fb;
+      const v = JSON.parse(raw);
+      if (maxItems && Array.isArray(v) && v.length > maxItems) return v.slice(0, maxItems);
+      return v;
+    } catch (e) {
+      try { localStorage.removeItem(key); } catch (e2) {}
+      return fb;
+    }
   },
 
   safeUrl(url) {
@@ -2239,7 +2252,7 @@ const APP = {
 
   resetLoginAttempts(email) {
     try {
-      const all = JSON.parse(localStorage.getItem('nove_login_attempts')) || {};
+      const all = APP.safeParse('nove_login_attempts', {});
       delete all[email];
       localStorage.setItem('nove_login_attempts', JSON.stringify(all));
     } catch (e) {}
@@ -2247,7 +2260,7 @@ const APP = {
 
   recordLoginAttempt(email) {
     try {
-      const all = JSON.parse(localStorage.getItem('nove_login_attempts')) || {};
+      const all = APP.safeParse('nove_login_attempts', {});
       const rec = all[email] || { count: 0, lockUntil: 0 };
       if (Date.now() >= rec.lockUntil) {
         rec.count = 0;
@@ -2266,7 +2279,7 @@ const APP = {
 
   isLoginLocked(email) {
     try {
-      const all = JSON.parse(localStorage.getItem('nove_login_attempts')) || {};
+      const all = APP.safeParse('nove_login_attempts', {});
       const rec = all[email];
       if (!rec) return { locked: false, remaining: 0 };
       if (rec.lockUntil && Date.now() < rec.lockUntil) {
@@ -2313,12 +2326,17 @@ const APP = {
   checkAuth() {
     const userData = localStorage.getItem('nove_user');
     if (userData) {
-      this.currentUser = JSON.parse(userData);
+      try {
+        this.currentUser = JSON.parse(userData);
+      } catch (e) {
+        this.currentUser = null;
+        try { localStorage.removeItem('nove_user'); } catch (e2) {}
+      }
     }
   },
 
   registerUser(user) {
-    const users = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const users = APP.safeParse('nove_users', [], 20000);
     const existing = users.find(u => u.email === user.email);
     if (!existing) {
       user.joinedAt = new Date().toISOString();
@@ -2434,7 +2452,7 @@ const APP = {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const users = APP.safeParse('nove_users', [], 20000);
     if (users.find(u => u.email === email)) {
       this.showToast(this.t('email_exists'), 'error');
       this.logActivity('register_fail', 'Email already registered', email);
@@ -2562,7 +2580,7 @@ const APP = {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const users = APP.safeParse('nove_users', [], 20000);
     const user = {
       id: 'email_' + Date.now(),
       name: pending.name,
@@ -2655,7 +2673,7 @@ const APP = {
       return;
     }
 
-    const users = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const users = APP.safeParse('nove_users', [], 20000);
     const hashed = await this.hashPassword(password);
     const user = users.find(u => u.email === email && u.password === hashed);
 
@@ -2772,7 +2790,7 @@ const APP = {
 
   getUserRole(email) {
     if (email === this.ADMIN_EMAIL) return 'owner';
-    const list = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const list = APP.safeParse('nove_users', [], 20000);
     const u = list.find(e => e.email === email);
     if (!u) return 'user';
     const r = this.loadRoles()[u.role];
@@ -2812,7 +2830,7 @@ const APP = {
       const dataUrl = ev.target.result;
       this.currentUser.avatar = dataUrl;
       localStorage.setItem('nove_user', JSON.stringify(this.currentUser));
-      const list = JSON.parse(localStorage.getItem('nove_users')) || [];
+      const list = APP.safeParse('nove_users', [], 20000);
       const user = list.find(u => u.email === this.currentUser.email);
       if (user) {
         user.avatar = dataUrl;
@@ -2913,7 +2931,7 @@ const APP = {
   async saveProfileName() {
     const newName = (document.getElementById('profile-name').value || '').trim();
     if (!newName) { this.showToast(this.t('role_name_required'), 'error'); return; }
-    const list = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const list = APP.safeParse('nove_users', [], 20000);
     const user = list.find(u => u.email === this.currentUser.email);
     if (user) { user.name = newName; localStorage.setItem('nove_users', JSON.stringify(list)); }
     this.currentUser.name = newName;
@@ -2928,7 +2946,7 @@ const APP = {
     const conf = document.getElementById('profile-confirm-pass').value;
     if (nw !== conf) { this.showToast(this.t('password_mismatch'), 'error'); return; }
     if (nw.length < 6) { this.showToast(this.t('password_short'), 'error'); return; }
-    const list = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const list = APP.safeParse('nove_users', [], 20000);
     const user = list.find(u => u.email === this.currentUser.email);
     if (!user) return;
     const curHash = await this.hashPassword(cur);
@@ -3407,7 +3425,7 @@ const APP = {
             <div class="stat-icon">\u{1F465}</div>
             <h4>${this.t('users_manage')}</h4>
           </div>
-          <div class="value">${(JSON.parse(localStorage.getItem('nove_users')) || []).length}</div>
+          <div class="value">${(APP.safeParse('nove_users', [], 20000)).length}</div>
           <div class="change">\u2191 ${this.t('new_signups')}</div>
         </div>
       </div>
@@ -3909,7 +3927,7 @@ const APP = {
 
   // ===== COUPONS =====
   loadCoupons() {
-    return JSON.parse(localStorage.getItem('nove_coupons')) || [];
+    return APP.safeParse('nove_coupons', [], 5000);
   },
   saveCoupons(list) {
     localStorage.setItem('nove_coupons', JSON.stringify(list));
@@ -4118,7 +4136,7 @@ const APP = {
   },
 
   renderAdminUsers(content) {
-    const users = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const users = APP.safeParse('nove_users', [], 20000);
     const me = APP.currentUser ? APP.currentUser.email : '';
     const isTopOwner = APP.isTopOwner(me);
     const getRole = (u) => {
@@ -4127,7 +4145,7 @@ const APP = {
       return (r && u.role !== 'user') ? u.role : 'user';
     };
     const setRole = (email, role) => {
-      const list = JSON.parse(localStorage.getItem('nove_users')) || [];
+      const list = APP.safeParse('nove_users', [], 20000);
       const target = list.find(u => u.email === email);
       const meEmail = APP.currentUser ? APP.currentUser.email : '';
       if (!APP.isTopOwner(meEmail)) {
@@ -4216,7 +4234,7 @@ const APP = {
     };
   },
   loadRoles() {
-    const stored = JSON.parse(localStorage.getItem('nove_roles')) || {};
+    const stored = APP.safeParse('nove_roles', {});
     return { ...this.defaultRoles(), ...stored };
   },
   saveRoles(roles) {
@@ -4276,7 +4294,7 @@ const APP = {
     }
     if (!confirm(this.t('delete_role_confirm'))) return;
     const roles = this.loadRoles();
-    const list = JSON.parse(localStorage.getItem('nove_users')) || [];
+    const list = APP.safeParse('nove_users', [], 20000);
     delete roles[roleKey];
     list.forEach(u => { if (u.role === roleKey) u.role = 'user'; });
     this.saveRoles(roles);
@@ -4586,6 +4604,11 @@ const APP = {
   uploadLogo(e) {
     const file = e.target.files[0];
     if (!file) return;
+    if (!/image\/(png|jpe?g|webp|svg\+xml)/i.test(file.type)) {
+      this.showToast(this.t('image_too_large'), 'error');
+      e.target.value = '';
+      return;
+    }
     if (file.size > 2 * 1024 * 1024) {
       this.showToast(this.t('image_too_large'), 'error');
       e.target.value = '';
@@ -4593,21 +4616,47 @@ const APP = {
     }
     const reader = new FileReader();
     reader.onload = (ev) => {
-      const dataUrl = ev.target.result;
-      APP.STORE_LOGO = dataUrl;
-      const prev = document.getElementById('logo-preview');
-      if (prev) prev.innerHTML = `<img src="${dataUrl}" alt="" style="width:100%; height:100%; object-fit:contain;">`;
-      const btn = document.getElementById('remove-logo-btn');
-      if (btn) btn.style.display = '';
-      const settings = JSON.parse(localStorage.getItem('nove_settings')) || {};
-      settings.logo = dataUrl;
-      settings.storeName = APP.STORE_NAME;
-      settings.paypal = APP.PAYPAL_CLIENT_ID;
-      localStorage.setItem('nove_settings', JSON.stringify(settings));
-      APP.applyLogo();
-      this.showToast(this.t('logo_uploaded'), 'success');
+      const raw = ev.target.result;
+      if (file.type === 'image/svg+xml') {
+        APP.finishLogoUpload(raw);
+        return;
+      }
+      const img = new Image();
+      img.onload = () => {
+        try {
+          const MAX = 320;
+          let w = img.naturalWidth || img.width, h = img.naturalHeight || img.height;
+          if (w > MAX || h > MAX) {
+            const r = Math.min(MAX / w, MAX / h);
+            w = Math.round(w * r); h = Math.round(h * r);
+          }
+          const c = document.createElement('canvas');
+          c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          APP.finishLogoUpload(c.toDataURL('image/jpeg', 0.8));
+        } catch (err) {
+          APP.finishLogoUpload(raw);
+        }
+      };
+      img.onerror = () => APP.finishLogoUpload(raw);
+      img.src = raw;
     };
     reader.readAsDataURL(file);
+  },
+
+  finishLogoUpload(dataUrl) {
+    APP.STORE_LOGO = dataUrl;
+    const prev = document.getElementById('logo-preview');
+    if (prev) prev.innerHTML = `<img src="${dataUrl}" alt="" style="width:100%; height:100%; object-fit:contain;">`;
+    const btn = document.getElementById('remove-logo-btn');
+    if (btn) btn.style.display = '';
+    const settings = APP.safeParse('nove_settings', {});
+    settings.logo = dataUrl;
+    settings.storeName = APP.STORE_NAME;
+    settings.paypal = APP.PAYPAL_CLIENT_ID;
+    localStorage.setItem('nove_settings', JSON.stringify(settings));
+    APP.applyLogo();
+    this.showToast(this.t('logo_uploaded'), 'success');
   },
 
   removeLogo() {
@@ -4621,11 +4670,12 @@ const APP = {
   },
 
 applyLogo() {
+    const isStore = document.body.getAttribute('data-page') === 'store';
     const navIcon = document.querySelector('.nav-brand-icon');
     const heroIcon = document.querySelector('.hero-logo-icon');
+    const staticLogo = isStore && document.body.getAttribute('data-static-logo') === '1';
     const logoUrl = APP.STORE_LOGO || 'images/logo.png';
-    const hasLogo = !!(APP.STORE_LOGO) || document.body.dataset.hasStaticLogo;
-    const showLogo = APP.STORE_LOGO || document.body.getAttribute('data-static-logo') === '1';
+    const showLogo = !!(APP.STORE_LOGO) || staticLogo;
     if (showLogo) {
       if (heroIcon) {
         heroIcon.style.background = '#0b0e13';
@@ -4633,32 +4683,18 @@ applyLogo() {
         heroIcon.style.border = '1px solid rgba(255,255,255,0.45)';
         heroIcon.style.padding = '0';
         heroIcon.style.overflow = 'hidden';
-        heroIcon.innerHTML = `<img src="${logoUrl}" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
+        heroIcon.innerHTML = `<img src="${APP.STORE_LOGO}" alt="Logo" onerror="this.remove(); this.parentElement.textContent='N';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
       }
       if (navIcon) {
         navIcon.style.background = '#0b0e13';
         navIcon.style.overflow = 'hidden';
         navIcon.style.border = '1px solid rgba(255,255,255,0.3)';
-        navIcon.innerHTML = `<img src="${logoUrl}" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
+        navIcon.innerHTML = `<img src="${APP.STORE_LOGO}" alt="Logo" onerror="this.remove(); this.parentElement.textContent='N';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
       }
       return;
     }
-    if (heroIcon) {
-      heroIcon.style.background = '';
-      heroIcon.style.boxShadow = '';
-      heroIcon.style.border = '';
-      heroIcon.style.padding = '';
-      heroIcon.style.overflow = '';
-      heroIcon.textContent = 'N';
-    }
-    if (navIcon) {
-      navIcon.style.background = '';
-      navIcon.style.width = '';
-      navIcon.style.height = '';
-      navIcon.style.overflow = '';
-      navIcon.style.border = '';
-      navIcon.textContent = 'N';
-    }
+    if (heroIcon) heroIcon.textContent = 'N';
+    if (navIcon) navIcon.textContent = 'N';
   },
 
   renderSocialIcons() {
