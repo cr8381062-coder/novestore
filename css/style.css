@@ -634,10 +634,7 @@ body::before {
 
 .hero h1 span {
   display: block;
-  background: linear-gradient(135deg, #ffffff, var(--primary-light), var(--secondary));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--white);
 }
 
 .hero p {
@@ -704,10 +701,7 @@ body::before {
 .hero-stat h3 {
   font-size: 2rem;
   font-weight: 900;
-  background: var(--gradient);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--white);
 }
 
 .hero-stat p {
@@ -732,10 +726,8 @@ body::before {
   font-size: 2.2rem;
   font-weight: 800;
   margin-bottom: 0.5rem;
-  background: linear-gradient(135deg, var(--white), var(--primary-light));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
+  color: var(--white);
+  text-shadow: 0 0 20px rgba(255,255,255,0.25);
 }
 
 .section-header p {
@@ -3137,7 +3129,7 @@ body::before {
   --gold: #ffffff;
   --glass: rgba(255,255,255,0.06);
   --glass-border: rgba(255,255,255,0.12);
-  --lux-gradient: linear-gradient(135deg, #ffffff, #ff9f43);
+  --lux-gradient: linear-gradient(135deg, #ffffff, #bdbdbd);
   --radius-xl: 22px;
   --shadow-lux: 0 30px 80px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
 }
@@ -3226,10 +3218,7 @@ body::before {
 }
 
 .hero h1 {
-  background: linear-gradient(135deg, #ffffff 10%, #ffffff 40%, #ffffff 70%, #ffffff 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--white);
   filter: drop-shadow(0 6px 40px rgba(255,255,255,0.35));
 }
 
@@ -3242,10 +3231,7 @@ body::before {
 }
 
 .hero-stats .hero-stat h3 {
-  background: linear-gradient(135deg, #ffffff, #bdbdbd);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--white);
   filter: drop-shadow(0 2px 20px rgba(255,255,255,0.4));
 }
 
@@ -3282,10 +3268,8 @@ body::before {
   transition: transform 0.6s cubic-bezier(0.2,0.8,0.2,1);
 }
 .products-grid .product-price {
-  background: linear-gradient(135deg, #ffffff, #ff9f43);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--white);
+  font-weight: 700;
 }
 .btn-add-cart {
   background: linear-gradient(135deg, #e6e6e6, #ffffff) !important;
@@ -3419,10 +3403,7 @@ body::before {
 /* ===== EMAIL VERIFICATION STEP ===== */
 #verify-step .modal-section-title h3 {
   font-size: 1.25rem;
-  background: linear-gradient(90deg, var(--gold, #ffffff), #e9a000);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--white);
   margin: 0;
 }
 #verify-step input {

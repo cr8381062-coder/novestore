@@ -1010,6 +1010,7 @@ const APP = {
     const settings = JSON.parse(localStorage.getItem('nove_settings')) || {};
     if (settings.storeName) this.STORE_NAME = settings.storeName;
     if (settings.logo) this.STORE_LOGO = settings.logo;
+    if (!this.STORE_LOGO) document.body.setAttribute('data-static-logo', '1');
     if (settings.paypal && settings.paypal !== 'YOUR_PAYPAL_CLIENT_ID') this.PAYPAL_CLIENT_ID = settings.paypal;
     if (settings.social) this.SOCIAL_LINKS = Object.assign({}, this.SOCIAL_LINKS, settings.social);
     if (settings.emailjs) this.SETTINGS.emailjs = settings.emailjs;
@@ -4619,17 +4620,30 @@ const APP = {
     this.saveSettings();
   },
 
-  applyLogo() {
+applyLogo() {
     const navIcon = document.querySelector('.nav-brand-icon');
     const heroIcon = document.querySelector('.hero-logo-icon');
-    if (APP.STORE_LOGO && heroIcon) {
-      heroIcon.style.background = '#0b0e13';
-      heroIcon.style.boxShadow = 'inset 0 0 0 2px rgba(255,255,255,0.4), 0 0 60px rgba(255,255,255,0.35)';
-      heroIcon.style.border = '1px solid rgba(255,255,255,0.45)';
-      heroIcon.style.padding = '0';
-      heroIcon.style.overflow = 'hidden';
-      heroIcon.innerHTML = `<img src="${APP.STORE_LOGO}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
-    } else if (heroIcon) {
+    const logoUrl = APP.STORE_LOGO || 'images/logo.png';
+    const hasLogo = !!(APP.STORE_LOGO) || document.body.dataset.hasStaticLogo;
+    const showLogo = APP.STORE_LOGO || document.body.getAttribute('data-static-logo') === '1';
+    if (showLogo) {
+      if (heroIcon) {
+        heroIcon.style.background = '#0b0e13';
+        heroIcon.style.boxShadow = 'inset 0 0 0 2px rgba(255,255,255,0.4), 0 0 60px rgba(255,255,255,0.35)';
+        heroIcon.style.border = '1px solid rgba(255,255,255,0.45)';
+        heroIcon.style.padding = '0';
+        heroIcon.style.overflow = 'hidden';
+        heroIcon.innerHTML = `<img src="${logoUrl}" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
+      }
+      if (navIcon) {
+        navIcon.style.background = '#0b0e13';
+        navIcon.style.overflow = 'hidden';
+        navIcon.style.border = '1px solid rgba(255,255,255,0.3)';
+        navIcon.innerHTML = `<img src="${logoUrl}" alt="Logo" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
+      }
+      return;
+    }
+    if (heroIcon) {
       heroIcon.style.background = '';
       heroIcon.style.boxShadow = '';
       heroIcon.style.border = '';
@@ -4641,6 +4655,8 @@ const APP = {
       navIcon.style.background = '';
       navIcon.style.width = '';
       navIcon.style.height = '';
+      navIcon.style.overflow = '';
+      navIcon.style.border = '';
       navIcon.textContent = 'N';
     }
   },
