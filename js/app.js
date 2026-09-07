@@ -2,6 +2,7 @@
 
 const APP = {
   ADMIN_EMAIL: 'cr8381062@gmail.com',
+  ADMIN_KEY: 'NOVE2026',
   STORE_NAME: 'NOVE STOR',
   STORE_LOGO: '',
   PAYPAL_CLIENT_ID: 'AdZijgGKQiP5hkM7nWSUQgVFH4dBS8K5SuClk9n9B1NP6KHUTe84pTcjVWBF7fIe8IZ-XXxhfJ0SegzO',
@@ -43,6 +44,10 @@ const APP = {
       sign_in: 'تسجيل الدخول',
       sign_out: 'تسجيل الخروج',
       admin_panel: 'لوحة التحكم',
+      admin_pin: 'رمز الحماية (PIN)',
+      admin_pin_desc: 'أدخل رمز الدخول للوحة التحكم. المخترق يُقفل لمدة 5 دقائق بعد 5 محاولات خاطئة.',
+      admin_default_pin: 'NOVE2026',
+      enter: 'دخول',
       store: 'المتجر',
       hero_badge: 'منتجات فايف ام وديسكورد الفاخرة',
       hero_title1: 'سكريبتات احترافية لسيرفرك',
@@ -494,6 +499,10 @@ const APP = {
       sign_in: 'Sign In',
       sign_out: 'Sign Out',
       admin_panel: 'Admin Panel',
+      admin_pin: 'Security PIN',
+      admin_pin_desc: 'Enter the admin PIN. Attackers get locked for 5 minutes after 5 wrong attempts.',
+      admin_default_pin: 'NOVE2026',
+      enter: 'Enter',
       store: 'Store',
       hero_badge: 'Premium FiveM & Discord Products',
       hero_title1: 'Premium Scripts & Bots',
@@ -987,6 +996,7 @@ const APP = {
     this.loadSettings();
     this.loadData();
     this.checkAuth();
+    this.armAntiTamper();
     this.renderCurrentPage();
     this.initNavbar();
     this.initScrollEffects();
@@ -1010,7 +1020,7 @@ const APP = {
     const settings = APP.safeParse('nove_settings', {});
     if (settings.storeName) this.STORE_NAME = settings.storeName;
     if (settings.logo) this.STORE_LOGO = settings.logo;
-    if (!this.STORE_LOGO && document.body.getAttribute('data-page') === 'store') document.body.setAttribute('data-static-logo', '1');
+    document.body.setAttribute('data-static-logo', '1');
     if (settings.paypal && settings.paypal !== 'YOUR_PAYPAL_CLIENT_ID') this.PAYPAL_CLIENT_ID = settings.paypal;
     if (settings.social) this.SOCIAL_LINKS = Object.assign({}, this.SOCIAL_LINKS, settings.social);
     if (settings.emailjs) this.SETTINGS.emailjs = settings.emailjs;
@@ -2164,6 +2174,25 @@ const APP = {
     return ip || 'unknown-' + (this.currentUser ? this.currentUser.email : 'anon');
   },
 
+  getDeviceInfo() {
+    const ua = navigator.userAgent || '';
+    let os = 'Unknown', browser = 'Unknown';
+    if (/Windows NT 10/.test(ua)) os = 'Windows 10';
+    else if (/Windows NT 11/.test(ua)) os = 'Windows 11';
+    else if (/Mac OS X/.test(ua)) os = 'macOS';
+    else if (/Android/.test(ua)) os = 'Android';
+    else if (/iPhone|iPad/.test(ua)) os = 'iOS';
+    else if (/Linux/.test(ua)) os = 'Linux';
+    if (/Edg\//.test(ua)) browser = 'Edge';
+    else if (/OPR\//.test(ua)) browser = 'Opera';
+    else if (/Chrome\//.test(ua)) browser = 'Chrome';
+    else if (/Firefox\//.test(ua)) browser = 'Firefox';
+    else if (/Safari\//.test(ua)) browser = 'Safari';
+    const scr = (typeof window !== 'undefined' && window.screen) ? (window.screen.width + 'x' + window.screen.height) : '';
+    const lang = navigator.language || '';
+    return { os, browser, screen: scr, lang };
+  },
+
   getClientIP() {
     return new Promise(resolve => {
       try {
@@ -2335,6 +2364,32 @@ const APP = {
     }
   },
 
+  armAntiTamper() {
+    if (window.__noveAntiTamperArmed) return;
+    window.__noveAntiTamperArmed = true;
+    try {
+      window.addEventListener('storage', (ev) => {
+        if (!ev || !ev.key) return;
+        if (['nove_roles', 'nove_users', 'nove_settings'].indexOf(ev.key) === -1) return;
+        const isAdminPage = document.body && document.body.getAttribute('data-page') === 'admin';
+        if (!isAdminPage) return;
+        const allowed = APP.currentUser ? APP.getUserRole(APP.currentUser.email) : '';
+        const legit = allowed === 'owner' || (ev.key === 'nove_users' && allowed === 'admin');
+        if (!legit) {
+          APP.logActivity('security', 'Tamper attempt detected (storage)', ev.key + ' by ' + (APP.currentUser ? APP.currentUser.email : 'anon'));
+          try { localStorage.setItem('nove_tamper_' + Date.now(), JSON.stringify({ ts: new Date().toISOString(), ip: APP.getIPKey(), key: ev.key, who: APP.currentUser ? APP.currentUser.email : 'anon' })); } catch (e) {}
+          try {
+            localStorage.removeItem('nove_user');
+            sessionStorage.removeItem('nove_admin_unlocked');
+            APP.currentUser = null;
+            if (APP.updateAuthUI) APP.updateAuthUI();
+            if (window.location.pathname.indexOf('admin') > -1) APP.renderAdminPage();
+          } catch (e2) {}
+        }
+      });
+    } catch (e) {}
+  },
+
   registerUser(user) {
     const users = APP.safeParse('nove_users', [], 20000);
     const existing = users.find(u => u.email === user.email);
@@ -2476,6 +2531,9 @@ const APP = {
       ip: ip,
       isAdmin: email === this.ADMIN_EMAIL,
       verified: true,
+      device: (APP.getDeviceInfo().os + ' / ' + APP.getDeviceInfo().browser + ' / ' + (APP.getDeviceInfo().screen||'') + ' / ' + (APP.getDeviceInfo().lang||'')),
+      lastLoginAt: new Date().toISOString(),
+      lastLoginIp: ip,
       joinedAt: new Date().toISOString()
     };
 
@@ -2674,6 +2732,7 @@ const APP = {
     }
 
     const users = APP.safeParse('nove_users', [], 20000);
+    const ip_ = await this.getClientIP() || APP.getIPKey();
     const hashed = await this.hashPassword(password);
     const user = users.find(u => u.email === email && u.password === hashed);
 
@@ -2692,7 +2751,12 @@ const APP = {
     }
 
     this.resetLoginAttempts(email);
-    this.logActivity('login', 'Login successful', email);
+    const mon = APP.getDeviceInfo();
+    user.lastLoginAt = new Date().toISOString();
+    user.lastLoginIp = user.lastLoginIp || ip_;
+    user.device = user.device || (mon.os + ' / ' + mon.browser + ' / ' + (mon.screen||'') + ' / ' + (mon.lang||''));
+    localStorage.setItem('nove_users', JSON.stringify(users));
+    this.logActivity('login', 'Login successful', email + ' ip:' + (ip_ || '?'));
 
     this.currentUser = { ...user };
     delete this.currentUser.password;
@@ -3342,20 +3406,74 @@ const APP = {
   // ===== ADMIN =====
   renderAdminPage() {
     if (!this.isAdmin()) {
-      document.getElementById('admin-content') ?
-        document.getElementById('admin-content').innerHTML = `
-          <div class="access-denied">
-            <div>
-              <h1>\ud83d\udeab</h1>
-              <h1>${this.t('access_denied')}</h1>
-              <p>${this.t('access_denied_desc')}</p>
-              <a href="index.html" class="btn-primary">${this.t('back_to_store')}</a>
-            </div>
-          </div>
-        ` : null;
+      this.renderAdminPinGate();
       return;
     }
-    this.renderAdminDashboard();
+    const role = this.currentUser ? this.getUserRole(this.currentUser.email) : '';
+    if (role === 'owner' || this.currentUser.email === this.ADMIN_EMAIL) {
+      this.renderAdminDashboard();
+      return;
+    }
+    if (sessionStorage.getItem('nove_admin_unlocked') === '1') {
+      this.renderAdminDashboard();
+      return;
+    }
+    this.renderAdminPinGate();
+  },
+
+  renderAdminPinGate() {
+    const content = document.getElementById('admin-content');
+    if (!content) return;
+    const attempts = APP.safeParse('nove_admin_attempts', {});
+    const now = Date.now();
+    const block = attempts.blockUntil && now < attempts.blockUntil;
+    content.innerHTML = `
+      <div style="min-height:80vh; display:flex; align-items:center; justify-content:center; padding:2rem;">
+        <div class="admin-form-card" style="max-width:400px; width:100%;">
+          <div class="form-card-header">
+            <div class="fc-icon">\u{1F510}</div>
+            <h3>${this.t('admin_panel')}</h3>
+          </div>
+          ${block
+            ? `<p style="text-align:center; color:var(--red,#ff5f57); padding:1rem;">${this.t('too_many_attempts').replace('{time}', this.formatCountdown(attempts.blockUntil - now))}</p>`
+            : `
+              <div style="display:flex; flex-direction:column; gap:0.9rem; padding:0.5rem 0;">
+                <label>${this.t('admin_pin')}</label>
+                <input id="admin-pin-input" type="password" inputmode="numeric" maxlength="16" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022" style="padding:0.7rem 0.9rem; border-radius:10px; border:1px solid var(--border); background:var(--gray-900,#0b0e13); color:var(--gray-100,#fff);" />
+                <button class="btn-admin btn-admin-primary" onclick="APP.checkAdminPin()">\u{1F510} ${this.t('enter')}</button>
+                <p style="font-size:0.75rem; color:var(--gray-500); text-align:center;">${this.t('admin_pin_desc')}</p>
+              </div>`
+          }
+        </div>
+      </div>
+    `;
+    const input = document.getElementById('admin-pin-input');
+    if (input) {
+      input.focus();
+      input.addEventListener('keydown', (e) => { if (e.key === 'Enter') APP.checkAdminPin(); });
+    }
+  },
+
+  checkAdminPin() {
+    const input = document.getElementById('admin-pin-input');
+    const pin = input ? input.value.trim() : '';
+    if (!pin) return;
+    const key = APP.ADMIN_KEY || 'NOVE2026';
+    if (pin === key) {
+      sessionStorage.setItem('nove_admin_unlocked', '1');
+      APP.renderAdminPage();
+      return;
+    }
+    const attempts = APP.safeParse('nove_admin_attempts', {});
+    attempts.count = (attempts.count || 0) + 1;
+    if (attempts.count >= 5) {
+      attempts.blockUntil = Date.now() + 5 * 60 * 1000;
+      attempts.count = 0;
+    }
+    localStorage.setItem('nove_admin_attempts', JSON.stringify(attempts));
+    APP.logActivity('security', 'Wrong admin PIN attempt', 'PIN ' + pin + ' ip:' + APP.getIPKey());
+    APP.renderAdminPinGate();
+    APP.showToast(this.t('wrong_code'), 'error');
   },
 
   renderAdminDashboard() {
@@ -4203,6 +4321,9 @@ const APP = {
                       <div class="users-meta">
                         <span class="users-name">${this.esc(u.name || this.t('guest'))}</span>
                         <span class="users-email">${this.esc(u.email)}</span>
+                        <span class="users-ip" style="font-size:0.72rem; color:var(--gray-500);">
+                          IP: ${this.esc(u.ip || (u.lastLoginIp || '-'))}${u.joinedAt ? ' \u00b7 ' + this.esc(u.joinedAt).replace('T',' ').slice(0,16) : ''}${u.device ? ' \u00b7 ' + this.esc(u.device) : ''}
+                        </span>
                       </div>
                     </div>
                     <div class="role-group">
@@ -4673,23 +4794,23 @@ applyLogo() {
     const isStore = document.body.getAttribute('data-page') === 'store';
     const navIcon = document.querySelector('.nav-brand-icon');
     const heroIcon = document.querySelector('.hero-logo-icon');
-    const staticLogo = isStore && document.body.getAttribute('data-static-logo') === '1';
-    const logoUrl = APP.STORE_LOGO || 'images/logo.png';
-    const showLogo = !!(APP.STORE_LOGO) || staticLogo;
-    if (showLogo) {
+    const staticLogo = document.body.getAttribute('data-static-logo') === '1';
+    const logoUrl = staticLogo ? (isStore ? 'images/logo.png' : '../images/logo.png') : APP.STORE_LOGO;
+    const showLogo = staticLogo || !!(APP.STORE_LOGO);
+    if (showLogo && logoUrl) {
       if (heroIcon) {
         heroIcon.style.background = '#0b0e13';
         heroIcon.style.boxShadow = 'inset 0 0 0 2px rgba(255,255,255,0.4), 0 0 60px rgba(255,255,255,0.35)';
         heroIcon.style.border = '1px solid rgba(255,255,255,0.45)';
         heroIcon.style.padding = '0';
         heroIcon.style.overflow = 'hidden';
-        heroIcon.innerHTML = `<img src="${APP.STORE_LOGO}" alt="Logo" onerror="this.remove(); this.parentElement.textContent='N';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
+        heroIcon.innerHTML = `<img src="${logoUrl}" alt="Logo" onerror="this.remove(); this.parentElement.textContent='N';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
       }
       if (navIcon) {
         navIcon.style.background = '#0b0e13';
         navIcon.style.overflow = 'hidden';
         navIcon.style.border = '1px solid rgba(255,255,255,0.3)';
-        navIcon.innerHTML = `<img src="${APP.STORE_LOGO}" alt="Logo" onerror="this.remove(); this.parentElement.textContent='N';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
+        navIcon.innerHTML = `<img src="${logoUrl}" alt="Logo" onerror="this.remove(); this.parentElement.textContent='N';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
       }
       return;
     }
