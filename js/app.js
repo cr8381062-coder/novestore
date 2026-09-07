@@ -47,6 +47,8 @@ const APP = {
       admin_pin: 'رمز الحماية (PIN)',
       admin_pin_desc: 'أدخل رمز الدخول للوحة التحكم. المخترق يُقفل لمدة 5 دقائق بعد 5 محاولات خاطئة.',
       admin_default_pin: 'NOVE2026',
+      intruder_blocked: 'تم رصد متطفل — تم حظر الوصول',
+      intruder_blocked_desc: 'اكتشف نظام الحماية محاولة تعديل في بيانات المتجر. تم إلغاء جلستك وإغلاق لوحة التحكم مؤقتاً لحماية المتجر.',
       enter: 'دخول',
       store: 'المتجر',
       hero_badge: 'منتجات فايف ام وديسكورد الفاخرة',
@@ -503,6 +505,8 @@ const APP = {
       admin_pin: 'Security PIN',
       admin_pin_desc: 'Enter the admin PIN. Attackers get locked for 5 minutes after 5 wrong attempts.',
       admin_default_pin: 'NOVE2026',
+      intruder_blocked: 'Intruder detected — access blocked',
+      intruder_blocked_desc: 'The security system detected an attempt to modify store data. Your session was terminated and the admin panel is temporarily locked to protect the store.',
       enter: 'Enter',
       store: 'Store',
       hero_badge: 'Premium FiveM & Discord Products',
@@ -998,6 +1002,7 @@ const APP = {
     this.loadSettings();
     this.loadData();
     this.checkAuth();
+    this.seedSignatures();
     this.armAntiTamper();
     this.renderCurrentPage();
     this.initNavbar();
@@ -2201,8 +2206,38 @@ const APP = {
     const raw = JSON.stringify(data);
     localStorage.setItem(key, raw);
     this._computeSig(key).then(sig => {
-      if (sig) { try { localStorage.setItem(key + '_sig', sig); } catch (e) {} }
+      if (sig) {
+        try {
+          localStorage.setItem(key + '_sig', sig);
+          localStorage.setItem(key + '_bk', raw);
+          localStorage.setItem(key + '_bksig', sig);
+        } catch (e) {}
+      }
     });
+  },
+
+  seedSignatures() {
+    ['nove_users', 'nove_roles'].forEach(key => {
+      try {
+        const raw = localStorage.getItem(key);
+        if (!raw) return;
+        if (localStorage.getItem(key + '_sig')) return;
+        this._computeSig(key).then(sig => {
+          if (sig) {
+            try {
+              localStorage.setItem(key + '_sig', sig);
+              localStorage.setItem(key + '_bk', raw);
+              localStorage.setItem(key + '_bksig', sig);
+            } catch (e) {}
+          }
+        });
+      } catch (e) {}
+    });
+  },
+
+  isSecurityLocked() {
+    const lock = APP.safeParse('nove_security_lock', {});
+    return !!(lock.until && Date.now() < lock.until);
   },
 
   safeUrl(url) {
@@ -2416,25 +2451,85 @@ const APP = {
   armAntiTamper() {
     if (window.__noveAntiTamperArmed) return;
     window.__noveAntiTamperArmed = true;
+    const WATCH_HZ = 1000;
+    const GUARDED = ['nove_users', 'nove_roles'];
+    let strikes = 0;
+
+    const backupKey = k => k + '_bk';
+    const sigKey = k => k + '_sig';
+
+    const isWatching = () => {
+      try {
+        const p = (window.location.pathname || '').toLowerCase();
+        return p.indexOf('admin') > -1 || document.body.getAttribute('data-page') === 'store' || p.indexOf('index') > -1 || p.length <= 1;
+      } catch (e) { return false; }
+    };
+
+    const kickTamperer = (key) => {
+      strikes++;
+      APP.logActivity('security', 'Intruder detected & ejected', key + ' ip:' + APP.getIPKey());
+      try { localStorage.setItem('nove_tamper_' + Date.now(), JSON.stringify({ ts: new Date().toISOString(), ip: APP.getIPKey(), key: key, who: APP.currentUser ? APP.currentUser.email : 'anon' })); } catch (e) {}
+      if (strikes >= 3) {
+        try { localStorage.setItem('nove_security_lock', JSON.stringify({ until: Date.now() + 10 * 60 * 1000, ip: APP.getIPKey() })); } catch (e) {}
+      }
+      try {
+        localStorage.removeItem('nove_user');
+        sessionStorage.removeItem('nove_admin_unlocked');
+        APP.currentUser = null;
+        if (APP.updateAuthUI) APP.updateAuthUI();
+        if ((window.location.pathname || '').indexOf('admin') > -1) APP.renderAdminPage();
+      } catch (e2) {}
+    };
+
+    const restore = (key) => {
+      try {
+        const bk = localStorage.getItem(backupKey(key));
+        if (bk) {
+          localStorage.setItem(key, bk);
+          const s = localStorage.getItem(sigKey(key));
+          if (s) localStorage.setItem(sigKey(key), s);
+        }
+      } catch (e) {}
+    };
+
+    const guardTick = async () => {
+      const lock = APP.safeParse('nove_security_lock', {});
+      if (lock.until && Date.now() < lock.until) {
+        kickTamperer('security_lock');
+        return;
+      }
+      for (const key of GUARDED) {
+        try {
+          const hasData = !!localStorage.getItem(key);
+          if (!hasData) continue;
+          const sigStored = localStorage.getItem(sigKey(key));
+          const sigNow = await APP._computeSig(key);
+          if (sigStored && sigNow && sigStored !== sigNow) {
+            const bk = localStorage.getItem(backupKey(key));
+            if (bk && bk !== localStorage.getItem(key)) {
+              restore(key);
+            }
+            kickTamperer(key);
+          }
+        } catch (e) {}
+      }
+    };
+
+    window.__noveGuard = setInterval(guardTick, WATCH_HZ);
+
     try {
       window.addEventListener('storage', (ev) => {
         if (!ev || !ev.key) return;
-        if (['nove_roles', 'nove_users', 'nove_settings'].indexOf(ev.key) === -1) return;
-        const isAdminPage = document.body && document.body.getAttribute('data-page') === 'admin';
-        if (!isAdminPage) return;
-        const allowed = APP.currentUser ? APP.getUserRole(APP.currentUser.email) : '';
-        const legit = allowed === 'owner' || (ev.key === 'nove_users' && allowed === 'admin');
-        if (!legit) {
-          APP.logActivity('security', 'Tamper attempt detected (storage)', ev.key + ' by ' + (APP.currentUser ? APP.currentUser.email : 'anon'));
-          try { localStorage.setItem('nove_tamper_' + Date.now(), JSON.stringify({ ts: new Date().toISOString(), ip: APP.getIPKey(), key: ev.key, who: APP.currentUser ? APP.currentUser.email : 'anon' })); } catch (e) {}
-          try {
-            localStorage.removeItem('nove_user');
-            sessionStorage.removeItem('nove_admin_unlocked');
-            APP.currentUser = null;
-            if (APP.updateAuthUI) APP.updateAuthUI();
-            if (window.location.pathname.indexOf('admin') > -1) APP.renderAdminPage();
-          } catch (e2) {}
-        }
+        if (GUARDED.indexOf(ev.key) === -1) return;
+        try {
+          const lock = APP.safeParse('nove_security_lock', {});
+          if (lock.until && Date.now() < lock.until) { kickTamperer('security_lock'); return; }
+          const sigStored = localStorage.getItem(sigKey(ev.key));
+          const sigNow = APP._computeSig(ev.key);
+          sigNow.then(s => {
+            if (sigStored && s && sigStored !== s) kickTamperer(ev.key);
+          });
+        } catch (e) {}
       });
     } catch (e) {}
   },
@@ -3459,6 +3554,19 @@ const APP = {
 
   // ===== ADMIN =====
   renderAdminPage() {
+    if (this.isSecurityLocked()) {
+      const content = document.getElementById('admin-content');
+      if (content) content.innerHTML = `
+        <div style="min-height:80vh; display:flex; align-items:center; justify-content:center; padding:2rem; text-align:center;">
+          <div>
+            <h1 style="font-size:4rem;">\u{1F6AB}</h1>
+            <h1 style="color:var(--red,#ff5f57);">${this.t('intruder_blocked')}</h1>
+            <p style="color:var(--gray-400); max-width:440px; margin:0.8rem auto 1.5rem;">${this.t('intruder_blocked_desc')}</p>
+            <a href="../index.html" class="btn-admin btn-admin-primary">${this.t('back_to_store')}</a>
+          </div>
+        </div>`;
+      return;
+    }
     const checkTamper = async () => {
       for (const k of ['nove_users', 'nove_roles']) {
         if (await this.tampered(k)) {
