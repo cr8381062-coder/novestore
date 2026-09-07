@@ -383,6 +383,8 @@ const APP = {
       cloud_db_owner: 'سجّل دخولك بحساب المالك (Supabase) لتفعيل الحفظ السحابي للمنتجات والطلبات وتفعيل الطرد الحقيقي.',
       cloud_login: 'اتصال بحساب المالك',
       cloud_logout: 'قطع الاتصال',
+      cloud_push: 'رفع جميع البيانات للسحابة',
+      cloud_push_hint: 'يرفع المنتجات والفئات والكوبونات والطلبات والإعدادات الحالية في جهازك إلى القاعدة السحابية. يعمل مرة واحدة فقط (وأي تعديل بعدها يُحفظ تلقائياً).',
       cloud_db_password: 'كلمة مرور حساب المالك',
       cloud_status_on: 'متصل بالسحابة',
       cloud_status_off: 'غير متصل — الموقع يعمل بوضع الصمود المحلي',
@@ -850,6 +852,8 @@ const APP = {
       cloud_db_owner: 'Sign in with your owner account (Supabase) to enable cloud saving of products/orders and real kicking.',
       cloud_login: 'Connect Owner Account',
       cloud_logout: 'Disconnect',
+      cloud_push: 'Push all data to Cloud',
+      cloud_push_hint: 'Uploads current products, categories, coupons, orders and settings to the cloud database. One-time operation (subsequent edits save automatically).',
       cloud_db_password: 'Owner password',
       cloud_status_on: 'Connected to Cloud',
       cloud_status_off: 'Offline - store runs in local resilience mode',
@@ -4848,6 +4852,8 @@ const APP = {
         </div>
         <button class="btn-admin btn-admin-ghost" onclick="APP.cloudLogout()" id="cloud-logout-btn" style="display:none;">\u{1F6AA} ${this.t('cloud_logout')}</button>
         <button class="btn-admin btn-admin-primary" onclick="APP.cloudLogin()" id="cloud-login-btn">\u{1F510} ${this.t('cloud_login')}</button>
+        <button class="btn-admin btn-admin-ghost" onclick="APP.cloudPushAll()" id="cloud-push-btn">\u{1F4E4} ${this.t('cloud_push')}</button>
+        <div id="cloud-push-note" style="font-size:0.72rem; color:var(--gray-500); margin-top:0.6rem;">${this.t('cloud_push_hint')}</div>
       </div>
 
       <div class="admin-form-card" style="margin-top:1.5rem; max-width:760px;">
@@ -5139,6 +5145,35 @@ applyLogo() {
       if (window.CloudDB && CloudDB.enabled) await CloudDB.signOut();
       this.showToast('تم قطع الاتصال', 'success');
       await this.updateCloudStatus();
+    } catch (e) {}
+  },
+
+  async cloudPushAll() {
+    try {
+      if (!window.CloudDB || !CloudDB.enabled) {
+        this.showToast('قاعدة البيانات السحابية غير مفعلة', 'error');
+        return;
+      }
+      const authed = await CloudDB.isAuthed();
+      if (!authed) {
+        this.showToast('سجّل اتصال بحساب المالك أولاً', 'error');
+        return;
+      }
+      this.showToast('جارِ رفع جميع البيانات...', 'success');
+      await CloudDB.save('products', this.products);
+      await CloudDB.save('categories', this.categories);
+      await CloudDB.save('coupons', this.coupons);
+      await CloudDB.save('orders', this.orders.slice(-50));
+      await CloudDB.save('settings', [{
+        id: 1,
+        store_name: APP.STORE_NAME,
+        logo: APP.STORE_LOGO || 'images/logo.png',
+        paypal: APP.PAYPAL_CLIENT_ID,
+        social: APP.SOCIAL_LINKS || {},
+        emailjs: APP.SETTINGS.emailjs || {},
+        updated_at: new Date().toISOString()
+      }]);
+      this.showToast('تم رفع جميع البيانات للسحابة', 'success');
     } catch (e) {}
   },
 

@@ -14,6 +14,7 @@
         case 'orders': return 'orders';
         case 'categories': return 'categories';
         case 'coupons': return 'coupons';
+        case 'settings': return 'store_settings';
         case 'users': return 'profiles';
         default: return null;
       }
@@ -66,6 +67,12 @@
           if (error) throw error;
         } else if (key === 'coupons') {
           const { error } = await this.client.from(t).upsert(prep, { onConflict: 'code' });
+          if (error) throw error;
+        } else if (key === 'categories') {
+          const { error } = await this.client.from(t).upsert(prep, { onConflict: 'value' });
+          if (error) throw error;
+        } else if (key === 'settings') {
+          const { error } = await this.client.from(t).upsert(prep, { onConflict: 'id' });
           if (error) throw error;
         }
       } catch (e) {}
