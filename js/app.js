@@ -1034,6 +1034,22 @@ const APP = {
     this.applyLogo();
     this.renderSocialIcons();
     this.updateHeroStats();
+    if (window.CloudDB && CloudDB.enabled) this.autoCloudConnect();
+  },
+
+  async autoCloudConnect() {
+    try {
+      const authed = await CloudDB.isAuthed();
+      const pill = document.getElementById('cloud-status-pill');
+      if (authed && pill) {
+        pill.innerHTML = '<span class="status-badge active">' + this.t('cloud_status_on') + '</span>';
+        const lbtn = document.getElementById('cloud-login-btn');
+        const obtn = document.getElementById('cloud-logout-btn');
+        if (lbtn) lbtn.style.display = 'none';
+        if (obtn) obtn.style.display = '';
+        this.syncFromCloud();
+      }
+    } catch (e) {}
   },
 
   updateHeroStats() {
