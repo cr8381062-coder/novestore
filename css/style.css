@@ -593,44 +593,38 @@ body::before {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 1.4rem;
+  gap: 1.6rem;
   margin-bottom: 2.5rem;
-  animation: logoEntrance 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-@keyframes logoEntrance {
-  from { opacity: 0; transform: scale(0.8) translateY(22px); }
-  to { opacity: 1; transform: none; }
 }
 
 .hero-logo-icon {
-  width: 180px;
-  height: 180px;
+  width: 270px;
+  height: 270px;
   background: var(--gradient);
-  border-radius: 42px;
+  border-radius: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-weight: 900;
-  font-size: 5rem;
+  font-size: 7.2rem;
   color: #000;
   box-shadow:
-    0 0 0 1px rgba(212,175,55,0.35),
-    0 24px 70px rgba(0,0,0,0.65),
-    0 0 90px rgba(212,175,55,0.45);
+    0 0 0 2px rgba(212,175,55,0.35),
+    0 30px 90px rgba(0,0,0,0.65),
+    0 0 120px rgba(212,175,55,0.5);
 }
 
 .hero-logo-name {
-  font-size: 4.2rem;
+  font-size: 5.5rem;
   font-weight: 900;
   letter-spacing: 0.14em;
   color: var(--white);
-  text-shadow: 0 0 40px rgba(212,175,55,0.55);
+  text-shadow: 0 0 45px rgba(212,175,55,0.6);
 }
 
 .hero-logo-name span {
   color: var(--primary);
-  text-shadow: 0 0 40px rgba(212,175,55,0.65);
+  text-shadow: 0 0 45px rgba(212,175,55,0.7);
 }
 
 .hero-badge {
@@ -3632,83 +3626,12 @@ body::before {
 
 @media (max-width: 600px) {
   .hero-logo-icon {
-    width: 120px;
-    height: 120px;
-    border-radius: 30px;
-    font-size: 3.2rem;
+    width: 170px;
+    height: 170px;
+    border-radius: 42px;
+    font-size: 4.6rem;
   }
   .hero-logo-name {
-    font-size: 2.6rem;
-  }
-}
-
-/* Entry splash screen — logo dead-center on first view */
-.splash {
-  position: fixed;
-  inset: 0;
-  z-index: 99999;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background:
-    radial-gradient(120% 80% at 50% 0%, rgba(212,175,55,0.16) 0%, transparent 60%),
-    radial-gradient(ellipse at center, #000 0%, #060708 100%);
-  animation: splashFade 1.9s ease forwards;
-  pointer-events: none;
-}
-
-@keyframes splashFade {
-  0% { opacity: 1; visibility: visible; }
-  70% { opacity: 1; }
-  100% { opacity: 0; visibility: hidden; }
-}
-
-.splash-logo {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 1.4rem;
-  animation: logoEntrance 0.8s cubic-bezier(0.2, 0.8, 0.2, 1) both;
-}
-
-.splash-logo-icon {
-  width: 190px;
-  height: 190px;
-  background: var(--gradient);
-  border-radius: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 900;
-  font-size: 5.2rem;
-  color: #000;
-  box-shadow:
-    0 0 0 1px rgba(212,175,55,0.35),
-    0 24px 70px rgba(0,0,0,0.65),
-    0 0 100px rgba(212,175,55,0.5);
-}
-
-.splash-logo-name {
-  font-size: 4.4rem;
-  font-weight: 900;
-  letter-spacing: 0.14em;
-  color: var(--white);
-  text-shadow: 0 0 40px rgba(212,175,55,0.55);
-}
-
-.splash-logo-name span {
-  color: var(--primary);
-  text-shadow: 0 0 40px rgba(212,175,55,0.65);
-}
-
-@media (max-width: 600px) {
-  .splash-logo-icon {
-    width: 130px;
-    height: 130px;
-    border-radius: 32px;
     font-size: 3.4rem;
-  }
-  .splash-logo-name {
-    font-size: 2.8rem;
   }
 }
