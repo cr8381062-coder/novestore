@@ -4620,17 +4620,26 @@ const APP = {
   },
 
   applyLogo() {
-    const brandIcon = document.querySelector('.nav-brand-icon');
-    if (APP.STORE_LOGO && brandIcon) {
-      brandIcon.style.background = 'transparent';
-      brandIcon.style.width = '48px';
-      brandIcon.style.height = '48px';
-      brandIcon.innerHTML = `<img src="${APP.STORE_LOGO}" alt="" style="width:100%; height:100%; object-fit:contain; border-radius:10px;">`;
-    } else if (brandIcon) {
-      brandIcon.style.background = '';
-      brandIcon.style.width = '';
-      brandIcon.style.height = '';
-      brandIcon.textContent = 'N';
+    const navIcon = document.querySelector('.nav-brand-icon');
+    const heroIcon = document.querySelector('.hero-logo-icon');
+    if (APP.STORE_LOGO && heroIcon) {
+      heroIcon.style.background = 'transparent';
+      heroIcon.style.boxShadow = 'none';
+      heroIcon.style.border = '1px solid rgba(212,175,55,0.35)';
+      heroIcon.style.padding = '12px';
+      heroIcon.innerHTML = `<img src="${APP.STORE_LOGO}" alt="" style="width:100%; height:100%; object-fit:contain;">`;
+    } else if (heroIcon) {
+      heroIcon.style.background = '';
+      heroIcon.style.boxShadow = '';
+      heroIcon.style.border = '';
+      heroIcon.style.padding = '';
+      heroIcon.textContent = 'N';
+    }
+    if (navIcon) {
+      navIcon.style.background = '';
+      navIcon.style.width = '';
+      navIcon.style.height = '';
+      navIcon.textContent = 'N';
     }
   },
 
