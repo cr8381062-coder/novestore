@@ -109,6 +109,7 @@ const APP = {
       reg_timeout_done: 'انتهى الوقت، يمكنك التسجيل الآن',
       too_many_regs: 'تم التسجيل أكثر من مرة من نفس الـ IP. ممنوع لمدة {time}',
       invalid_email: 'البريد الإلكتروني غير صالح',
+      invalid_name: 'الاسم غير صالح — تجنب الرموز الخطرة',
       email_disposable: 'هذا البريد مؤقت/وهمي — استخدم بريداً حقيقياً',
       email_no_mx: 'هذا البريد لا يستقبل رسائل (غير حقيقي)',
       reg_success: 'تم إنشاء حسابك بنجاح',
@@ -564,6 +565,7 @@ const APP = {
       reg_timeout_done: 'Time is up, you can register now',
       too_many_regs: 'Registered more than once from the same IP. Blocked for {time}',
       invalid_email: 'Invalid email address',
+      invalid_name: 'Invalid name — no dangerous symbols allowed',
       email_disposable: 'This email is temporary/fake — use a real one',
       email_no_mx: 'This email cannot receive mail (not real)',
       reg_success: 'Account created successfully',
@@ -2156,6 +2158,53 @@ const APP = {
     }
   },
 
+  sign(key) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) return null;
+      return this.hashString(JSON.stringify(key) + raw + (APP.ADMIN_KEY || 'NOVE2026'));
+    } catch (e) { return null; }
+  },
+
+  async hashString(str) {
+    try {
+      if (!window.crypto || !window.crypto.subtle) return 'plain-' + str.length;
+      const data = new TextEncoder().encode(String(str));
+      const buf = await window.crypto.subtle.digest('SHA-256', data);
+      return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) {
+      return 'plain-' + String(str).length;
+    }
+  },
+
+  tampered(key) {
+    return this._verifySignature(key);
+  },
+
+  async _computeSig(key) {
+    const raw = localStorage.getItem(key);
+    if (!raw) return '';
+    return await this.hashString(JSON.stringify(key) + raw + (APP.ADMIN_KEY || 'NOVE2026'));
+  },
+
+  async _verifySignature(key) {
+    try {
+      const sigKey = key + '_sig';
+      const stored = localStorage.getItem(sigKey);
+      if (!stored) return false;
+      const cur = await this._computeSig(key);
+      return cur !== stored;
+    } catch (e) { return false; }
+  },
+
+  storeSigned(key, data) {
+    const raw = JSON.stringify(data);
+    localStorage.setItem(key, raw);
+    this._computeSig(key).then(sig => {
+      if (sig) { try { localStorage.setItem(key + '_sig', sig); } catch (e) {} }
+    });
+  },
+
   safeUrl(url) {
     if (!url) return '';
     const u = String(url).trim().toLowerCase();
@@ -2396,7 +2445,7 @@ const APP = {
     if (!existing) {
       user.joinedAt = new Date().toISOString();
       users.push(user);
-      localStorage.setItem('nove_users', JSON.stringify(users));
+      APP.storeSigned('nove_users', users);
     }
   },
 
@@ -2496,6 +2545,11 @@ const APP = {
       this.logActivity('register_fail', 'Invalid email format', email);
       return;
     }
+    if (/[<>"']/.test(name) || /script|javascript|on\w+=/i.test(name) || name.trim().length > 40) {
+      this.logActivity('register_blocked', 'Malicious name blocked', name + ' <' + email + '>');
+      this.showToast(this.t('invalid_name'), 'error');
+      return;
+    }
 
     const ip = await this.getClientIP();
     const ipKey = ip ? ip : this.getIPKey();
@@ -2538,7 +2592,7 @@ const APP = {
     };
 
     users.push(user);
-    localStorage.setItem('nove_users', JSON.stringify(users));
+    APP.storeSigned('nove_users', users);
     this.markIpReg(ip ? ip : this.getIPKey(), email);
     localStorage.removeItem('nove_pending_verify');
     this.logActivity('register', 'New account registered (real email)', name + ' <' + email + '> ip:' + ip);
@@ -2652,7 +2706,7 @@ const APP = {
     };
 
     users.push(user);
-    localStorage.setItem('nove_users', JSON.stringify(users));
+    APP.storeSigned('nove_users', users);
     this.markIpReg(pending.ip ? pending.ip : this.getIPKey(), pending.email);
     localStorage.removeItem('nove_pending_verify');
     this.logActivity('register', 'New account registered (verified email)', pending.name + ' <' + pending.email + '> ip:' + pending.ip);
@@ -2755,7 +2809,7 @@ const APP = {
     user.lastLoginAt = new Date().toISOString();
     user.lastLoginIp = user.lastLoginIp || ip_;
     user.device = user.device || (mon.os + ' / ' + mon.browser + ' / ' + (mon.screen||'') + ' / ' + (mon.lang||''));
-    localStorage.setItem('nove_users', JSON.stringify(users));
+    APP.storeSigned('nove_users', users);
     this.logActivity('login', 'Login successful', email + ' ip:' + (ip_ || '?'));
 
     this.currentUser = { ...user };
@@ -2898,7 +2952,7 @@ const APP = {
       const user = list.find(u => u.email === this.currentUser.email);
       if (user) {
         user.avatar = dataUrl;
-        localStorage.setItem('nove_users', JSON.stringify(list));
+        APP.storeSigned('nove_users', list);
       }
       this.updateAuthUI();
       this.logActivity('avatar', 'Avatar updated', this.currentUser.email);
@@ -2997,7 +3051,7 @@ const APP = {
     if (!newName) { this.showToast(this.t('role_name_required'), 'error'); return; }
     const list = APP.safeParse('nove_users', [], 20000);
     const user = list.find(u => u.email === this.currentUser.email);
-    if (user) { user.name = newName; localStorage.setItem('nove_users', JSON.stringify(list)); }
+    if (user) { user.name = newName; APP.storeSigned('nove_users', list); }
     this.currentUser.name = newName;
     localStorage.setItem('nove_user', JSON.stringify(this.currentUser));
     this.updateAuthUI();
@@ -3016,7 +3070,7 @@ const APP = {
     const curHash = await this.hashPassword(cur);
     if (user.password !== curHash) { this.showToast(this.t('wrong_password'), 'error'); return; }
     user.password = await this.hashPassword(nw);
-    localStorage.setItem('nove_users', JSON.stringify(list));
+    APP.storeSigned('nove_users', list);
     this.showToast(this.t('password_changed'), 'success');
     document.getElementById('profile-cur-pass').value = '';
     document.getElementById('profile-new-pass').value = '';
@@ -3405,6 +3459,22 @@ const APP = {
 
   // ===== ADMIN =====
   renderAdminPage() {
+    const checkTamper = async () => {
+      for (const k of ['nove_users', 'nove_roles']) {
+        if (await this.tampered(k)) {
+          APP.logActivity('security', 'Signature mismatch detected', k + ' ip:' + APP.getIPKey());
+          try { localStorage.removeItem('nove_user'); } catch (e) {}
+          const content = document.getElementById('admin-content');
+          if (content) content.innerHTML = `<div style="min-height:80vh; display:flex; align-items:center; justify-content:center;"><h1 style="color:var(--red,#ff5f57);">\u{26A0}\uFE0F ${this.t('access_denied')}</h1></div>`;
+          return;
+        }
+      }
+      this.renderAdminGateAfterCheck();
+    };
+    checkTamper();
+  },
+
+  renderAdminGateAfterCheck() {
     if (!this.isAdmin()) {
       this.renderAdminPinGate();
       return;
@@ -3503,7 +3573,7 @@ const APP = {
         <div>
           <h1>
             <span class="tb-icon">\u2705</span>
-            ${this.t('admin_welcome')}, ${APP.currentUser.name.split(' ')[0]}!
+            ${this.t('admin_welcome')}, ${this.esc((APP.currentUser.name || '').split(' ')[0])}!
             <div class="tb-sub">${this.t('store_slogan')}</div>
           </h1>
         </div>
@@ -4280,7 +4350,7 @@ const APP = {
       }
       if (target) {
         target.role = role;
-        localStorage.setItem('nove_users', JSON.stringify(list));
+        APP.storeSigned('nove_users', list);
         APP.renderAdminUsers(document.getElementById('admin-content'));
         APP.showToast('Role updated', 'success');
       }
@@ -4359,7 +4429,7 @@ const APP = {
     return { ...this.defaultRoles(), ...stored };
   },
   saveRoles(roles) {
-    localStorage.setItem('nove_roles', JSON.stringify(roles));
+    APP.storeSigned('nove_roles', roles);
   },
   roleName(key) {
     const r = this.loadRoles()[key];
@@ -4419,7 +4489,7 @@ const APP = {
     delete roles[roleKey];
     list.forEach(u => { if (u.role === roleKey) u.role = 'user'; });
     this.saveRoles(roles);
-    localStorage.setItem('nove_users', JSON.stringify(list));
+    APP.storeSigned('nove_users', list);
     this.logActivity('role_delete', 'Role deleted', roleKey);
     this.showToast(this.t('deleted_toast'), 'success');
     this.renderAdminPermissions(document.getElementById('admin-content'));
