@@ -4949,8 +4949,10 @@ applyLogo() {
   renderAdminLogs(content) {
     const logs = this.getLogs().slice().reverse();
     const typeBadge = (t) => {
-      const cls = t === 'register' || t === 'order' || t === 'login' ? 'active' : t === 'settings' || t === 'avatar' ? 'pending' : 'inactive';
-      return `<span class="status-badge ${cls}">${this.esc(t)}</span>`;
+      const danger = /block|locked|tamper|security|fail|attempt/i.test(t);
+      const cls = danger ? 'inactive' : (t === 'register' || t === 'order' || t === 'login' ? 'active' : t === 'settings' || t === 'avatar' ? 'pending' : 'inactive');
+      const style = danger ? 'background:rgba(255,95,87,0.18); color:#ff5f57; border:1px solid rgba(255,95,87,0.4);' : '';
+      return `<span class="status-badge ${cls}" ${style ? 'style="' + style + '"' : ''}>${this.esc(t)}</span>`;
     };
     content.innerHTML = `
       <div class="admin-topbar">
