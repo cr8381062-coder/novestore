@@ -1343,7 +1343,7 @@ const APP = {
     if (!styleEl) {
       styleEl = doc.createElement('style');
       styleEl.id = 'cz-pointer-style';
-      styleEl.textContent = '.cz-pointer-hover{outline:3px dashed #22d3ee !important; outline-offset:2px; cursor:pointer;} .cz-pointer-bar{position:fixed; z-index:99999; display:flex; gap:0.5rem; padding:0.55rem 0.8rem; border-radius:12px; background:#0b0e13; border:1px solid #22d3ee; box-shadow:0 8px 30px rgba(0,0,0,.65); font-family:inherit; align-items:center;} .cz-pointer-bar button{border:0; border-radius:9px; padding:0.55rem 1rem; font-size:0.88rem; font-weight:700; cursor:pointer;} .cz-pointer-bar .pb-name{color:#fff; font-size:0.8rem; font-weight:700;} .cz-pointer-bar .pb-edit{background:rgba(34,211,238,.15); color:#22d3ee;} .cz-pointer-bar .pb-del{background:rgba(239,68,68,.15); color:#f87171;}';
+      styleEl.textContent = '.cz-pointer-hover{outline:3px dashed #d4af37 !important; outline-offset:2px; cursor:pointer;} .cz-pointer-bar{position:fixed; z-index:99999; display:flex; gap:0.5rem; padding:0.55rem 0.8rem; border-radius:12px; background:#0b0e13; border:1px solid #d4af37; box-shadow:0 8px 30px rgba(0,0,0,.65); font-family:inherit; align-items:center;} .cz-pointer-bar button{border:0; border-radius:9px; padding:0.55rem 1rem; font-size:0.88rem; font-weight:700; cursor:pointer;} .cz-pointer-bar .pb-name{color:#fff; font-size:0.8rem; font-weight:700;} .cz-pointer-bar .pb-edit{background:rgba(212,175,55,.15); color:#d4af37;} .cz-pointer-bar .pb-del{background:rgba(239,68,68,.15); color:#f87171;}';
       doc.head.appendChild(styleEl);
     }
     doc.removeEventListener('mouseover', this._ptHover);
@@ -1435,7 +1435,7 @@ const APP = {
     wrap.id = 'cz-style-modal';
     wrap.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; z-index:99998; background:rgba(0,0,0,.6); display:flex; align-items:flex-start; justify-content:center; padding:6vh 1rem; overflow:auto;';
     const box = document.createElement('div');
-    box.style.cssText = 'width:min(94%,520px); background:#0b0e13; border:1px solid #22d3ee; border-radius:16px; padding:1.1rem; color:#fff; font-family:inherit; box-shadow:0 24px 70px rgba(0,0,0,.7); position:relative;';
+    box.style.cssText = 'width:min(94%,520px); background:#0b0e13; border:1px solid #d4af37; border-radius:16px; padding:1.1rem; color:#fff; font-family:inherit; box-shadow:0 24px 70px rgba(0,0,0,.7); position:relative;';
     const st = this.czElementStyles();
     const cur = st[this.czElementSelector(el)] || {};
     const v = (x, fb) => x === undefined || x === null || x === '' ? fb : x;
@@ -1512,7 +1512,7 @@ const APP = {
         if (isGlow) {
           cur.glow = n;
           this.saveElementStyle(el, 'boxShadow', n);
-          el.style.boxShadow = n > 0 ? '0 0 ' + n + 'px ' + this.rgba((el.style.color || '#22d3ee'), 0.35) : '';
+          el.style.boxShadow = n > 0 ? '0 0 ' + n + 'px ' + this.rgba((el.style.color || '#d4af37'), 0.35) : '';
         } else {
           cur.borderRadius = n;
           el.style.borderRadius = n + 'px';
@@ -1539,7 +1539,7 @@ const APP = {
     });
     const save = document.createElement('button');
     save.innerHTML = '\u2714 ' + this.t('cz_save');
-    save.style.cssText = 'border:0; border-radius:10px; padding:0.6rem 1.5rem; background:linear-gradient(135deg,#22d3ee,#7c3aed); color:#fff; cursor:pointer; font-weight:800; font-size:0.88rem;';
+    save.style.cssText = 'border:0; border-radius:10px; padding:0.6rem 1.5rem; background:linear-gradient(135deg,#d4af37,#f5c518); color:#000; cursor:pointer; font-weight:800; font-size:0.88rem;';
     save.addEventListener('click', () => {
       this.applyPointerEdit(el, ta.value.trim());
       wrap.remove();
@@ -1589,7 +1589,7 @@ const APP = {
     if (!styles[sel]) styles[sel] = {};
     if (prop === 'boxShadow') {
       styles[sel].glow = parseFloat(value) || 0;
-      el.style.boxShadow = styles[sel].glow > 0 ? '0 0 ' + (styles[sel].glow) + 'px ' + this.rgba((styles[sel].color || '#22d3ee'), 0.35) : '';
+      el.style.boxShadow = styles[sel].glow > 0 ? '0 0 ' + (styles[sel].glow) + 'px ' + this.rgba((styles[sel].color || '#d4af37'), 0.35) : '';
     } else {
       styles[sel][prop] = value;
     }
@@ -1622,7 +1622,7 @@ const APP = {
           if (s.borderColor) el.style.borderColor = s.borderColor;
           if (s.borderWidth !== undefined) el.style.borderWidth = s.borderWidth + 'px';
           if (s.borderRadius !== undefined) el.style.borderRadius = s.borderRadius + 'px';
-          if (s.glow) el.style.boxShadow = '0 0 ' + s.glow + 'px ' + this.rgba((s.color || '#22d3ee'), 0.35);
+          if (s.glow) el.style.boxShadow = '0 0 ' + s.glow + 'px ' + this.rgba((s.color || '#d4af37'), 0.35);
         });
       } catch (e) {}
     });
@@ -1802,7 +1802,7 @@ const APP = {
     if (btn) {
       btn.classList.add('cz-active');
       btn.style.border = '1.5px solid var(--secondary)';
-      btn.style.background = 'rgba(34,211,238,0.15)';
+      btn.style.background = 'rgba(212,175,55,0.15)';
     }
     this.logActivity('customizer', 'Customizer target selected', key);
   },
