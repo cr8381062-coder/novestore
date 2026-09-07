@@ -1035,9 +1035,9 @@ const APP = {
     'اخضر': '#22c55e',
     green: '#22c55e',
     'ازرق': '#3b82f6',
-    'ذهبي': '#f5b93e',
-    'ذهب': '#f5b93e',
-    gold: '#f5b93e',
+    'ذهبي': '#ffffff',
+    'ذهب': '#ffffff',
+    gold: '#ffffff',
     'برتقالي': '#f97316',
     orange: '#f97316',
     'ابيض': '#ffffff',
@@ -1119,7 +1119,7 @@ const APP = {
       document.body.insertBefore(bar, document.body.firstChild);
     }
     bar.style.cssText = 'position:relative; z-index:1000; text-align:center; padding:0.7rem 1rem; font-weight:700; font-size:0.95rem; ' +
-      'color:' + (d.noteColor || '#f5c518') + '; background:rgba(0,0,0,0.55); border-bottom:1px solid rgba(255,255,255,0.08);';
+      'color:' + (d.noteColor || '#ffffff') + '; background:rgba(0,0,0,0.55); border-bottom:1px solid rgba(255,255,255,0.08);';
     bar.textContent = d.note;
   },
 
@@ -1343,7 +1343,7 @@ const APP = {
     if (!styleEl) {
       styleEl = doc.createElement('style');
       styleEl.id = 'cz-pointer-style';
-      styleEl.textContent = '.cz-pointer-hover{outline:3px dashed #d4af37 !important; outline-offset:2px; cursor:pointer;} .cz-pointer-bar{position:fixed; z-index:99999; display:flex; gap:0.5rem; padding:0.55rem 0.8rem; border-radius:12px; background:#0b0e13; border:1px solid #d4af37; box-shadow:0 8px 30px rgba(0,0,0,.65); font-family:inherit; align-items:center;} .cz-pointer-bar button{border:0; border-radius:9px; padding:0.55rem 1rem; font-size:0.88rem; font-weight:700; cursor:pointer;} .cz-pointer-bar .pb-name{color:#fff; font-size:0.8rem; font-weight:700;} .cz-pointer-bar .pb-edit{background:rgba(212,175,55,.15); color:#d4af37;} .cz-pointer-bar .pb-del{background:rgba(239,68,68,.15); color:#f87171;}';
+      styleEl.textContent = '.cz-pointer-hover{outline:3px dashed #ffffff !important; outline-offset:2px; cursor:pointer;} .cz-pointer-bar{position:fixed; z-index:99999; display:flex; gap:0.5rem; padding:0.55rem 0.8rem; border-radius:12px; background:#0b0e13; border:1px solid #ffffff; box-shadow:0 8px 30px rgba(0,0,0,.65); font-family:inherit; align-items:center;} .cz-pointer-bar button{border:0; border-radius:9px; padding:0.55rem 1rem; font-size:0.88rem; font-weight:700; cursor:pointer;} .cz-pointer-bar .pb-name{color:#fff; font-size:0.8rem; font-weight:700;} .cz-pointer-bar .pb-edit{background:rgba(255,255,255,.15); color:#ffffff;} .cz-pointer-bar .pb-del{background:rgba(239,68,68,.15); color:#f87171;}';
       doc.head.appendChild(styleEl);
     }
     doc.removeEventListener('mouseover', this._ptHover);
@@ -1435,7 +1435,7 @@ const APP = {
     wrap.id = 'cz-style-modal';
     wrap.style.cssText = 'position:fixed; top:0; left:0; right:0; bottom:0; z-index:99998; background:rgba(0,0,0,.6); display:flex; align-items:flex-start; justify-content:center; padding:6vh 1rem; overflow:auto;';
     const box = document.createElement('div');
-    box.style.cssText = 'width:min(94%,520px); background:#0b0e13; border:1px solid #d4af37; border-radius:16px; padding:1.1rem; color:#fff; font-family:inherit; box-shadow:0 24px 70px rgba(0,0,0,.7); position:relative;';
+    box.style.cssText = 'width:min(94%,520px); background:#0b0e13; border:1px solid #ffffff; border-radius:16px; padding:1.1rem; color:#fff; font-family:inherit; box-shadow:0 24px 70px rgba(0,0,0,.7); position:relative;';
     const st = this.czElementStyles();
     const cur = st[this.czElementSelector(el)] || {};
     const v = (x, fb) => x === undefined || x === null || x === '' ? fb : x;
@@ -1512,7 +1512,7 @@ const APP = {
         if (isGlow) {
           cur.glow = n;
           this.saveElementStyle(el, 'boxShadow', n);
-          el.style.boxShadow = n > 0 ? '0 0 ' + n + 'px ' + this.rgba((el.style.color || '#d4af37'), 0.35) : '';
+          el.style.boxShadow = n > 0 ? '0 0 ' + n + 'px ' + this.rgba((el.style.color || '#ffffff'), 0.35) : '';
         } else {
           cur.borderRadius = n;
           el.style.borderRadius = n + 'px';
@@ -1539,7 +1539,7 @@ const APP = {
     });
     const save = document.createElement('button');
     save.innerHTML = '\u2714 ' + this.t('cz_save');
-    save.style.cssText = 'border:0; border-radius:10px; padding:0.6rem 1.5rem; background:linear-gradient(135deg,#d4af37,#f5c518); color:#000; cursor:pointer; font-weight:800; font-size:0.88rem;';
+    save.style.cssText = 'border:0; border-radius:10px; padding:0.6rem 1.5rem; background:linear-gradient(135deg,#ffffff,#ffffff); color:#000; cursor:pointer; font-weight:800; font-size:0.88rem;';
     save.addEventListener('click', () => {
       this.applyPointerEdit(el, ta.value.trim());
       wrap.remove();
@@ -1589,7 +1589,7 @@ const APP = {
     if (!styles[sel]) styles[sel] = {};
     if (prop === 'boxShadow') {
       styles[sel].glow = parseFloat(value) || 0;
-      el.style.boxShadow = styles[sel].glow > 0 ? '0 0 ' + (styles[sel].glow) + 'px ' + this.rgba((styles[sel].color || '#d4af37'), 0.35) : '';
+      el.style.boxShadow = styles[sel].glow > 0 ? '0 0 ' + (styles[sel].glow) + 'px ' + this.rgba((styles[sel].color || '#ffffff'), 0.35) : '';
     } else {
       styles[sel][prop] = value;
     }
@@ -1622,7 +1622,7 @@ const APP = {
           if (s.borderColor) el.style.borderColor = s.borderColor;
           if (s.borderWidth !== undefined) el.style.borderWidth = s.borderWidth + 'px';
           if (s.borderRadius !== undefined) el.style.borderRadius = s.borderRadius + 'px';
-          if (s.glow) el.style.boxShadow = '0 0 ' + s.glow + 'px ' + this.rgba((s.color || '#d4af37'), 0.35);
+          if (s.glow) el.style.boxShadow = '0 0 ' + s.glow + 'px ' + this.rgba((s.color || '#ffffff'), 0.35);
         });
       } catch (e) {}
     });
@@ -1767,7 +1767,7 @@ const APP = {
     if (!d.note) return '<div style="font-size:0.8rem; color:var(--gray-500);">' + this.t('cz_no_notes') + '</div>';
     return `
       <div style="display:flex; align-items:center; gap:0.7rem; padding:0.6rem 0; border-bottom:1px solid var(--border);">
-        <span style="font-size:1.2rem; color:${this.esc(d.noteColor || '#f5c518')};">\u{1F4DD}</span>
+        <span style="font-size:1.2rem; color:${this.esc(d.noteColor || '#ffffff')};">\u{1F4DD}</span>
         <span style="flex:1; font-size:0.85rem; color:var(--gray-200); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${this.esc(d.note)}</span>
         <button class="btn-admin btn-admin-ghost" style="padding:0.25rem 0.6rem; font-size:0.72rem; border-color:var(--secondary);" onclick="APP.showCustomNoteForm()">\u270F\uFE0F ${this.t('edit')}</button>
         <button class="btn-admin btn-admin-ghost" style="padding:0.25rem 0.6rem; font-size:0.72rem;" onclick="APP.removeCustomNote()">\u{1F5D1}\uFE0F ${this.t('delete')}</button>
@@ -1802,7 +1802,7 @@ const APP = {
     if (btn) {
       btn.classList.add('cz-active');
       btn.style.border = '1.5px solid var(--secondary)';
-      btn.style.background = 'rgba(212,175,55,0.15)';
+      btn.style.background = 'rgba(255,255,255,0.15)';
     }
     this.logActivity('customizer', 'Customizer target selected', key);
   },
@@ -1976,7 +1976,7 @@ const APP = {
           <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:1rem;">
             <div class="form-group">
               <label>${this.t('cz_note_color')}</label>
-              <input type="color" id="cnote-color" value="${d.noteColor || '#f5c518'}" style="width:100%; height:42px; border-radius:10px; border:1px solid var(--border); background:transparent;">
+              <input type="color" id="cnote-color" value="${d.noteColor || '#ffffff'}" style="width:100%; height:42px; border-radius:10px; border:1px solid var(--border); background:transparent;">
             </div>
             <div class="form-group">
               <label>${this.t('cz_note_show')}</label>
@@ -3470,7 +3470,7 @@ const APP = {
                 <div class="a-amount" style="color:#22d3ee; font-size:0.75rem;">5 ${this.t('attempts')}</div>
               </div>
               <div class="activity-item">
-                <div class="a-icon" style="background:rgba(245,197,24,0.15);">\u{1F4CB}</div>
+                <div class="a-icon" style="background:rgba(255,255,255,0.15);">\u{1F4CB}</div>
                 <div class="a-text">
                   <div class="a-title">${this.t('activity_logs')}</div>
                   <div class="a-sub">${this.getLogs().length} ${this.t('log_entries')}</div>
@@ -4624,8 +4624,8 @@ const APP = {
     const heroIcon = document.querySelector('.hero-logo-icon');
     if (APP.STORE_LOGO && heroIcon) {
       heroIcon.style.background = '#0b0e13';
-      heroIcon.style.boxShadow = 'inset 0 0 0 2px rgba(212,175,55,0.4), 0 0 60px rgba(212,175,55,0.35)';
-      heroIcon.style.border = '1px solid rgba(212,175,55,0.45)';
+      heroIcon.style.boxShadow = 'inset 0 0 0 2px rgba(255,255,255,0.4), 0 0 60px rgba(255,255,255,0.35)';
+      heroIcon.style.border = '1px solid rgba(255,255,255,0.45)';
       heroIcon.style.padding = '0';
       heroIcon.style.overflow = 'hidden';
       heroIcon.innerHTML = `<img src="${APP.STORE_LOGO}" alt="" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
