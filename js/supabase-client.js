@@ -24,8 +24,9 @@
     },
     tryInit() {
       try {
-        if (this.enabled && typeof createClient === 'function' && !this.client) {
-          this.client = createClient(CFG.url, CFG.anonKey);
+        if (this.enabled && !this.client) {
+          const cc = (typeof createClient === 'function') ? createClient : (window.supabase && window.supabase.createClient);
+          if (cc) this.client = cc(CFG.url, CFG.anonKey);
         }
       } catch (e) {}
     },
