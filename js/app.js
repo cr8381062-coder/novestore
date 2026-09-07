@@ -378,6 +378,15 @@ const APP = {
       paypal_integration: 'تكامل باي بال',
       paypal_client: 'مفتاح باي بال العام',
       paypal_hint: 'متوفر في لوحة مطوري باي بال. تصل المدفوعات إلى حسابك.',
+      cloud_db: 'قاعدة البيانات السحابية (Supabase)',
+      cloud_db_desc: 'يربط المتجر بقاعدة بيانات سحابية مجانية تعمل 24/7 مع حماية حقيقية (حظر IP، كشف التلاعب، نسخ احتياطي).',
+      cloud_db_owner: 'سجّل دخولك بحساب المالك (Supabase) لتفعيل الحفظ السحابي للمنتجات والطلبات وتفعيل الطرد الحقيقي.',
+      cloud_login: 'اتصال بحساب المالك',
+      cloud_logout: 'قطع الاتصال',
+      cloud_db_password: 'كلمة مرور حساب المالك',
+      cloud_status_on: 'متصل بالسحابة',
+      cloud_status_off: 'غير متصل — الموقع يعمل بوضع الصمود المحلي',
+      admin_email: 'البريد الإلكتروني للمالك',
       save_all: 'حفظ جميع الإعدادات',
       edit_product: 'تعديل المنتج',
       order_success_sub: 'تتبع مبيعاتك وسجل الطلبات',
@@ -836,6 +845,15 @@ const APP = {
       paypal_integration: 'PayPal Integration',
       paypal_client: 'PayPal Client ID',
       paypal_hint: 'Found in PayPal Developer dashboard. Payments go to your account.',
+      cloud_db: 'Cloud Database (Supabase)',
+      cloud_db_desc: 'Connects the store to a free 24/7 cloud database with real protection (IP ban, tamper detection, backups).',
+      cloud_db_owner: 'Sign in with your owner account (Supabase) to enable cloud saving of products/orders and real kicking.',
+      cloud_login: 'Connect Owner Account',
+      cloud_logout: 'Disconnect',
+      cloud_db_password: 'Owner password',
+      cloud_status_on: 'Connected to Cloud',
+      cloud_status_off: 'Offline - store runs in local resilience mode',
+      admin_email: 'Owner Email',
       save_all: 'Save All Settings',
       edit_product: 'Edit Product',
       order_success_sub: 'Track your sales and order history',
@@ -4023,6 +4041,8 @@ const APP = {
     else if (section === 'customizer') this.renderCustomizer(content);
     else this.renderAdminDashboard();
 
+    if (section === 'settings') this.updateCloudStatus();
+
     document.querySelectorAll('.admin-nav-item').forEach(n => n.classList.remove('active'));
     const activeNav = document.querySelector(`.admin-nav-item[data-section="${section}"]`);
     if (activeNav) activeNav.classList.add('active');
@@ -4806,6 +4826,32 @@ const APP = {
 
       <div class="admin-form-card" style="margin-top:1.5rem; max-width:760px;">
         <div class="form-card-header">
+          <div class="fc-icon">\u{1F5C4}\uFE0F</div>
+          <h3>${this.t('cloud_db')}</h3>
+        </div>
+        <div style="font-size:0.8rem; color:var(--gray-300); line-height:1.7; margin-bottom:1rem;">
+          \u{1F6E1}\uFE0F <span id="cloud-status-pill">...</span>
+          <ol style="margin:0.6rem 0; padding-right:1.2rem; font-size:0.75rem; color:var(--gray-400); line-height:1.8;">
+            <li>\u{1F3F7}\uFE0F ${this.t('cloud_db_desc')}</li>
+            <li>\u{1F511} ${this.t('cloud_db_owner')}</li>
+          </ol>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.9rem;">
+          <div class="form-group">
+            <label>${this.t('admin_email')}</label>
+            <input type="email" id="cloud-email" value="${APP.ADMIN_EMAIL || ''}" placeholder="cr8381062@gmail.com">
+          </div>
+          <div class="form-group">
+            <label>${this.t('cloud_db_password')}</label>
+            <input type="password" id="cloud-password" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022" autocomplete="off">
+          </div>
+        </div>
+        <button class="btn-admin btn-admin-ghost" onclick="APP.cloudLogout()" id="cloud-logout-btn" style="display:none;">\u{1F6AA} ${this.t('cloud_logout')}</button>
+        <button class="btn-admin btn-admin-primary" onclick="APP.cloudLogin()" id="cloud-login-btn">\u{1F510} ${this.t('cloud_login')}</button>
+      </div>
+
+      <div class="admin-form-card" style="margin-top:1.5rem; max-width:760px;">
+        <div class="form-card-header">
           <div class="fc-icon">\u{1F4B0}</div>
           <h3>${this.t('paypal_integration')}</h3>
         </div>
@@ -5036,6 +5082,64 @@ applyLogo() {
       .join('');
     container.innerHTML = html;
     container.style.display = html ? 'flex' : 'none';
+  },
+
+  async updateCloudStatus() {
+    try {
+      if (!window.CloudDB || !CloudDB.enabled) {
+        document.querySelectorAll('#cloud-status-pill').forEach(el => {
+          el.innerHTML = '<span class="status-badge inactive" style="color:#ffb86c; border-color:rgba(255,184,108,0.4);">' + this.t('cloud_status_off') + '</span>';
+        });
+        return;
+      }
+      const authed = await CloudDB.isAuthed();
+      const pill = document.getElementById('cloud-status-pill');
+      if (pill) {
+        if (authed) {
+          pill.innerHTML = '<span class="status-badge active">' + this.t('cloud_status_on') + '</span>';
+          const lbtn = document.getElementById('cloud-login-btn');
+          const obtn = document.getElementById('cloud-logout-btn');
+          if (lbtn) lbtn.style.display = 'none';
+          if (obtn) obtn.style.display = '';
+        } else {
+          pill.innerHTML = '<span class="status-badge inactive">' + this.t('cloud_status_off') + '</span>';
+        }
+      }
+    } catch (e) {}
+  },
+
+  async cloudLogin() {
+    const btn = document.getElementById('cloud-login-btn');
+    if (btn) { btn.disabled = true; btn.textContent = '\u{23F3} ...'; }
+    try {
+      const email = (document.getElementById('cloud-email') || {}).value || APP.ADMIN_EMAIL || '';
+      const password = (document.getElementById('cloud-password') || {}).value || '';
+      if (!email || !password) {
+        this.showToast('أدخل البريد وكلمة المرور', 'error');
+        return;
+      }
+      if (!window.CloudDB || !CloudDB.enabled) {
+        this.showToast('قاعدة البيانات السحابية غير مفعلة', 'error');
+        return;
+      }
+      const res = await CloudDB.signIn(email, password);
+      if (res && res.ok) {
+        this.showToast('تم الاتصال بالسحابة', 'success');
+        await this.updateCloudStatus();
+      } else {
+        this.showToast((res && res.error) ? res.error : 'فشل الاتصال', 'error');
+      }
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '\u{1F510} ' + this.t('cloud_login'); }
+    }
+  },
+
+  async cloudLogout() {
+    try {
+      if (window.CloudDB && CloudDB.enabled) await CloudDB.signOut();
+      this.showToast('تم قطع الاتصال', 'success');
+      await this.updateCloudStatus();
+    } catch (e) {}
   },
 
   saveSettings() {

@@ -83,6 +83,31 @@
       } catch (e) { return null; }
     },
 
+    // ---- OWNER SIGN-IN (real auth, enforces RLS writes) ----
+    async signIn(email, password) {
+      try {
+        this.tryInit();
+        if (!this.enabled || !this.client) return { ok: false };
+        const { data, error } = await this.client.auth.signInWithPassword({ email: String(email||'').trim().toLowerCase(), password: String(password||'') });
+        if (error) return { ok: false, error: error.message };
+        return { ok: true };
+      } catch (e) { return { ok: false, error: String(e) }; }
+    },
+    async signOut() {
+      try {
+        this.tryInit();
+        if (this.enabled && this.client) await this.client.auth.signOut();
+      } catch (e) {}
+    },
+    async isAuthed() {
+      try {
+        this.tryInit();
+        if (!this.enabled || !this.client) return false;
+        const me = await this.client.auth.getUser();
+        return !!(me.data && me.data.user);
+      } catch (e) { return false; }
+    },
+
     // ---- REAL KICK ----
     async isBlocked(ip) {
       try {
