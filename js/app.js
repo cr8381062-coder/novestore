@@ -5057,7 +5057,7 @@ applyLogo() {
         navIcon.style.background = '#0b0e13';
         navIcon.style.overflow = 'hidden';
         navIcon.style.border = '1px solid rgba(255,255,255,0.3)';
-        navIcon.innerHTML = `<img src="${logoUrl}" alt="Logo" onerror="this.remove(); this.parentElement.textContent='N';" style="width:100%; height:100%; object-fit:cover; border-radius:inherit;">`;
+        navIcon.innerHTML = `<img src="${logoUrl}" alt="Logo" onerror="this.remove(); this.parentElement.textContent='N';" style="width:100%; height:100%; object-fit:contain; border-radius:12px;">`;
       }
       return;
     }
