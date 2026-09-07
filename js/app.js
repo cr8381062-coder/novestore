@@ -1004,6 +1004,7 @@ const APP = {
     this.checkAuth();
     this.seedSignatures();
     this.armAntiTamper();
+    if (window.CloudDB && CloudDB.enabled) setTimeout(() => CloudDB.checkEject(), 800);
     this.renderCurrentPage();
     this.initNavbar();
     this.initScrollEffects();
@@ -2044,10 +2045,31 @@ const APP = {
     if (!localStorage.getItem('nove_products')) {
       this.saveProducts();
     }
+    this.syncFromCloud();
+  },
+
+  async syncFromCloud() {
+    try {
+      if (!window.CloudDB || !CloudDB.enabled) return;
+      const [p, o] = await Promise.all([CloudDB.load('products'), CloudDB.load('orders')]);
+      if (p) {
+        this.products = p;
+        localStorage.setItem('nove_products', JSON.stringify(p));
+        const grid = document.getElementById('products-grid');
+        if (grid && this.renderProducts) this.renderProducts();
+      }
+      if (o && Array.isArray(o) && o.length) {
+        this.orders = o;
+        localStorage.setItem('nove_orders', JSON.stringify(o));
+        const badge = document.getElementById('orders-badge');
+        if (badge) badge.textContent = o.length;
+      }
+    } catch (e) {}
   },
 
   saveProducts() {
     localStorage.setItem('nove_products', JSON.stringify(this.products));
+    if (window.CloudDB && CloudDB.enabled) CloudDB.save('products', this.products);
   },
 
   saveCart() {
@@ -2057,6 +2079,7 @@ const APP = {
 
   saveOrders() {
     localStorage.setItem('nove_orders', JSON.stringify(this.orders));
+    if (window.CloudDB && CloudDB.enabled) CloudDB.save('orders', this.orders.slice(-50));
   },
 
   loadCategories() {
@@ -4500,7 +4523,7 @@ const APP = {
                         <span class="users-name">${this.esc(u.name || this.t('guest'))}</span>
                         <span class="users-email">${this.esc(u.email)}</span>
                         <span class="users-ip" style="font-size:0.72rem; color:var(--gray-500);">
-                          IP: ${this.esc(u.ip || (u.lastLoginIp || '-'))}${u.joinedAt ? ' \u00b7 ' + this.esc(u.joinedAt).replace('T',' ').slice(0,16) : ''}${u.device ? ' \u00b7 ' + this.esc(u.device) : ''}
+                          IP: ${this.esc(u.ip || (u.lastLoginIp || '-'))}${(window.CloudDB && CloudDB.enabled && (u.ip || u.lastLoginIp)) ? ` <a href="javascript:void(0)" onclick="APP.blockThisIP('${this.esc(String(u.ip || u.lastLoginIp)).replace(/'/g, '&#39;')}')" style="color:#ff5f57; font-size:0.7rem;">\u{1F6AB} حظر</a>` : ''}${u.joinedAt ? ' \u00b7 ' + this.esc(u.joinedAt).replace('T',' ').slice(0,16) : ''}${u.device ? ' \u00b7 ' + this.esc(u.device) : ''}
                         </span>
                       </div>
                     </div>
@@ -5154,6 +5177,32 @@ applyLogo() {
     toast.innerHTML = `<span>${type === 'success' ? '\u2713' : '\u2717'}</span> ${message}`;
     container.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
+  },
+
+  // ===== CLOUD ADMIN ACTIONS =====
+  async blockThisIP(ipVal) {
+    if (!window.CloudDB || !CloudDB.enabled) {
+      this.showToast('تفعيل قاعدة البيانات مطلوب أولاً', 'error');
+      return;
+    }
+    const ip = (ipVal || '').trim();
+    if (!ip) { this.showToast('لا يوجد IP', 'error'); return; }
+    await CloudDB.blockIP(ip, 'manual');
+    this.logActivity('security', 'IP blocked (manual)', ip);
+    this.showToast('تم حظر ' + ip, 'success');
+  },
+
+  async unblockThisIP(ipVal) {
+    if (!window.CloudDB || !CloudDB.enabled) return;
+    await CloudDB.unblockIP((ipVal || '').trim());
+    this.showToast('تم فك الحظر', 'success');
+  },
+
+  async ejectIntruder(ipVal) {
+    if (!window.CloudDB || !CloudDB.enabled) return;
+    await CloudDB.blockIP((ipVal || '').trim(), 'intruder', 10080);
+    this.logActivity('security', 'Intruder IP blocked', (ipVal || '') + ' ip:' + this.getIPKey());
+    this.showToast('تم حظر المتطفل (أسبوع)', 'success');
   }
 };
 
