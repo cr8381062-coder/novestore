@@ -1057,7 +1057,7 @@ const APP = {
     this.renderSocialIcons();
     this.updateHeroStats();
     if (window.CloudDB && CloudDB.enabled) this.autoCloudConnect();
-    if (window.CloudDB && CloudDB.enabled) setTimeout(() => this.backgroundUserSync(), 1500);
+    if (window.CloudDB && CloudDB.enabled && window.location.pathname.includes('admin.html')) setTimeout(() => this.backgroundUserSync(), 1500);
   },
 
   async backgroundUserSync() {
@@ -2140,6 +2140,9 @@ const APP = {
   },
 
   mergeCloudUsers(cloudUsers) {
+    const now = Date.now();
+    if (this._mergeBusy && now - this._mergeBusy < 800) return;
+    this._mergeBusy = now;
     try {
       const norm = (cloudUsers || []).map(cu => ({
         email: cu.email,
@@ -2154,14 +2157,26 @@ const APP = {
         lastLoginIp: cu.ip || '',
         joinedAt: cu.joined_at || cu.created_at || ''
       })).filter(u => u.email);
+      const seenC = {};
+      const normUniq = [];
+      norm.forEach(cu => {
+        const e = cu.email;
+        if (seenC[e]) return;
+        seenC[e] = true;
+        normUniq.push(cu);
+      });
       const local = APP.safeParse('nove_users', [], 20000);
       const localByEmail = {};
+      const dedupLocal = [];
       local.forEach(u => {
-        if (u && u.email) localByEmail[u.email] = u;
+        if (!u || !u.email) return;
+        if (localByEmail[u.email]) return;
+        localByEmail[u.email] = u;
+        dedupLocal.push(u);
       });
       let changed = false;
-      const merged = local.slice();
-      norm.forEach(cu => {
+      const merged = dedupLocal.slice();
+      normUniq.forEach(cu => {
         const existing = localByEmail[cu.email];
         if (existing) {
           let dirty = false;
@@ -2809,7 +2824,7 @@ const APP = {
       return;
     }
 
-    const ip = await this.getClientIP();
+    const [ip, real] = await Promise.all([this.getClientIP(), this.isRealEmail(email)]);
     const ipKey = ip ? ip : this.getIPKey();
     const limit = ip ? this.checkIpLimit(ipKey) : { blocked: false };
     if (limit.blocked) {
@@ -2826,7 +2841,6 @@ const APP = {
       return;
     }
 
-    const real = await this.isRealEmail(email);
     if (!real.ok) {
       this.logActivity('register_blocked', 'Fake email blocked', email + ' (' + real.reason + ')');
       this.showToast(real.msg || this.t('invalid_email'), 'error');
@@ -3069,7 +3083,6 @@ const APP = {
     user.device = user.device || (mon.os + ' / ' + mon.browser + ' / ' + (mon.screen||'') + ' / ' + (mon.lang||''));
     APP.storeSigned('nove_users', users);
     this.logActivity('login', 'Login successful', email + ' ip:' + (ip_ || '?'));
-    if (window.CloudDB && CloudDB.enabled) this.pushLocalUsers();
 
     this.currentUser = { ...user };
     delete this.currentUser.password;
