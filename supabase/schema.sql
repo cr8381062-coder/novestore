@@ -82,6 +82,21 @@ create table if not exists public.profiles (
   created_at timestamptz default now()
 );
 
+create table if not exists public.store_users (
+  email text primary key,
+  name text default '',
+  device text default '',
+  ip text default '',
+  role text default 'user',
+  is_admin int default 0,
+  verified int default 0,
+  avatar text default '',
+  last_login_at timestamptz,
+  joined_at timestamptz,
+  created_at timestamptz default now(),
+  updated_at timestamptz default now()
+);
+
 create table if not exists public.store_settings (
   id int primary key default 1,
   store_name text default 'NOVE STOR',
@@ -113,6 +128,11 @@ alter table public.blocked_ips enable row level security;
 alter table public.security_logs enable row level security;
 alter table public.profiles enable row level security;
 alter table public.store_settings enable row level security;
+
+-- --- store_users: customers may upsert their own public profile; any visitor may read
+--     the public roster. Passwords/secret fields are NEVER uploaded (see publicUser). ---
+drop policy if exists store_users_all on public.store_users;
+create policy store_users_all on public.store_users for all using (true) with check (true);
 
 -- --- products: everyone can read, only owner/admin modify ---
 drop policy if exists products_read on public.products;

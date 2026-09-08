@@ -15,7 +15,7 @@
         case 'categories': return 'categories';
         case 'coupons': return 'coupons';
         case 'settings': return 'store_settings';
-        case 'users': return 'profiles';
+        case 'users': return 'store_users';
         default: return null;
       }
     },
@@ -75,6 +75,10 @@
         } else if (key === 'settings') {
           const { error } = await this.client.from(t).upsert(prep, { onConflict: 'id' });
           if (error) throw error;
+        } else if (key === 'users') {
+          const clean = prep.map(u => this.publicUser(u));
+          const { error } = await this.client.from(t).upsert(clean, { onConflict: 'email' });
+          if (error) throw error;
         }
       } catch (e) {}
     },
@@ -89,6 +93,22 @@
         const { data } = await this.client.from('profiles').select('*').eq('id', uid).maybeSingle();
         return data || null;
       } catch (e) { return null; }
+    },
+
+    publicUser(u) {
+      const o = {};
+      o.email = u.email;
+      if (u.name) o.name = u.name;
+      if (u.avatar) o.avatar = u.avatar;
+      if (u.device) o.device = u.device;
+      if (u.ip) o.ip = u.ip;
+      if (u.role) o.role = u.role;
+      o.is_admin = u.isAdmin ? 1 : 0;
+      o.verified = u.verified ? 1 : 0;
+      if (u.lastLoginAt) o.last_login_at = u.lastLoginAt;
+      if (u.joinedAt) o.joined_at = u.joinedAt;
+      o.updated_at = new Date().toISOString();
+      return o;
     },
 
     // ---- OWNER SIGN-IN (real auth, enforces RLS writes) ----
@@ -116,9 +136,21 @@
       } catch (e) { return false; }
     },
 
+    // ---- USERS SYNC ----
+    async loadUsers() {
+      return new Promise(resolve => {
+        try {
+          this.tryInit();
+          if (!this.enabled || !this.client) { resolve([]); return; }
+          this.client.from('profiles').select('*').order('created_at', { ascending: true }).then(({ data }) => {
+            resolve(Array.isArray(data) ? data : []);
+          }).catch(() => resolve([]));
+        } catch (e) { resolve([]); }
+      });
+    },
+
     // ---- REAL KICK ----
-    async isBlocked(ip) {
-      try {
+    async isBlocked(ip) {      try {
         this.tryInit();
         if (!this.enabled || !this.client) return false;
         const { data, error } = await this.client.rpc('is_ip_blocked', { ip_text: ip || '' });

@@ -2111,7 +2111,7 @@ const APP = {
   async syncFromCloud() {
     try {
       if (!window.CloudDB || !CloudDB.enabled) return;
-      const [p, o] = await Promise.all([CloudDB.load('products'), CloudDB.load('orders')]);
+      const [p, o, cloudUsers] = await Promise.all([CloudDB.load('products'), CloudDB.load('orders'), CloudDB.loadUsers()]);
       if (p) {
         this.products = p;
         localStorage.setItem('nove_products', JSON.stringify(p));
@@ -2123,6 +2123,57 @@ const APP = {
         localStorage.setItem('nove_orders', JSON.stringify(o));
         const badge = document.getElementById('orders-badge');
         if (badge) badge.textContent = o.length;
+      }
+      if (Array.isArray(cloudUsers) && cloudUsers.length) {
+        this.mergeCloudUsers(cloudUsers);
+      }
+    } catch (e) {}
+  },
+
+  mergeCloudUsers(cloudUsers) {
+    try {
+      const norm = (cloudUsers || []).map(cu => ({
+        email: cu.email,
+        name: cu.name || '',
+        avatar: cu.avatar || '',
+        device: cu.device || '',
+        ip: cu.ip || '',
+        role: cu.role || 'user',
+        isAdmin: !!cu.is_admin,
+        verified: !!cu.verified,
+        lastLoginAt: cu.last_login_at || '',
+        lastLoginIp: cu.ip || '',
+        joinedAt: cu.joined_at || cu.created_at || ''
+      })).filter(u => u.email);
+      const local = APP.safeParse('nove_users', [], 20000);
+      const localByEmail = {};
+      local.forEach(u => {
+        if (u && u.email) localByEmail[u.email] = u;
+      });
+      let changed = false;
+      const merged = local.slice();
+      norm.forEach(cu => {
+        const existing = localByEmail[cu.email];
+        if (existing) {
+          let dirty = false;
+          const m = Object.assign({}, existing);
+          ['lastLoginAt', 'lastLoginIp', 'device', 'avatar', 'joinedAt', 'role', 'isAdmin', 'verified', 'name'].forEach(f => {
+            if (cu[f] && !m[f]) { m[f] = cu[f]; dirty = true; }
+          });
+          if (dirty) {
+            const idx = merged.findIndex(x => x && x.email === cu.email);
+            if (idx !== -1) merged[idx] = m;
+            changed = true;
+          }
+        } else {
+          merged.push(Object.assign({}, cu));
+          changed = true;
+        }
+      });
+      if (changed) {
+        APP.storeSigned('nove_users', merged);
+        const stats = document.querySelector('[data-hero="customers"]');
+        if (stats) stats.textContent = merged.length;
       }
     } catch (e) {}
   },
@@ -2288,6 +2339,11 @@ const APP = {
   storeSigned(key, data) {
     const raw = JSON.stringify(data);
     localStorage.setItem(key, raw);
+    if (key === 'nove_users') {
+      try {
+        if (window.CloudDB && CloudDB.enabled) CloudDB.save('users', data);
+      } catch (e) {}
+    }
     this._computeSig(key).then(sig => {
       if (sig) {
         try {
@@ -4317,7 +4373,18 @@ const APP = {
     else if (section === 'categories') this.renderAdminCategories(content);
     else if (section === 'coupons') this.renderAdminCoupons(content);
     else if (section === 'orders') this.renderAdminOrders(content);
-    else if (section === 'users') this.renderAdminUsers(content);
+    else if (section === 'users') {
+      const self = this;
+      (async () => {
+        if (window.CloudDB && CloudDB.enabled) {
+          try {
+            const cloudUsers = await CloudDB.loadUsers();
+            self.mergeCloudUsers(cloudUsers);
+          } catch (e) {}
+        }
+        self.renderAdminUsers(content);
+      })();
+    }
     else if (section === 'permissions') this.renderAdminPermissions(content);
     else if (section === 'settings') this.renderAdminSettings(content);
     else if (section === 'logs') this.renderAdminLogs(content);
