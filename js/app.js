@@ -2122,7 +2122,22 @@ const APP = {
   async syncFromCloud() {
     try {
       if (!window.CloudDB || !CloudDB.enabled) return;
-      const [p, o, cloudUsers] = await Promise.all([CloudDB.load('products'), CloudDB.load('orders'), CloudDB.loadUsers()]);
+      const [p, o, cloudUsers, cloudCategories] = await Promise.all([CloudDB.load('products'), CloudDB.load('orders'), CloudDB.loadUsers(), CloudDB.load('categories')]);
+      if (Array.isArray(cloudCategories)) {
+        if (cloudCategories.length) {
+          const seenC = {};
+          const cUniq = [];
+          cloudCategories.forEach(c => {
+            if (!c || !c.value) return;
+            if (seenC[c.value]) return;
+            seenC[c.value] = true;
+            cUniq.push({ key: c.value, name: c.label || c.value, color: c.color || '#22d3ee', icon: c.icon || '\u{1F4C1}' });
+          });
+          this.categories = cUniq;
+          localStorage.setItem('nove_categories', JSON.stringify(cUniq));
+        }
+        this.syncStoreFilters();
+      }
       if (p) {
         const seen = {};
         const uniq = [];
@@ -2250,6 +2265,13 @@ const APP = {
   saveCategories() {
     localStorage.setItem('nove_categories', JSON.stringify(this.categories));
     this.categories = this.categories || [];
+    const push = (this.categories || []).map(c => ({
+      value: (c.key || c.value || '').toString(),
+      label: c.name || c.label || c.value || '',
+      color: c.color || '#22d3ee',
+      icon: c.icon || '\u{1F4C1}'
+    })).filter(c => c.value);
+    if (window.CloudDB && CloudDB.enabled && push.length) CloudDB.save('categories', push);
   },
 
   getCategories() {
@@ -4387,6 +4409,7 @@ const APP = {
     }
     this.saveCategories();
     this.saveProducts();
+    if (window.CloudDB && CloudDB.enabled) CloudDB.remove('categories', 'value', key);
     this.logActivity('category_delete', 'Category deleted', key);
     this.showToast(this.t('deleted_cat_toast'), 'success');
     this.showAdminSection('categories');

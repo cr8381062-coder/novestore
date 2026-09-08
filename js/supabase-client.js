@@ -115,6 +115,16 @@
       return o;
     },
 
+    async remove(key, column, value) {
+      try {
+        this.tryInit();
+        if (!this.enabled || !this.client) return;
+        const t = this.tableName(key);
+        if (!t || !column || value === undefined || value === null) return;
+        await this.client.from(t).delete().eq(column, value);
+      } catch (e) {}
+    },
+
     // ---- OWNER SIGN-IN (real auth, enforces RLS writes) ----
     async signIn(email, password) {
       try {
