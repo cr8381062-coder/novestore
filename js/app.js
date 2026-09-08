@@ -3354,12 +3354,61 @@ const APP = {
     if (!text) return;
     if (input) input.value = '';
     this.aiAddMsg('user', this.esc(text).replace(/\n/g, '<br>'));
-    this.aiRespond(text);
+    this.aiRespond(text, true);
   },
 
   aiQuick(key) {
-    this.aiAddMsg('user', this.t(key));
-    this.aiRespond(this.t(key));
+    const label = this.t(key);
+    this.aiAddMsg('user', label);
+    this.aiRespond(label, false);
+  },
+
+  async aiRespond(text, useGemini) {
+    const typing = this.aiAddMsg('bot', '', true);
+    let answer = null;
+    if (useGemini) {
+      try {
+        answer = await this.aiGemini(text);
+      } catch (e) {
+        answer = null;
+      }
+      if (!answer) answer = this.aiAnswer(text);
+    } else {
+      answer = this.aiAnswer(text);
+      await new Promise(r => setTimeout(r, 450));
+    }
+    if (typing && typing.parentNode) typing.remove();
+    this.aiAddMsg('bot', answer);
+  },
+
+  async aiGemini(message) {
+    const cfg = (typeof NOVE_BACKEND !== 'undefined') ? NOVE_BACKEND : null;
+    if (!cfg || !cfg.url || !cfg.anonKey) throw new Error('no backend');
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 15000);
+    try {
+      const products = (this.products || [])
+        .filter(p => p.status === 'active')
+        .map(p => ({ name: p.name, price: p.price, category: p.category || '' }))
+        .slice(0, 50);
+      const res = await fetch(cfg.url + '/functions/v1/gemini', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          apikey: cfg.anonKey,
+          Authorization: 'Bearer ' + cfg.anonKey
+        },
+        body: JSON.stringify({ message: String(message).slice(0, 500), lang: this.lang, products: products }),
+        signal: ctl.signal
+      });
+      if (res.status === 429) throw new Error('rate_limited');
+      if (!res.ok) throw new Error('http ' + res.status);
+      const data = await res.json();
+      if (!data || !data.text) throw new Error('no answer');
+      return String(data.text);
+    } finally {
+      clearTimeout(timer);
+    }
   },
 
   aiAddMsg(role, html, typing) {
@@ -3376,14 +3425,6 @@ const APP = {
     box.appendChild(div);
     box.scrollTop = box.scrollHeight;
     return div;
-  },
-
-  async aiRespond(text) {
-    const answer = this.aiAnswer(text);
-    const typing = this.aiAddMsg('bot', '', true);
-    await new Promise(r => setTimeout(r, 450 + Math.random() * 550));
-    if (typing && typing.parentNode) typing.remove();
-    this.aiAddMsg('bot', answer);
   },
 
   aiAnswer(raw) {
