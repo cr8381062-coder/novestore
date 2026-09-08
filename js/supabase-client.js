@@ -142,7 +142,7 @@
         try {
           this.tryInit();
           if (!this.enabled || !this.client) { resolve([]); return; }
-          this.client.from('profiles').select('*').order('created_at', { ascending: true }).then(({ data }) => {
+          this.client.from(this.tableName('users')).select('*').order('created_at', { ascending: true }).then(({ data }) => {
             resolve(Array.isArray(data) ? data : []);
           }).catch(() => resolve([]));
         } catch (e) { resolve([]); }

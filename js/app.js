@@ -1057,6 +1057,15 @@ const APP = {
     this.renderSocialIcons();
     this.updateHeroStats();
     if (window.CloudDB && CloudDB.enabled) this.autoCloudConnect();
+    if (window.CloudDB && CloudDB.enabled) setTimeout(() => this.backgroundUserSync(), 1500);
+  },
+
+  async backgroundUserSync() {
+    try {
+      await this.pushLocalUsers();
+      const cloudUsers = await CloudDB.loadUsers();
+      this.mergeCloudUsers(cloudUsers);
+    } catch (e) {}
   },
 
   async autoCloudConnect() {
