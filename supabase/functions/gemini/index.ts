@@ -9,8 +9,34 @@ const MODELS = GEMINI_KEY.startsWith("AIza")
   : ["gemini-flash-latest", "gemini-pro-latest", "gemma-4-26b-a4b-it"];
 
 const IP_WINDOW_MS = 60_000;
-const IP_LIMIT = 30;
+const IP_LIMIT = 60;
 const hits = new Map<string, number[]>();
+
+const CACHE_TTL_MS = 10 * 60 * 1000;
+const CACHE_MAX = 300;
+const CACHE = new Map<string, { t: number; text: string }>();
+
+function cachedGet(key: string): string | null {
+  const hit = CACHE.get(key);
+  if (hit && Date.now() - hit.t < CACHE_TTL_MS) return hit.text;
+  if (hit) CACHE.delete(key);
+  return null;
+}
+
+function cachedSet(key: string, text: string) {
+  if (CACHE.size >= CACHE_MAX) {
+    let oldestKey = "";
+    let oldestT = Infinity;
+    CACHE.forEach((v, k) => {
+      if (v.t < oldestT) {
+        oldestT = v.t;
+        oldestKey = k;
+      }
+    });
+    if (oldestKey) CACHE.delete(oldestKey);
+  }
+  CACHE.set(key, { t: Date.now(), text });
+}
 
 const cors = {
   "Access-Control-Allow-Origin": "*",
@@ -64,6 +90,10 @@ serve(async (req) => {
     return json(400, { error: "empty_message" });
   }
 
+  const cacheKey = lang + ":" + message;
+  const cached = cachedGet(cacheKey);
+  if (cached) return json(200, { text: cached });
+
   const catalog = products.length
     ? products
         .map((p: any) => `- ${p.name} ($${p.price})` + (p.category ? ` [${p.category}]` : ""))
@@ -99,7 +129,7 @@ Rules:
           }
         : { temperature: 0.6, maxOutputTokens: 1100 },
     };
-    const attempts = model === MODELS[0] ? 3 : 1;
+    const attempts = 1;
     for (let a = 0; a < attempts; a++) {
       let upstream: Response;
       try {
@@ -109,7 +139,7 @@ Rules:
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
-            signal: AbortSignal.timeout(25000),
+            signal: AbortSignal.timeout(13000),
           }
         );
       } catch (e) {
@@ -135,7 +165,10 @@ Rules:
       const text = isGemma
         ? extractAnswer(raw)
         : raw.replace(/\n+/g, "<br>").slice(0, 1200);
-      if (text) return json(200, { text });
+      if (text) {
+        cachedSet(cacheKey, text);
+        return json(200, { text });
+      }
       lastErr = "empty candidate";
     }
   }
