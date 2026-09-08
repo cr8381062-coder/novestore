@@ -98,6 +98,8 @@ const APP = {
       your_cart: 'سلة المشتريات',
       cart_selected: 'المنتجات المختارة',
       cart_empty: 'سلتك فارغة',
+      empty_cart: 'تفريغ السلة',
+      empty_cart_confirm: 'هل تريد تفريغ السلة بالكامل؟',
       total: 'الإجمالي',
       pay_paypal: 'ادفع عبر باي بال',
       remove: 'حذف',
@@ -578,6 +580,8 @@ const APP = {
       your_cart: 'Your Cart',
       cart_selected: 'Your selected products',
       cart_empty: 'Your cart is empty',
+      empty_cart: 'Empty cart',
+      empty_cart_confirm: 'Clear the entire cart?',
       total: 'Total',
       pay_paypal: 'Pay with PayPal',
       remove: 'Remove',
@@ -2108,7 +2112,8 @@ const APP = {
 
   // ===== DATA =====
   loadData() {
-    this.products = APP.safeParse('nove_products', this.getDefaultProducts(), 5000);
+    const cloudActive = !!(window.CloudDB && CloudDB.enabled);
+    this.products = APP.safeParse('nove_products', cloudActive ? [] : this.getDefaultProducts(), 5000);
     this.cart = APP.safeParse('nove_cart', [], 2000);
     this.orders = APP.safeParse('nove_orders', [], 20000);
     if (!localStorage.getItem('nove_products')) {
@@ -2122,8 +2127,16 @@ const APP = {
       if (!window.CloudDB || !CloudDB.enabled) return;
       const [p, o, cloudUsers] = await Promise.all([CloudDB.load('products'), CloudDB.load('orders'), CloudDB.loadUsers()]);
       if (p) {
-        this.products = p;
-        localStorage.setItem('nove_products', JSON.stringify(p));
+        const seen = {};
+        const uniq = [];
+        (Array.isArray(p) ? p : []).forEach(pr => {
+          if (!pr || pr.id === undefined || pr.id === null) return;
+          if (seen[pr.id]) return;
+          seen[pr.id] = true;
+          uniq.push(pr);
+        });
+        this.products = uniq;
+        localStorage.setItem('nove_products', JSON.stringify(uniq));
         const grid = document.getElementById('products-grid');
         if (grid && this.renderProducts) this.renderProducts();
       }
@@ -3376,7 +3389,7 @@ const APP = {
   },
 
   getCartTotal() {
-    return this.cart.reduce((sum, item) => sum + item.price, 0);
+    return this.cart.reduce((sum, item) => sum + (Number(item.price) || 0), 0);
   },
 
   updateCartBadge() {
@@ -3767,7 +3780,7 @@ const APP = {
   },
 
   showProduct(id) {
-    const product = this.products.find(p => p.id === id);
+    const product = this.products.find(p => p.id === id && p.status !== '__deleted__');
     if (!product) return;
     const overlay = document.getElementById('product-modal');
     const body = overlay.querySelector('.modal-body');
@@ -3808,6 +3821,11 @@ const APP = {
   renderCart() {
     const container = document.getElementById('cart-modal');
     if (!container) return;
+    this.cart = this.cart.filter(c => {
+      const p = this.products.find(x => x.id === c.id);
+      return p && p.status === 'active';
+    });
+    if (this.cart.length !== JSON.parse(localStorage.getItem('nove_cart') || '[]').length) this.saveCart();
     const body = container.querySelector('.modal-body');
     let html = `<h2>${this.t('your_cart')}</h2><p>${this.t('cart_selected')}</p>`;
 
@@ -3821,14 +3839,15 @@ const APP = {
     } else {
       html += '<div class="cart-items">';
       this.cart.forEach(item => {
+        const itemName = item.name || ('#' + item.id);
         html += `
           <div class="cart-item">
-            <div class="cart-item-icon">${this.esc(item.icon)}</div>
+            <div class="cart-item-icon">${this.esc(item.icon ? item.icon : '\ud83d\udce6')}</div>
             <div class="cart-item-details">
-              <h4>${this.esc(item.name)}</h4>
+              <h4>${this.esc(itemName)}</h4>
               <p>${this.esc(this.resolveCategoryLabel(item.category))}</p>
             </div>
-            <div class="cart-item-price">$${item.price.toFixed(2)}</div>
+            <div class="cart-item-price">$${(Number(item.price) || 0).toFixed(2)}</div>
             <button class="cart-item-remove" onclick="APP.removeFromCart(${item.id})">\u2715</button>
           </div>
         `;
@@ -3840,6 +3859,7 @@ const APP = {
             <span>${this.t('total')}</span>
             <strong>$${this.getCartTotal().toFixed(2)}</strong>
           </div>
+          <button class="btn-admin btn-admin-ghost" style="width:100%; margin-bottom:0.8rem;" onclick="APP.clearCart()">\ud83d\uddd1\uFE0F ${this.t('empty_cart')}</button>
           <div id="paypal-button-container"></div>
           <button class="btn-primary" style="width:100%; margin-top:0.8rem;" onclick="APP.checkoutPayPal()">
             ${this.t('pay_paypal')} - $${this.getCartTotal().toFixed(2)}
@@ -3849,6 +3869,15 @@ const APP = {
     }
     body.innerHTML = html;
     this.initPayPal();
+  },
+
+  clearCart() {
+    if (this.cart.length === 0) return;
+    if (!confirm(this.t('empty_cart_confirm'))) return;
+    this.cart = [];
+    this.saveCart();
+    this.renderCart();
+    this.updateAddToCartButtons();
   },
 
   openCart() {
@@ -4464,7 +4493,7 @@ const APP = {
             </tr>
           </thead>
           <tbody>
-            ${this.products.map(p => `
+            ${this.products.filter(p => p.status !== '__deleted__').map(p => `
               <tr>
                 <td>
                   <div class="cell-product">
@@ -4646,8 +4675,10 @@ const APP = {
     if (!confirm(this.t('delete_confirm'))) return;
     const victim = this.products.find(p => p.id === id);
     const victimName = victim ? victim.name : '';
-    this.products = this.products.filter(p => p.id !== id);
-    this.saveProducts();
+    if (victim) {
+      victim.status = '__deleted__';
+      this.saveProducts();
+    }
     this.logActivity('product_delete', 'Product deleted', (victimName || 'ID ' + id) + ' by ' + (this.currentUser ? (this.currentUser.name || '') + ' <' + this.currentUser.email + '>' : 'guest'));
     this.showToast(this.t('deleted_toast'), 'success');
     this.showAdminSection('products');

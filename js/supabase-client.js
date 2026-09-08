@@ -33,6 +33,7 @@
 
     async load(key) {
       return new Promise(async resolve => {
+        let reachedCloud = false;
         try {
           this.tryInit();
           if (!this.enabled || !this.client) { resolve(null); return; }
@@ -42,8 +43,11 @@
           if (key === 'products') q = q.neq('status', '__deleted__');
           const { data, error } = await q.order('created_at', { ascending: true });
           if (error) throw error;
-          resolve(data && data.length ? data : null);
-        } catch (e) { resolve(null); }
+          reachedCloud = true;
+          resolve(Array.isArray(data) ? data.filter(d => d && d.id !== undefined && d.id !== null) : []);
+        } catch (e) {
+          resolve(reachedCloud ? [] : null);
+        }
       });
     },
 

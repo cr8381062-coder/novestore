@@ -1492,9 +1492,21 @@ body::before {
 }
 
 .cart-summary > .cart-total,
+.cart-summary > .btn-admin,
 .cart-summary > #paypal-button-container,
 .cart-summary > .btn-primary {
   width: min(100%, 320px);
+}
+
+.cart-summary .btn-admin {
+  color: var(--gray-300);
+  border-color: var(--border);
+  background: rgba(255,255,255,0.04);
+}
+.cart-summary .btn-admin:hover {
+  border-color: var(--red, #ff5f57);
+  color: var(--red, #ff5f57);
+  background: rgba(255,95,87,0.08);
 }
 
 .cart-total {
