@@ -3,7 +3,10 @@
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
 const GEMINI_KEY = Deno.env.get("GEMINI_API_KEY") || "";
-const MODEL = "gemma-4-26b-a4b-it";
+// Try the best models the key allows, in priority order.
+const MODELS = GEMINI_KEY.startsWith("AIza")
+  ? ["gemini-2.5-flash", "gemma-4-26b-a4b-it"]
+  : ["gemini-flash-latest", "gemini-pro-latest", "gemma-4-26b-a4b-it"];
 
 const IP_WINDOW_MS = 60_000;
 const IP_LIMIT = 30;
@@ -67,62 +70,101 @@ serve(async (req) => {
         .join("\n")
     : "- (no products loaded)";
 
-  const system = `You are "NOVE AI", the smart assistant of NOVE STOR, a digital products store selling FiveM scripts, Discord bots and gaming resources.
+  const systemBase = `You are "NOVE AI", the smart assistant of NOVE STOR, a digital products store selling FiveM scripts, Discord bots and gaming resources.
 Available products right now:
 ${catalog}
 Rules:
 - If the customer greets (السلام عليكم, وعليكم السلام, سلام, مرحبا, هلا, hello, hi), ALWAYS start your answer by returning the greeting: for "السلام عليكم"/"سلام" reply "وعليكم السلام ورحمة الله وبركاته", for others reply "أهلاً وسهلاً"/"Hello". Then briefly offer help.
 - Answer ONLY in ${lang === "en" ? "English" : "Arabic"} unless the customer writes in another language.
 - Keep the answer short (1-4 lines), friendly, with no markdown, no emojis, no analysis or reasoning.
-- Reply ONLY with a JSON object like: {"answer":"your answer here"} and nothing else.
 - Payment: PayPal only and secure. Delivery: instant after payment. Support and installation help: discord.gg/nove.
 - If you don't know, politely point to discord.gg/nove.`;
 
-  const payload = {
-    systemInstruction: { parts: [{ text: system }] },
-    contents: [{ role: "user", parts: [{ text: message }] }],
-    generationConfig: {
-      temperature: 0.6,
-      maxOutputTokens: 220,
-      responseMimeType: "application/json",
-      responseSchema: { type: "OBJECT", properties: { answer: { type: "STRING" } } },
-    },
-  };
-
-  try {
-    const upstream = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${GEMINI_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      }
-    );
-    if (!upstream.ok) {
-      const err = await upstream.text();
-      console.error("gemini upstream error", upstream.status, err.slice(0, 300));
-      return json(502, { error: "upstream_error" });
-    }
-    const data = await upstream.json();
-    const raw = (data?.candidates?.[0]?.content?.parts || [])
-      .map((p: any) => String(p.text || ""))
-      .join("")
-      .trim();
-    let text = raw;
-    if (raw) {
+  let lastErr = "";
+  const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+  for (const model of MODELS) {
+    const isGemma = model.startsWith("gemma");
+    const system = isGemma
+      ? systemBase + `\n- Output ONLY a JSON object with the single field "answer" containing your final response. Do not print any other text.`
+      : systemBase;
+    const payload = {
+      systemInstruction: { parts: [{ text: system }] },
+      contents: [{ role: "user", parts: [{ text: message }] }],
+      generationConfig: isGemma
+        ? {
+            temperature: 0.6,
+            maxOutputTokens: 350,
+            responseMimeType: "application/json",
+            responseSchema: { type: "OBJECT", properties: { answer: { type: "STRING" } } },
+          }
+        : { temperature: 0.6, maxOutputTokens: 1100 },
+    };
+    const attempts = model === MODELS[0] ? 3 : 1;
+    for (let a = 0; a < attempts; a++) {
+      let upstream: Response;
       try {
-        const parsed = JSON.parse(raw);
-        if (parsed && typeof parsed.answer === "string" && parsed.answer.trim()) {
-          text = parsed.answer.trim();
-        }
-      } catch {
-        /* keep raw */
+        upstream = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${GEMINI_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+            signal: AbortSignal.timeout(25000),
+          }
+        );
+      } catch (e) {
+        lastErr = "fetch " + String((e as any).name || e);
+        await sleep(1500);
+        continue;
       }
+      if (upstream.status === 429 || upstream.status === 503) {
+        lastErr = "busy " + upstream.status;
+        await sleep(1500);
+        continue;
+      }
+      if (!upstream.ok) {
+        const err = await upstream.text();
+        lastErr = upstream.status + " " + err.slice(0, 200);
+        continue;
+      }
+      const data = await upstream.json();
+      const raw = (data?.candidates?.[0]?.content?.parts || [])
+        .map((p: any) => String(p.text || ""))
+        .join("")
+        .trim();
+      const text = isGemma
+        ? extractAnswer(raw)
+        : raw.replace(/\n+/g, "<br>").slice(0, 1200);
+      if (text) return json(200, { text });
+      lastErr = "empty candidate";
     }
-    if (!text) return json(502, { error: "empty_upstream" });
-    return json(200, { text });
-  } catch (e) {
-    console.error("gemini fetch failed", String(e));
-    return json(502, { error: "upstream_error" });
   }
+  console.error("gemini all models failed", lastErr);
+  return json(502, { error: "upstream_error" });
 });
+
+function extractAnswer(raw: string): string {
+  const t = String(raw || "").trim();
+  if (!t) return "";
+  try {
+    const parsed = JSON.parse(t);
+    if (parsed && typeof parsed.answer === "string" && parsed.answer.trim()) {
+      return parsed.answer.trim();
+    }
+  } catch {
+    /* try slice below */
+  }
+  const start = t.indexOf("{");
+  const end = t.lastIndexOf("}");
+  if (start !== -1 && end > start) {
+    try {
+      const parsed = JSON.parse(t.slice(start, end + 1));
+      if (parsed && typeof parsed.answer === "string" && parsed.answer.trim()) {
+        return parsed.answer.trim();
+      }
+    } catch {
+      /* use raw below */
+    }
+  }
+  return t.slice(0, 600);
+}
