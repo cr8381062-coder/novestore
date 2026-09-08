@@ -2116,9 +2116,6 @@ const APP = {
     this.products = APP.safeParse('nove_products', cloudActive ? [] : this.getDefaultProducts(), 5000);
     this.cart = APP.safeParse('nove_cart', [], 2000);
     this.orders = APP.safeParse('nove_orders', [], 20000);
-    if (!localStorage.getItem('nove_products')) {
-      this.saveProducts();
-    }
     this.syncFromCloud();
   },
 
