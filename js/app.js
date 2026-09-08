@@ -2178,6 +2178,21 @@ const APP = {
     } catch (e) {}
   },
 
+  async pushLocalUsers() {
+    try {
+      if (!window.CloudDB || !CloudDB.enabled) return;
+      const local = APP.safeParse('nove_users', [], 20000);
+      if (!Array.isArray(local) || !local.length) return;
+      const cloudUsers = await CloudDB.loadUsers() || [];
+      const cloudEmails = {};
+      cloudUsers.forEach(cu => { if (cu && cu.email) cloudEmails[cu.email] = true; });
+      const toPush = local.filter(u => u && u.email && !cloudEmails[u.email]);
+      if (toPush.length) {
+        await CloudDB.save('users', toPush);
+      }
+    } catch (e) {}
+  },
+
   saveProducts() {
     localStorage.setItem('nove_products', JSON.stringify(this.products));
     if (window.CloudDB && CloudDB.enabled) CloudDB.save('products', this.products);
@@ -3045,6 +3060,7 @@ const APP = {
     user.device = user.device || (mon.os + ' / ' + mon.browser + ' / ' + (mon.screen||'') + ' / ' + (mon.lang||''));
     APP.storeSigned('nove_users', users);
     this.logActivity('login', 'Login successful', email + ' ip:' + (ip_ || '?'));
+    if (window.CloudDB && CloudDB.enabled) this.pushLocalUsers();
 
     this.currentUser = { ...user };
     delete this.currentUser.password;
@@ -4378,6 +4394,7 @@ const APP = {
       (async () => {
         if (window.CloudDB && CloudDB.enabled) {
           try {
+            await self.pushLocalUsers();
             const cloudUsers = await CloudDB.loadUsers();
             self.mergeCloudUsers(cloudUsers);
           } catch (e) {}
