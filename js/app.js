@@ -41,6 +41,17 @@ const APP = {
       nav_products: 'المنتجات',
       nav_features: 'المميزات',
       nav_about: 'من نحن',
+      nav_ai: 'AI',
+      ai_title: 'مساعد المتجر الذكي',
+      ai_desc: 'اسأل مساعدنا الذكي عن المنتجات، الأسعار، الدفع، التسليم والدعم الفني',
+      ai_placeholder: 'اكتب سؤالك هنا...',
+      ai_hello: 'مرحباً 👋 أنا مساعد <b>NOVE STOR</b> الذكي.<br><br>اسألني عن المنتجات والأسعار، طرق الدفع، التسليم والتركيب، أو الدعم الفني. اختر سؤالاً سريعاً بالأسفل أو اكتب سؤالك بنفسك.',
+      ai_quick_products: '🛒 المنتجات والأسعار',
+      ai_quick_buy: '🛍️ كيف أشتري؟',
+      ai_quick_pay: '💳 طرق الدفع',
+      ai_quick_ship: '📦 التسليم والتركيب',
+      ai_quick_support: '🎧 الدعم الفني',
+      ai_quick_discord: '💬 سيرفر الديسكورد',
       sign_in: 'تسجيل الدخول',
       sign_out: 'تسجيل الخروج',
       admin_panel: 'لوحة التحكم',
@@ -510,6 +521,17 @@ const APP = {
       nav_products: 'Products',
       nav_features: 'Features',
       nav_about: 'About',
+      nav_ai: 'AI',
+      ai_title: 'Smart Store Assistant',
+      ai_desc: 'Ask our smart assistant about products, prices, payment, delivery and support',
+      ai_placeholder: 'Type your question here...',
+      ai_hello: 'Hello 👋 I am the <b>NOVE STOR</b> smart assistant.<br><br>Ask me about products and prices, payment methods, delivery and installation, or support. Pick a quick question below or type your own.',
+      ai_quick_products: '🛒 Products &amp; Prices',
+      ai_quick_buy: '🛍️ How do I buy?',
+      ai_quick_pay: '💳 Payment Methods',
+      ai_quick_ship: '📦 Delivery &amp; Installation',
+      ai_quick_support: '🎧 Support',
+      ai_quick_discord: '💬 Discord Server',
       sign_in: 'Sign In',
       sign_out: 'Sign Out',
       admin_panel: 'Admin Panel',
@@ -3301,6 +3323,193 @@ const APP = {
       this.showProduct(parseInt(sharedId));
     }
     if (page === 'admin') this.renderAdminPage();
+  },
+
+  // ===== AI ASSISTANT =====
+  renderAI() {
+    const box = document.getElementById('ai-messages');
+    const chips = document.getElementById('ai-chips');
+    const input = document.getElementById('ai-input');
+    if (box && !box.children.length) this.aiAddMsg('bot', this.t('ai_hello'));
+    if (chips) {
+      const list = ['ai_quick_products', 'ai_quick_buy', 'ai_quick_pay', 'ai_quick_ship', 'ai_quick_support', 'ai_quick_discord'];
+      chips.innerHTML = list.map(k => `<button class="ai-chip" onclick="APP.aiQuick('${k}')">${this.t(k)}</button>`).join('');
+    }
+    if (input && !input.dataset.ai) {
+      input.dataset.ai = '1';
+      input.placeholder = this.t('ai_placeholder');
+      input.addEventListener('keydown', ev => { if (ev.key === 'Enter') this.aiSend(); });
+    }
+  },
+
+  aiClear() {
+    const box = document.getElementById('ai-messages');
+    if (box) box.innerHTML = '';
+    this.aiAddMsg('bot', this.t('ai_hello'));
+  },
+
+  aiSend() {
+    const input = document.getElementById('ai-input');
+    const text = (input ? input.value : '').trim();
+    if (!text) return;
+    if (input) input.value = '';
+    this.aiAddMsg('user', this.esc(text).replace(/\n/g, '<br>'));
+    this.aiRespond(text);
+  },
+
+  aiQuick(key) {
+    this.aiAddMsg('user', this.t(key));
+    this.aiRespond(this.t(key));
+  },
+
+  aiAddMsg(role, html, typing) {
+    const box = document.getElementById('ai-messages');
+    if (!box) return null;
+    const div = document.createElement('div');
+    div.className = 'ai-msg ' + role;
+    if (typing) {
+      div.classList.add('typing');
+      div.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
+    } else {
+      div.innerHTML = html;
+    }
+    box.appendChild(div);
+    box.scrollTop = box.scrollHeight;
+    return div;
+  },
+
+  async aiRespond(text) {
+    const answer = this.aiAnswer(text);
+    const typing = this.aiAddMsg('bot', '', true);
+    await new Promise(r => setTimeout(r, 450 + Math.random() * 550));
+    if (typing && typing.parentNode) typing.remove();
+    this.aiAddMsg('bot', answer);
+  },
+
+  aiAnswer(raw) {
+    const en = this.lang !== 'ar';
+    const k = en ? 'en' : 'ar';
+    const t = String(raw || '').toLowerCase();
+    const has = (...w) => w.some(x => t.indexOf(x.toLowerCase()) !== -1);
+
+    if (has('مرحبا', 'السلام', ' هلا', 'اهلا', 'هاي', 'صباح', 'مساء', 'اهلين', 'hi', 'hello', 'hey'))
+      return this.aGreet();
+    if (has('ديسكورد', 'discord', 'الانضمام', 'انضم للسيرفر'))
+      return this.aDiscord();
+    if (has('كيف اشتري', 'اشتري', 'اشتر', 'شراء', 'buy', 'purchase', 'السلة'))
+      return this.aBuy();
+    if (has('دفع', 'paypal', 'باي بال', 'بطاقة', 'visa', 'payment'))
+      return this.aPay();
+    if (has('تسليم', 'تركيب', 'تثبيت', 'تنصيب', 'تفعيل', 'شحن', 'delivery', 'install', 'setup'))
+      return this.aDelivery();
+    if (has('كوبون', 'خصم', 'coupon', 'discount', 'تخفيض'))
+      return this.aCoupon();
+    if (has('استرجاع', 'استرداد', 'refund', 'ارجع'))
+      return this.aRefund();
+    if (has('طلب', 'اوردر', 'order', 'طلباتي'))
+      return this.aOrder();
+    if (has('منتجات', 'الاسعار', 'الأسعار', 'prices', 'كل المنتجات'))
+      return this.aProductList(this.products.filter(p => p.status === 'active').slice(0, 6));
+    if (has('دعم', 'مساعدة', 'مشكلة', 'مشكله', 'support', 'help'))
+      return this.aSupport();
+    if (has('من انت', 'من انتم', 'مين انت', 'ما هو المتجر', 'عن المتجر', 'about', 'who are'))
+      return this.aAbout();
+
+    const found = this.products.filter(p => p.status === 'active' && (
+      String(p.name || '').toLowerCase().indexOf(t) !== -1 ||
+      String(p.category || '').toLowerCase().indexOf(t) !== -1 ||
+      String(p.description || '').toLowerCase().indexOf(t) !== -1
+    )).slice(0, 4);
+    if (found.length) return this.aProductList(found);
+
+    return this.aFallback();
+  },
+
+  aiLink() {
+    return '<a href="https://discord.gg/nove" target="_blank" style="color:#8ab4f8;">discord.gg/nove</a>';
+  },
+
+  aGreet() {
+    return this.lang === 'ar'
+      ? 'أهلاً وسهلاً! 👋 كيف أقدر أساعدك اليوم؟ أقدر أعرض لك منتجاتنا، أشرح لك الدفع والتسليم، أو أرشدك للدعم الفني.'
+      : 'Hello! 👋 How can I help you today? I can show our products, explain payment and delivery, or point you to support.';
+  },
+
+  aDiscord() {
+    return this.lang === 'ar'
+      ? 'انضم إلى سيرفرنا على ديسكورد للحصول على الدعم الفني والتحديثات: ' + this.aiLink()
+      : 'Join our Discord server for support, updates and community: ' + this.aiLink();
+  },
+
+  aBuy() {
+    return this.lang === 'ar'
+      ? 'الشراء سهل جداً:<br>1. افتح المنتج واضغط <b>أضف إلى السلة</b>.<br>2. افتح السلة من الأعلى واضغط <b>إتمام الشراء</b>.<br>3. ادفع بأمان عبر PayPal — ويتم التسليم تلقائياً فور الدفع. ✅'
+      : 'Buying is easy:<br>1. Open a product and tap <b>Add to Cart</b>.<br>2. Open the cart (top) and tap <b>Checkout</b>.<br>3. Pay securely with PayPal — delivery is automatic right after payment. ✅';
+  },
+
+  aPay() {
+    return this.lang === 'ar'
+      ? 'نقبل الدفع الآمن عبر <b>PayPal</b> فقط. معلومات الدفع لا تُحفظ أبداً على موقعنا. 🔒'
+      : 'We accept secure payments through <b>PayPal</b> only. Your payment details are never stored on our site. 🔒';
+  },
+
+  aDelivery() {
+    return this.lang === 'ar'
+      ? 'جميع المنتجات تُسلَّم <b>فور الدفع</b> مع دليل تركيب كامل. 📦<br>• سكريبتات FiveM: نزّل الملف، ضعه في مجلد resources، وأضفه إلى server.cfg.<br>• البوتات: أضف البوت إلى سيرفرك واضبط الإعدادات.<br>الفريق الفني يساعدك في التركيب في أي وقت.'
+      : 'All products are delivered <b>instantly after payment</b> with a full installation guide. 📦<br>• FiveM scripts: download the file, place it in the resources folder, and add it to server.cfg.<br>• Bots: invite the bot to your server and configure it.<br>Our support helps you with installation anytime.';
+  },
+
+  aCoupon() {
+    return this.lang === 'ar'
+      ? 'إن كان لديك كود خصم (كوبون)، أدخله أثناء إتمام الشراء ويُطبق الخصم تلقائياً. 🎟️'
+      : 'If you have a discount code (coupon), enter it at checkout and the discount is applied automatically. 🎟️';
+  },
+
+  aRefund() {
+    return this.lang === 'ar'
+      ? 'بما أن المنتجات تُسلَّم رقمياً، نوفر الإصلاح والتحديثات بدلاً من الاسترجاع. إن حدث أي خلل، يقف الدعم الفني لإصلاحه أو استبداله خلال 24 ساعة. 🛠️'
+      : 'Since products are delivered digitally, we offer repairs and updates instead of refunds. If anything breaks, our support fixes or replaces it within 24 hours. 🛠️';
+  },
+
+  aOrder() {
+    return this.lang === 'ar'
+      ? 'تظهر طلباتك في حسابك بعد تسجيل الدخول. لكل طلب رقم مرجعي يمكنك ذكره للدعم الفني إن احتجت مساعدة. 📋'
+      : 'Your orders appear in your account after signing in. Every finished order has a reference number you can mention to support if you need help. 📋';
+  },
+
+  aAbout() {
+    return this.lang === 'ar'
+      ? '<b>NOVE STOR</b> متجر موثوق للمنتجات الرقمية: سكريبتات FiveM، بوتات ديسكورد، وأدوات ألعاب — بجودة عالية ودعم فني وتسليم فوري.'
+      : '<b>NOVE STOR</b> is a trusted marketplace for digital products: FiveM scripts, Discord bots and gaming resources — quality, support and instant delivery.';
+  },
+
+  aSupport() {
+    return this.lang === 'ar'
+      ? 'تحتاج مساعدة؟ افتح تذكرة في سيرفرنا على ديسكورد ' + this.aiLink() + ' واذكر رقم طلبك — نرد بسرعة على مدار الساعة. ⏰'
+      : 'Need help? Open a ticket on our Discord server ' + this.aiLink() + ' and mention your order number — we reply fast, around the clock. ⏰';
+  },
+
+  aFallback() {
+    return this.lang === 'ar'
+      ? 'عذراً، لم أجد إجابة دقيقة لسؤالك. جرّب سؤالاً أوضح، أو تواصل مع فريق الدعم على ديسكورد ' + this.aiLink() + ' وسنساعدك فوراً. 💬'
+      : 'Sorry, I could not find a clear answer for that. Try a clearer question, or contact our team on Discord ' + this.aiLink() + '. 💬';
+  },
+
+  aProductList(list) {
+    if (!list || !list.length) {
+      return this.lang === 'ar'
+        ? 'لا توجد منتجات متاحة حالياً — جدد الصفحة لاحقاً أو راسل الدعم. 🙏'
+        : 'No products available right now — refresh later or contact support. 🙏';
+    }
+    const items = list.map(p => `
+      <button class="ai-prod" onclick="APP.showProduct(${p.id})">
+        <span class="ai-prod-icon">${this.esc(p.icon || '\u{1F4E6}')}</span>
+        <span class="ai-prod-name">${this.esc(p.name)}</span>
+        <span class="ai-prod-price">$${p.price}</span>
+      </button>`).join('');
+    return (this.lang === 'ar'
+      ? 'إليك المنتجات المناسبة من متجرنا (اضغط لعرض المنتج):'
+      : 'Here are matching products from our store (tap to view):') + '<div class="ai-prods">' + items + '</div>';
   },
 
   getPage() {
