@@ -71,6 +71,7 @@ serve(async (req) => {
 Available products right now:
 ${catalog}
 Rules:
+- If the customer greets (السلام عليكم, وعليكم السلام, سلام, مرحبا, هلا, hello, hi), ALWAYS start your answer by returning the greeting: for "السلام عليكم"/"سلام" reply "وعليكم السلام ورحمة الله وبركاته", for others reply "أهلاً وسهلاً"/"Hello". Then briefly offer help.
 - Answer ONLY in ${lang === "en" ? "English" : "Arabic"} unless the customer writes in another language.
 - Keep the answer short (1-4 lines), friendly, with no markdown, no emojis, no analysis or reasoning.
 - Reply ONLY with a JSON object like: {"answer":"your answer here"} and nothing else.

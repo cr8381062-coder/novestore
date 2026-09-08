@@ -3366,7 +3366,8 @@ const APP = {
   async aiRespond(text, useGemini) {
     const typing = this.aiAddMsg('bot', '', true);
     let answer = null;
-    if (useGemini) {
+    const greeted = this.isGreeting(text);
+    if (useGemini && !greeted) {
       try {
         answer = await this.aiGemini(text);
       } catch (e) {
@@ -3433,8 +3434,8 @@ const APP = {
     const t = String(raw || '').toLowerCase();
     const has = (...w) => w.some(x => t.indexOf(x.toLowerCase()) !== -1);
 
-    if (has('مرحبا', 'السلام', ' هلا', 'اهلا', 'هاي', 'صباح', 'مساء', 'اهلين', 'hi', 'hello', 'hey'))
-      return this.aGreet();
+    if (this.isGreeting(t))
+      return this.aGreet(t);
     if (has('ديسكورد', 'discord', 'الانضمام', 'انضم للسيرفر'))
       return this.aDiscord();
     if (has('كيف اشتري', 'اشتري', 'اشتر', 'شراء', 'buy', 'purchase', 'السلة'))
@@ -3470,9 +3471,21 @@ const APP = {
     return '<a href="https://discord.gg/nove" target="_blank" style="color:#8ab4f8;">discord.gg/nove</a>';
   },
 
-  aGreet() {
-    return this.lang === 'ar'
-      ? 'أهلاً وسهلاً! 👋 كيف أقدر أساعدك اليوم؟ أقدر أعرض لك منتجاتنا، أشرح لك الدفع والتسليم، أو أرشدك للدعم الفني.'
+  isGreeting(text) {
+    const t = String(text || '').toLowerCase();
+    return /سلام|مرحبا|اهلا|أهلا|هلا|هاي|اهلين|صباح|مساء|hi|hello|hey/.test(t);
+  },
+
+  aGreet(raw) {
+    const t = String(raw || '').toLowerCase();
+    const islamic = t.indexOf('سلام عليكم') !== -1 || t.indexOf('السلام عليكم') !== -1 || t.indexOf('وعليكم') !== -1;
+    if (this.lang === 'ar') {
+      return islamic
+        ? 'وعليكم السلام ورحمة الله وبركاته 🌸 أهلاً وسهلاً بك في NOVE STOR، كيف أقدر أخدمك اليوم؟'
+        : 'أهلاً وسهلاً! 👋 كيف أقدر أساعدك اليوم؟ أقدر أعرض لك منتجاتنا، أشرح لك الدفع والتسليم، أو أرشدك للدعم الفني.';
+    }
+    return islamic
+      ? 'And peace be upon you too 🌸 Welcome to NOVE STOR! How can I help you today?'
       : 'Hello! 👋 How can I help you today? I can show our products, explain payment and delivery, or point you to support.';
   },
 
