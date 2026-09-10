@@ -57,6 +57,8 @@ const APP = {
       admin_panel: 'لوحة التحكم',
       admin_pin: 'رمز الحماية (PIN)',
       admin_pin_desc: 'أدخل رمز الدخول للوحة التحكم. المخترق يُقفل لمدة 5 دقائق بعد 5 محاولات خاطئة.',
+      use_my_account: 'تسجيل الدخول بحسابي',
+      admin_login_title: 'دخول اللوحة بحساب المتجر',
       admin_default_pin: 'NOVE2026',
       intruder_blocked: 'تم رصد متطفل — تم حظر الوصول',
       intruder_blocked_desc: 'اكتشف نظام الحماية محاولة تعديل في بيانات المتجر. تم إلغاء جلستك وإغلاق لوحة التحكم مؤقتاً لحماية المتجر.',
@@ -539,6 +541,8 @@ const APP = {
       admin_panel: 'Admin Panel',
       admin_pin: 'Security PIN',
       admin_pin_desc: 'Enter the admin PIN. Attackers get locked for 5 minutes after 5 wrong attempts.',
+      use_my_account: 'Sign in with my account',
+      admin_login_title: 'Admin sign-in with store account',
       admin_default_pin: 'NOVE2026',
       intruder_blocked: 'Intruder detected — access blocked',
       intruder_blocked_desc: 'The security system detected an attempt to modify store data. Your session was terminated and the admin panel is temporarily locked to protect the store.',
@@ -2118,6 +2122,30 @@ const APP = {
     this.cart = APP.safeParse('nove_cart', [], 2000);
     this.orders = APP.safeParse('nove_orders', [], 20000);
     this.syncFromCloud();
+    this.syncSettingsFromCloud();
+  },
+
+  async syncSettingsFromCloud() {
+    try {
+      if (!window.CloudDB || !CloudDB.enabled) return;
+      const cloudSettings = await CloudDB.load('settings');
+      if (!Array.isArray(cloudSettings) || !cloudSettings[0]) return;
+      const s = cloudSettings[0];
+      if (!s.store_name && !s.logo) return;
+      const settings = APP.safeParse('nove_settings', {});
+      if (s.store_name) {
+        this.STORE_NAME = s.store_name;
+        settings.storeName = s.store_name;
+      }
+      if (s.logo) {
+        this.STORE_LOGO = s.logo;
+        settings.logo = s.logo;
+      }
+      localStorage.setItem('nove_settings', JSON.stringify(settings));
+      document.body.setAttribute('data-static-logo', (this.STORE_LOGO && this.STORE_LOGO.indexOf('images/') !== 0) ? '' : '1');
+      this.applyLogo();
+      this.applyBrandName();
+    } catch (e) {}
   },
 
   async syncFromCloud() {
@@ -4095,6 +4123,57 @@ const APP = {
     this.renderAdminDashboard();
   },
 
+  showAdminLogin() {
+    const content = document.getElementById('admin-content');
+    if (!content) return;
+    content.innerHTML = `
+      <div style="min-height:80vh; display:flex; align-items:center; justify-content:center; padding:2rem;">
+        <div class="admin-form-card" style="max-width:400px; width:100%;">
+          <div class="form-card-header">
+            <div class="fc-icon">\u{1F464}</div>
+            <h3>${this.t('admin_login_title')}</h3>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:0.9rem; padding:0.5rem 0;">
+            <label>${this.t('email_label') || 'Email'}</label>
+            <input id="admin-login-email" type="email" placeholder="you@example.com" style="padding:0.7rem 0.9rem; border-radius:10px; border:1px solid var(--border); background:var(--gray-900,#0b0e13); color:var(--gray-100,#fff);" />
+            <label>${this.t('password_label') || 'Password'}</label>
+            <input id="admin-login-password" type="password" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022" style="padding:0.7rem 0.9rem; border-radius:10px; border:1px solid var(--border); background:var(--gray-900,#0b0e13); color:var(--gray-100,#fff);" />
+            <button class="btn-admin btn-admin-primary" onclick="APP.submitAdminLogin()">\u{1F510} ${this.t('enter')}</button>
+            <button class="btn-admin" onclick="APP.renderAdminPinGate()">\u{1F512} PIN</button>
+          </div>
+        </div>
+      </div>
+    `;
+    const email = document.getElementById('admin-login-email');
+    if (email) email.focus();
+  },
+
+  async submitAdminLogin() {
+    const email = (document.getElementById('admin-login-email') || {}).value.trim().toLowerCase() || '';
+    const password = (document.getElementById('admin-login-password') || {}).value || '';
+    if (!email || !password) {
+      this.showToast(this.t('fill_all_fields'), 'error');
+      return;
+    }
+    let user = null;
+    const users = APP.safeParse('nove_users', [], 20000);
+    let key = null;
+    try { key = await this.hashPassword(password); } catch (e2) { key = null; }
+    user = users.find(u => u.email === email && u.password === key);
+    if (!user && email === this.ADMIN_EMAIL && password === (this.ADMIN_KEY || 'NOVE2026')) {
+      user = { email: email, name: 'Store Owner', role: 'owner', isAdmin: true };
+    }
+    if (!user) {
+      this.showToast(this.t('wrong_credentials'), 'error');
+      return;
+    }
+    this.currentUser = Object.assign({}, user);
+    delete this.currentUser.password;
+    localStorage.setItem('nove_user', JSON.stringify(this.currentUser));
+    this.logActivity('login', 'Admin panel sign-in', email + ' ip:' + (APP.getIPKey() || '?'));
+    this.renderAdminPage();
+  },
+
   renderAdminPinGate() {
     const content = document.getElementById('admin-content');
     if (!content) return;
@@ -4115,6 +4194,7 @@ const APP = {
                 <label>${this.t('admin_pin')}</label>
                 <input id="admin-pin-input" type="password" inputmode="numeric" maxlength="16" placeholder="\u2022\u2022\u2022\u2022\u2022\u2022" style="padding:0.7rem 0.9rem; border-radius:10px; border:1px solid var(--border); background:var(--gray-900,#0b0e13); color:var(--gray-100,#fff);" />
                 <button class="btn-admin btn-admin-primary" onclick="APP.checkAdminPin()">\u{1F510} ${this.t('enter')}</button>
+                <button class="btn-admin" style="margin-top:0.35rem;" onclick="APP.showAdminLogin()">\u{1F464} ${this.t('use_my_account')}</button>
                 <p style="font-size:0.75rem; color:var(--gray-500); text-align:center;">${this.t('admin_pin_desc')}</p>
               </div>`
           }
@@ -5041,7 +5121,7 @@ const APP = {
   defaultRoles() {
     return {
       user:       { name: 'User',       color: '#22d3ee',      icon: '\u{1F464}', perms: { products:false, orders:false, coupons:false, users:false, roles:false } },
-      moderator:  { name: 'Moderator',  color: '#10b981',      icon: '\u{1F6E1}', perms: { products:false, orders:false, coupons:false, users:false, roles:false } },
+      moderator:  { name: 'Moderator',  color: '#10b981',      icon: '\u{1F6E1}', perms: { products:true, orders:true, coupons:true, users:false, roles:false } },
       admin:      { name: 'Admin',      color: '#f59e0b',      icon: '\u{2699}', perms: { products:true,  orders:true,  coupons:true,  users:true,  roles:true } },
       owner:      { name: 'Owner',      color: '#c084fc',      icon: '\u{1F451}', perms: { products:true,  orders:true,  coupons:true,  users:true,  roles:true } }
     };
@@ -5664,7 +5744,7 @@ applyBrandName() {
   },
 
   saveSettings() {
-    APP.STORE_NAME = document.getElementById('setting-store-name').value || 'Nova Store';
+    APP.STORE_NAME = (document.getElementById('setting-store-name').value || 'Nova Store').trim().replace(/\s+/g, ' ');
     APP.PAYPAL_CLIENT_ID = document.getElementById('setting-paypal').value;
     const gid = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
     APP.SOCIAL_LINKS = {

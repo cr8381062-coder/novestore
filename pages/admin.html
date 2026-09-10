@@ -128,30 +128,7 @@
       const lt = document.getElementById('lang-toggle');
       if (lt) lt.textContent = APP.lang === 'ar' ? 'EN' : 'ع';
       APP.createRainDrops();
-      if (!APP.isAdmin()) {
-        document.getElementById('admin-content').innerHTML = `
-          <div class="access-denied">
-            <div>
-              <h1>&#128683;</h1>
-              <h1>${APP.t('access_denied')}</h1>
-              <p>${APP.t('access_denied_desc')}</p>
-              <a href="../index.html" class="btn-primary">${APP.t('back_to_store')}</a>
-            </div>
-          </div>
-        `;
-        return;
-      }
-      APP.updateAuthUI();
-      if (APP.currentUser && APP.currentUser.avatar) {
-        document.getElementById('owner-avatar').src = APP.currentUser.avatar;
-      } else {
-        document.getElementById('owner-avatar').src = APP.generateAvatar('O');
-      }
-      document.querySelector('.owner-name').textContent = APP.currentUser.name;
-      document.querySelector('.owner-email').textContent = APP.currentUser.email;
-      document.getElementById('orders-badge').textContent = APP.orders.length || 0;
-      APP.applyNavPermissions();
-      APP.showAdminSection('dashboard');
+      APP.renderAdminPage();
     });
   </script>
 </body>

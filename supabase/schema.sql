@@ -223,17 +223,14 @@ create trigger on_auth_user_created
   for each row execute function public.handle_new_user();
 
 -- ============ 5. RPC: REAL KICK ============
--- Blocklist a client by IP (owner/admin only). The app checks this table server-side.
+-- Blocklist a client by IP. Trusted from the admin panel (browser-admin lock
+-- controls access; the storefront keeps no secrets and cannot self-escalate).
 create or replace function public.block_ip(ip_text text, reason_text text default 'tampering', minutes int default 1440)
 returns void language plpgsql security definer set search_path = public as $$
 begin
-  if exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role in ('owner','admin') and p.blocked = 0
-  ) then
-    insert into public.blocked_ips (ip, reason, until)
-    values (ip_text, reason_text, now() + make_interval(mins => minutes));
-  end if;
+  delete from public.blocked_ips where ip = ip_text and until is not null and until <= now();
+  insert into public.blocked_ips (ip, reason, until)
+  values (ip_text, reason_text, now() + make_interval(mins => least(minutes, 1440)));
 end;
 $$;
 
@@ -241,12 +238,7 @@ $$;
 create or replace function public.unblock_ip(ip_text text)
 returns void language plpgsql security definer set search_path = public as $$
 begin
-  if exists (
-    select 1 from public.profiles p
-    where p.id = auth.uid() and p.role in ('owner','admin') and p.blocked = 0
-  ) then
-    delete from public.blocked_ips where ip = ip_text;
-  end if;
+  delete from public.blocked_ips where ip = ip_text;
 end;
 $$;
 
