@@ -2153,10 +2153,19 @@ const APP = {
         if (grid && this.renderProducts) this.renderProducts();
       }
       if (o && Array.isArray(o) && o.length) {
-        this.orders = o;
-        localStorage.setItem('nove_orders', JSON.stringify(o));
+        this.orders = o.map(or => ({
+          id: or.order_ref || ('ORD-' + or.id),
+          userName: or.user_name || or.userName || '',
+          email: or.email || '',
+          items: Array.isArray(or.items) ? or.items : [],
+          total: Number(or.total) || 0,
+          status: or.status || 'completed',
+          date: or.created_at || or.date || new Date().toISOString(),
+          paymentId: or.payment_id || ''
+        }));
+        localStorage.setItem('nove_orders', JSON.stringify(this.orders));
         const badge = document.getElementById('orders-badge');
-        if (badge) badge.textContent = o.length;
+        if (badge) badge.textContent = this.orders.length;
       }
       if (Array.isArray(cloudUsers) && cloudUsers.length) {
         this.mergeCloudUsers(cloudUsers);
