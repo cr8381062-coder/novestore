@@ -1,4 +1,4 @@
-// NOVE STOR - Secure Gemini AI proxy (Edge Function)
+// Nova Store - Secure Gemini AI proxy (Edge Function)
 // GEMINI_API_KEY is stored as a Supabase secret, never exposed to visitors.
 import { serve } from "https://deno.land/std@0.224.0/http/server.ts";
 
@@ -100,7 +100,7 @@ serve(async (req) => {
         .join("\n")
     : "- (no products loaded)";
 
-  const systemBase = `You are "NOVE AI", the smart assistant of NOVE STOR, a digital products store selling FiveM scripts, Discord bots and gaming resources.
+  const systemBase = `You are "NOVE AI", the smart assistant of Nova Store, a digital products store selling FiveM scripts, Discord bots and gaming resources.
 Available products right now:
 ${catalog}
 Rules:

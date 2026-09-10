@@ -1,9 +1,9 @@
-// ===== NOVE STOR - MAIN APPLICATION =====
+// ===== Nova Store - MAIN APPLICATION =====
 
 const APP = {
   ADMIN_EMAIL: 'cr8381062@gmail.com',
   ADMIN_KEY: 'NOVE2026',
-  STORE_NAME: 'NOVE STOR',
+  STORE_NAME: 'Nova Store',
   STORE_LOGO: '',
   PAYPAL_CLIENT_ID: 'AdZijgGKQiP5hkM7nWSUQgVFH4dBS8K5SuClk9n9B1NP6KHUTe84pTcjVWBF7fIe8IZ-XXxhfJ0SegzO',
   SOCIAL_LINKS: {
@@ -45,7 +45,7 @@ const APP = {
       ai_title: 'مساعد المتجر الذكي',
       ai_desc: 'اسأل مساعدنا الذكي عن المنتجات، الأسعار، الدفع، التسليم والدعم الفني',
       ai_placeholder: 'اكتب سؤالك هنا...',
-      ai_hello: 'مرحباً 👋 أنا مساعد <b>NOVE STOR</b> الذكي.<br><br>اسألني عن المنتجات والأسعار، طرق الدفع، التسليم والتركيب، أو الدعم الفني. اختر سؤالاً سريعاً بالأسفل أو اكتب سؤالك بنفسك.',
+      ai_hello: 'مرحباً 👋 أنا مساعد <b>Nova Store</b> الذكي.<br><br>اسألني عن المنتجات والأسعار، طرق الدفع، التسليم والتركيب، أو الدعم الفني. اختر سؤالاً سريعاً بالأسفل أو اكتب سؤالك بنفسك.',
       ai_quick_products: '🛒 المنتجات والأسعار',
       ai_quick_buy: '🛍️ كيف أشتري؟',
       ai_quick_pay: '💳 طرق الدفع',
@@ -77,7 +77,7 @@ const APP = {
       all: 'الكل',
       in_cart: 'في السلة',
       add_to_cart: 'أضف للسلة',
-      why_us: 'لماذا NOVE STOR؟',
+      why_us: 'لماذا Nova Store؟',
       why_us_desc: 'نوفر الجودة والدعم والموثوقية',
       inst_delivery: 'توصيل فوري',
       inst_delivery_desc: 'احصل على منتجاتك فور الدفع بدون انتظار.',
@@ -91,10 +91,10 @@ const APP = {
       easy_setup_desc: 'جميع المنتجات تأتي مع توثيق مفصل وتثبيت سهل.',
       quality_code: 'كود عالي الجودة',
       quality_code_desc: 'كود نظيف ومحسّن يمكنك الوثوق به.',
-      about_title: 'عن NOVE STOR',
-      about_desc: 'NOVE STOR سوق مميز لسكريبتات فايف ام وبوتات الديسكورد والأدوات. نتخصص في توفير منتجات عالية الجودة تساعدك في بناء وإدارة مجتمعاتك.',
+      about_title: 'عن Nova Store',
+      about_desc: 'Nova Store سوق مميز لسكريبتات فايف ام وبوتات الديسكورد والأدوات. نتخصص في توفير منتجات عالية الجودة تساعدك في بناء وإدارة مجتمعاتك.',
       about_desc2: 'مهمتنا تقديم أدوات بمستوى احترافي بأسعار مناسبة ودعم استثنائي. كل منتج مُختبَر وموثّق ومعه تحديثات مجانية.',
-      footer_rights: '© 2026 NOVE STOR. جميع الحقوق محفوظة.',
+      footer_rights: '© 2026 Nova Store. جميع الحقوق محفوظة.',
       your_cart: 'سلة المشتريات',
       cart_selected: 'المنتجات المختارة',
       cart_empty: 'سلتك فارغة',
@@ -103,7 +103,7 @@ const APP = {
       total: 'الإجمالي',
       pay_paypal: 'ادفع عبر باي بال',
       remove: 'حذف',
-      signin_title: 'أهلاً بك في NOVE STOR',
+      signin_title: 'أهلاً بك في Nova Store',
       signin_desc: 'سجل دخولك لتتمكن من الشراء وإدارة طلباتك',
       terms_note: 'بموجب تسجيل الدخول فأنت توافق على شروط الخدمة وسياسة الخصوصية',
       tab_login: 'تسجيل الدخول',
@@ -333,7 +333,7 @@ const APP = {
       recent_orders: 'طلبات حديثة',
       no_orders: 'لا توجد طلبات بعد',
       share: 'مشاركة',
-      share_text: '{name} — متوفر الآن في NOVE STOR',
+      share_text: '{name} — متوفر الآن في Nova Store',
       copy_link: 'نسخ الرابط',
       link_copied: 'تم نسخ الرابط!',
       customer: 'العميل',
@@ -527,7 +527,7 @@ const APP = {
       ai_title: 'Smart Store Assistant',
       ai_desc: 'Ask our smart assistant about products, prices, payment, delivery and support',
       ai_placeholder: 'Type your question here...',
-      ai_hello: 'Hello 👋 I am the <b>NOVE STOR</b> smart assistant.<br><br>Ask me about products and prices, payment methods, delivery and installation, or support. Pick a quick question below or type your own.',
+      ai_hello: 'Hello 👋 I am the <b>Nova Store</b> smart assistant.<br><br>Ask me about products and prices, payment methods, delivery and installation, or support. Pick a quick question below or type your own.',
       ai_quick_products: '🛒 Products &amp; Prices',
       ai_quick_buy: '🛍️ How do I buy?',
       ai_quick_pay: '💳 Payment Methods',
@@ -559,7 +559,7 @@ const APP = {
       all: 'All',
       in_cart: 'In Cart',
       add_to_cart: 'Add to Cart',
-      why_us: 'Why NOVE STOR?',
+      why_us: 'Why Nova Store?',
       why_us_desc: 'We deliver quality, support & reliability',
       inst_delivery: 'Instant Delivery',
       inst_delivery_desc: 'Get products instantly after payment. No waiting.',
@@ -573,10 +573,10 @@ const APP = {
       easy_setup_desc: 'All products come with detailed docs & easy install.',
       quality_code: 'Quality Code',
       quality_code_desc: 'Clean, optimized, well-documented code you can trust.',
-      about_title: 'About NOVE STOR',
-      about_desc: 'NOVE STOR is a premium marketplace for FiveM scripts, Discord bots & gaming resources. We specialize in high-quality products for your gaming communities.',
+      about_title: 'About Nova Store',
+      about_desc: 'Nova Store is a premium marketplace for FiveM scripts, Discord bots & gaming resources. We specialize in high-quality products for your gaming communities.',
       about_desc2: 'Our mission is professional-grade tools at fair prices with exceptional support. Every product is tested, documented & comes with free updates.',
-      footer_rights: '© 2026 NOVE STOR. All rights reserved.',
+      footer_rights: '© 2026 Nova Store. All rights reserved.',
       your_cart: 'Your Cart',
       cart_selected: 'Your selected products',
       cart_empty: 'Your cart is empty',
@@ -585,7 +585,7 @@ const APP = {
       total: 'Total',
       pay_paypal: 'Pay with PayPal',
       remove: 'Remove',
-      signin_title: 'Welcome to NOVE STOR',
+      signin_title: 'Welcome to Nova Store',
       signin_desc: 'Sign in to make purchases and manage your orders',
       terms_note: 'By signing in, you agree to our Terms of Service and Privacy Policy',
       tab_login: 'Login',
@@ -815,7 +815,7 @@ const APP = {
       recent_orders: 'Recent Orders',
       no_orders: 'No orders yet',
       share: 'Share',
-      share_text: '{name} — now available at NOVE STOR',
+      share_text: '{name} — now available at Nova Store',
       copy_link: 'Copy Link',
       link_copied: 'Link copied!',
       customer: 'Customer',
@@ -1329,7 +1329,7 @@ const APP = {
             <span style="width:10px; height:10px; border-radius:50%; background:#ff5f57;"></span>
             <span style="width:10px; height:10px; border-radius:50%; background:#febc2e;"></span>
             <span style="width:10px; height:10px; border-radius:50%; background:#28c840;"></span>
-            <span style="flex:1; font-size:0.72rem; color:var(--gray-400); text-align:center;">NOVE STOR</span>
+            <span style="flex:1; font-size:0.72rem; color:var(--gray-400); text-align:center;">Nova Store</span>
             <button id="cz-pointer-toggle" class="btn-admin btn-admin-ghost cz-toggle-on" style="padding:0.2rem 0.6rem; font-size:0.7rem; border-color:var(--secondary);" onclick="APP.togglePointerMode()">\u{1F5B2}\uFE0F ${this.t('cz_pointer_off')}</button>
             <button class="btn-admin btn-admin-ghost" style="padding:0.2rem 0.6rem; font-size:0.7rem;" onclick="document.getElementById('cz-preview').src = '../index.html'">\u{1F504} ${this.t('cz_refresh')}</button>
           </div>
@@ -2215,9 +2215,13 @@ const APP = {
         if (existing) {
           let dirty = false;
           const m = Object.assign({}, existing);
-          ['lastLoginAt', 'lastLoginIp', 'device', 'avatar', 'joinedAt', 'role', 'isAdmin', 'verified', 'name'].forEach(f => {
+          ['lastLoginAt', 'lastLoginIp', 'device', 'avatar', 'joinedAt', 'verified', 'name'].forEach(f => {
             if (cu[f] && !m[f]) { m[f] = cu[f]; dirty = true; }
           });
+          if (cu.role && cu.role !== 'user') {
+            if (m.role !== cu.role) { m.role = cu.role; dirty = true; }
+          }
+          if (cu.isAdmin && !m.isAdmin) { m.isAdmin = true; dirty = true; }
           if (dirty) {
             const idx = merged.findIndex(x => x && x.email === cu.email);
             if (idx !== -1) merged[idx] = m;
@@ -3616,11 +3620,11 @@ const APP = {
     const islamic = t.indexOf('سلام عليكم') !== -1 || t.indexOf('السلام عليكم') !== -1 || t.indexOf('وعليكم') !== -1;
     if (this.lang === 'ar') {
       return islamic
-        ? 'وعليكم السلام ورحمة الله وبركاته 🌸 أهلاً وسهلاً بك في NOVE STOR، كيف أقدر أخدمك اليوم؟'
+        ? 'وعليكم السلام ورحمة الله وبركاته 🌸 أهلاً وسهلاً بك في Nova Store، كيف أقدر أخدمك اليوم؟'
         : 'أهلاً وسهلاً! 👋 كيف أقدر أساعدك اليوم؟ أقدر أعرض لك منتجاتنا، أشرح لك الدفع والتسليم، أو أرشدك للدعم الفني.';
     }
     return islamic
-      ? 'And peace be upon you too 🌸 Welcome to NOVE STOR! How can I help you today?'
+      ? 'And peace be upon you too 🌸 Welcome to Nova Store! How can I help you today?'
       : 'Hello! 👋 How can I help you today? I can show our products, explain payment and delivery, or point you to support.';
   },
 
@@ -3668,8 +3672,8 @@ const APP = {
 
   aAbout() {
     return this.lang === 'ar'
-      ? '<b>NOVE STOR</b> متجر موثوق للمنتجات الرقمية: سكريبتات FiveM، بوتات ديسكورد، وأدوات ألعاب — بجودة عالية ودعم فني وتسليم فوري.'
-      : '<b>NOVE STOR</b> is a trusted marketplace for digital products: FiveM scripts, Discord bots and gaming resources — quality, support and instant delivery.';
+      ? '<b>Nova Store</b> متجر موثوق للمنتجات الرقمية: سكريبتات FiveM، بوتات ديسكورد، وأدوات ألعاب — بجودة عالية ودعم فني وتسليم فوري.'
+      : '<b>Nova Store</b> is a trusted marketplace for digital products: FiveM scripts, Discord bots and gaming resources — quality, support and instant delivery.';
   },
 
   aSupport() {
@@ -3943,7 +3947,7 @@ const APP = {
         return actions.order.create({
           purchase_units: [{
             amount: { value: this.getCartTotal().toFixed(2) },
-            description: 'NOVE STOR Purchase'
+            description: 'Nova Store Purchase'
           }]
         });
       },
@@ -4052,6 +4056,15 @@ const APP = {
           return;
         }
       }
+      if (this._adminGateBusy) return;
+      this._adminGateBusy = true;
+      try {
+        if (window.CloudDB && CloudDB.enabled) {
+          const cloudUsers = await CloudDB.loadUsers();
+          this.mergeCloudUsers(cloudUsers);
+        }
+      } catch (e) {}
+      this._adminGateBusy = false;
       this.renderAdminGateAfterCheck();
     };
     checkTamper();
@@ -4062,16 +4075,7 @@ const APP = {
       this.renderAdminPinGate();
       return;
     }
-    const role = this.currentUser ? this.getUserRole(this.currentUser.email) : '';
-    if (role === 'owner' || this.currentUser.email === this.ADMIN_EMAIL) {
-      this.renderAdminDashboard();
-      return;
-    }
-    if (sessionStorage.getItem('nove_admin_unlocked') === '1') {
-      this.renderAdminDashboard();
-      return;
-    }
-    this.renderAdminPinGate();
+    this.renderAdminDashboard();
   },
 
   renderAdminPinGate() {
@@ -4951,6 +4955,7 @@ const APP = {
       if (target) {
         target.role = role;
         APP.storeSigned('nove_users', list);
+        if (window.CloudDB && CloudDB.enabled) CloudDB.save('users', list);
         APP.renderAdminUsers(document.getElementById('admin-content'));
         APP.showToast('Role updated', 'success');
       }
@@ -5248,7 +5253,7 @@ const APP = {
         </div>
         <div class="form-group">
           <label>${this.t('store_name')}</label>
-          <input type="text" value="${APP.STORE_NAME}" id="setting-store-name" placeholder="NOVE STOR">
+          <input type="text" value="${APP.STORE_NAME}" id="setting-store-name" placeholder="Nova Store">
         </div>
         <div class="form-group">
           <label>${this.t('owner_email')}</label>
@@ -5623,7 +5628,7 @@ applyLogo() {
   },
 
   saveSettings() {
-    APP.STORE_NAME = document.getElementById('setting-store-name').value || 'NOVE STOR';
+    APP.STORE_NAME = document.getElementById('setting-store-name').value || 'Nova Store';
     APP.PAYPAL_CLIENT_ID = document.getElementById('setting-paypal').value;
     const gid = id => { const el = document.getElementById(id); return el ? el.value.trim() : ''; };
     APP.SOCIAL_LINKS = {

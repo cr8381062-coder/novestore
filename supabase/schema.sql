@@ -1,5 +1,5 @@
 -- ============================================================
--- NOVE STOR - Supabase Schema + Security Rules (RLS)
+-- Nova Store - Supabase Schema + Security Rules (RLS)
 -- SQL Editor (SQL > New query) -> paste -> Run
 -- ============================================================
 
@@ -99,7 +99,7 @@ create table if not exists public.store_users (
 
 create table if not exists public.store_settings (
   id int primary key default 1,
-  store_name text default 'NOVE STOR',
+  store_name text default 'Nova Store',
   logo text default 'images/logo.png',
   paypal text default '',
   social jsonb default '{}'::jsonb,
@@ -107,7 +107,7 @@ create table if not exists public.store_settings (
   updated_at timestamptz default now()
 );
 
-insert into public.store_settings (id, store_name) values (1, 'NOVE STOR')
+insert into public.store_settings (id, store_name) values (1, 'Nova Store')
   on conflict (id) do nothing;
 
 -- Owner email (replace with your real admin email BEFORE running):

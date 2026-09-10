@@ -1,5 +1,5 @@
 // ============================================================
-// NOVE STOR - CloudDB layer (Supabase) with local fallback
+// Nova Store - CloudDB layer (Supabase) with local fallback
 // The store keeps working 100% even if the cloud is unreachable.
 // ============================================================
 (function () {
