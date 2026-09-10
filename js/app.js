@@ -1058,6 +1058,7 @@ const APP = {
     this.initScrollEffects();
     this.applyStaticTranslations();
     this.applyLogo();
+    this.applyBrandName();
     this.renderSocialIcons();
     this.updateHeroStats();
     if (window.CloudDB && CloudDB.enabled) this.autoCloudConnect();
@@ -2136,9 +2137,7 @@ const APP = {
           localStorage.setItem('nove_settings', JSON.stringify(settings));
           document.body.setAttribute('data-static-logo', s.logo ? '' : '1');
           this.applyLogo();
-          document.querySelectorAll('.nav-brand-text').forEach(el => {
-            el.innerHTML = this.STORE_NAME.toUpperCase().replace(/\s+(\S+)$/, ' <span>$1</span>');
-          });
+          this.applyBrandName();
         }
       }
       if (Array.isArray(cloudCategories)) {
@@ -5522,7 +5521,15 @@ const APP = {
     this.saveSettings();
   },
 
-applyLogo() {
+applyBrandName() {
+    const name = (APP.STORE_NAME || 'Nova Store').toUpperCase().replace(/\s+(\S+)$/, ' <span>$1</span>');
+    document.querySelectorAll('.nav-brand-text').forEach(el => { el.innerHTML = name; });
+    document.querySelectorAll('.hero-logo-name').forEach(el => { el.innerHTML = name; });
+    document.querySelectorAll('.admin-sidebar-brand .sb-title').forEach(el => { el.textContent = APP.STORE_NAME; });
+    document.title = APP.STORE_NAME + (document.body.getAttribute('data-page') === 'store' ? ' - FiveM & Discord Products' : ' - Admin Panel');
+  },
+
+  applyLogo() {
     const isStore = document.body.getAttribute('data-page') === 'store';
     const navIcon = document.querySelector('.nav-brand-icon');
     const heroIcon = document.querySelector('.hero-logo-icon');
@@ -5686,9 +5693,7 @@ applyLogo() {
       emailjs: APP.SETTINGS.emailjs,
       ai: APP.SETTINGS.ai
     }));
-    document.querySelectorAll('.nav-brand-text').forEach(el => {
-      el.innerHTML = APP.STORE_NAME.toUpperCase().replace(/\s+(\S+)$/, ' <span>$1</span>');
-    });
+    this.applyBrandName();
     this.applyLogo();
     this.renderSocialIcons();
     if (window.CloudDB && CloudDB.enabled) {
