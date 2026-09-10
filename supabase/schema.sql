@@ -156,15 +156,13 @@ drop policy if exists coupons_write on public.coupons;
 create policy coupons_write on public.coupons for all using (true) with check (true);
 
 -- --- orders: anyone can insert a REAL checkout order (sanity-checked),
---     owner/admin can read ---
+--     read public (the admin panel works WITHOUT Supabase Auth, browser lock) ---
 drop policy if exists orders_insert on public.orders;
 create policy orders_insert on public.orders for insert with check (
-  coalesce(email,'') <> '' and total >= 0 and coalesce(payment_id,'') <> ''
+  coalesce(email,'') <> '' and total >= 0
 );
 drop policy if exists orders_read on public.orders;
-create policy orders_read on public.orders for select using (
-  exists (select 1 from public.profiles p where p.id = auth.uid() and p.role in ('owner','admin') and p.blocked = 0)
-);
+create policy orders_read on public.orders for select using (true);
 
 -- --- blocked_ips: only owner/admin read/write ---
 drop policy if exists blocked_ips_admin on public.blocked_ips;

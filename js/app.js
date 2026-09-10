@@ -9,7 +9,7 @@ const APP = {
   SOCIAL_LINKS: {
     instagram: '',
     tiktok: '',
-    discord: '',
+    discord: 'https://discord.gg/Jf8MwSvdXV',
     youtube: '',
     telegram: '',
     x: ''
@@ -3594,7 +3594,7 @@ const APP = {
   },
 
   aiLink() {
-    return '<a href="https://discord.gg/nove" target="_blank" style="color:#8ab4f8;">discord.gg/nove</a>';
+    return '<a href="https://discord.gg/Jf8MwSvdXV" target="_blank" style="color:#8ab4f8;">discord.gg/Jf8MwSvdXV</a>';
   },
 
   isGreeting(text) {

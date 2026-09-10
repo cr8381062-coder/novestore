@@ -68,7 +68,18 @@
           const { error } = await this.client.from(t).upsert(prep, { onConflict: 'id' });
           if (error) throw error;
         } else if (key === 'orders') {
-          const { error } = await this.client.from(t).insert(prep);
+          const clean = prep.map(u => ({
+            order_ref: u.id && String(u.id).indexOf('ORD-') === 0 ? u.id : ('ORD-' + Date.now()),
+            user_name: (u.userName || u.name || '').slice(0, 100),
+            email: (u.email || '').trim().toLowerCase(),
+            items: u.items || [],
+            total: Number(u.total) || 0,
+            status: u.status || 'completed',
+            payment_id: String(u.paymentId || u.payment_id || '').slice(0, 200),
+            ip: (u.ip || '').slice(0, 64),
+            created_at: u.date || new Date().toISOString()
+          })).filter(o => o.email);
+          const { error } = await this.client.from(t).insert(clean);
           if (error) throw error;
         } else if (key === 'coupons') {
           const { error } = await this.client.from(t).upsert(prep, { onConflict: 'code' });

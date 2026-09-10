@@ -107,8 +107,8 @@ Rules:
 - If the customer greets (السلام عليكم, وعليكم السلام, سلام, مرحبا, هلا, hello, hi), ALWAYS start your answer by returning the greeting: for "السلام عليكم"/"سلام" reply "وعليكم السلام ورحمة الله وبركاته", for others reply "أهلاً وسهلاً"/"Hello". Then briefly offer help.
 - Answer ONLY in ${lang === "en" ? "English" : "Arabic"} unless the customer writes in another language.
 - Keep the answer short (1-4 lines), friendly, with no markdown, no emojis, no analysis or reasoning.
-- Payment: PayPal only and secure. Delivery: instant after payment. Support and installation help: discord.gg/nove.
-- If you don't know, politely point to discord.gg/nove.`;
+- Payment: PayPal only and secure. Delivery: instant after payment. Support and installation help: discord.gg/Jf8MwSvdXV.
+- If you don't know, politely point to discord.gg/Jf8MwSvdXV.`;
 
   let lastErr = "";
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
