@@ -1101,7 +1101,7 @@ const APP = {
     const settings = APP.safeParse('nove_settings', {});
     if (settings.storeName) this.STORE_NAME = settings.storeName;
     if (settings.logo) this.STORE_LOGO = settings.logo;
-    document.body.setAttribute('data-static-logo', '1');
+    document.body.setAttribute('data-static-logo', settings.logo ? '' : '1');
     if (settings.paypal && settings.paypal !== 'YOUR_PAYPAL_CLIENT_ID') this.PAYPAL_CLIENT_ID = settings.paypal;
     if (settings.social) this.SOCIAL_LINKS = Object.assign({}, this.SOCIAL_LINKS, settings.social);
     if (settings.emailjs) this.SETTINGS.emailjs = settings.emailjs;
@@ -2122,7 +2122,25 @@ const APP = {
   async syncFromCloud() {
     try {
       if (!window.CloudDB || !CloudDB.enabled) return;
-      const [p, o, cloudUsers, cloudCategories] = await Promise.all([CloudDB.load('products'), CloudDB.load('orders'), CloudDB.loadUsers(), CloudDB.load('categories')]);
+      const [p, o, cloudUsers, cloudCategories, cloudSettings] = await Promise.all([CloudDB.load('products'), CloudDB.load('orders'), CloudDB.loadUsers(), CloudDB.load('categories'), CloudDB.load('settings')]);
+      if (Array.isArray(cloudSettings)) {
+        const s = cloudSettings[0];
+        if (s && s.store_name) {
+          this.STORE_NAME = s.store_name;
+          const settings = APP.safeParse('nove_settings', {});
+          settings.storeName = s.store_name;
+          if (s.logo) {
+            this.STORE_LOGO = s.logo;
+            settings.logo = s.logo;
+          }
+          localStorage.setItem('nove_settings', JSON.stringify(settings));
+          document.body.setAttribute('data-static-logo', s.logo ? '' : '1');
+          this.applyLogo();
+          document.querySelectorAll('.nav-brand-text').forEach(el => {
+            el.innerHTML = this.STORE_NAME.toUpperCase().replace(/\s+(\S+)$/, ' <span>$1</span>');
+          });
+        }
+      }
       if (Array.isArray(cloudCategories)) {
         if (cloudCategories.length) {
           const seenC = {};
@@ -5479,6 +5497,17 @@ const APP = {
     settings.storeName = APP.STORE_NAME;
     settings.paypal = APP.PAYPAL_CLIENT_ID;
     localStorage.setItem('nove_settings', JSON.stringify(settings));
+    if (window.CloudDB && CloudDB.enabled) {
+      CloudDB.save('settings', [{
+        id: 1,
+        store_name: APP.STORE_NAME,
+        logo: APP.STORE_LOGO || 'images/logo.png',
+        paypal: APP.PAYPAL_CLIENT_ID,
+        social: APP.SOCIAL_LINKS || {},
+        emailjs: APP.SETTINGS.emailjs || {},
+        updated_at: new Date().toISOString()
+      }]);
+    }
     APP.applyLogo();
     this.showToast(this.t('logo_uploaded'), 'success');
   },
@@ -5662,6 +5691,17 @@ applyLogo() {
     });
     this.applyLogo();
     this.renderSocialIcons();
+    if (window.CloudDB && CloudDB.enabled) {
+      CloudDB.save('settings', [{
+        id: 1,
+        store_name: APP.STORE_NAME,
+        logo: APP.STORE_LOGO || 'images/logo.png',
+        paypal: APP.PAYPAL_CLIENT_ID,
+        social: APP.SOCIAL_LINKS || {},
+        emailjs: APP.SETTINGS.emailjs || {},
+        updated_at: new Date().toISOString()
+      }]);
+    }
     this.logActivity('settings', 'Store settings updated');
     this.showToast(this.t('saved'), 'success');
   },
