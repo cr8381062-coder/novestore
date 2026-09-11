@@ -2399,6 +2399,30 @@ const APP = {
         description: 'Advanced housing system with interiors and furniture',
         price: 59.99, features: ['50+ interiors', 'Furniture system', 'Keys', 'Renting'],
         status: 'active', sales: 92
+      },
+      {
+        id: 10, name: 'بناء موقع خاص (Custom Website)', category: 'website', icon: '',
+        description: 'أبني لك موقعاً خاصاً كاملاً على ذوقك — متجر أو بطاقة تعريف أو صفحة هبوط، بأحدث التصاميم.',
+        price: 20, features: ['تصميم خاص بك', 'متجاوب بالكامل', 'تسليم سريع', 'تدريب على الاستخدام'],
+        status: 'active', sales: 0
+      },
+      {
+        id: 11, name: 'سكربت FiveM خاص (Custom Script)', category: 'fivem', icon: '',
+        description: 'أسوي لك سكربت FiveM خاص بحسب طلبك تماماً — أي فكرة تحتاجها تُنفَّذ وتُسلَّم جاهزة للإقلاع.',
+        price: 10, features: ['مكتوب حسب طلبك', 'متوافق مع QBCore/ESX', 'شرح تركيب', 'تحديثات مجانية'],
+        status: 'active', sales: 0
+      },
+      {
+        id: 12, name: 'بوت ديسكورد خاص (Custom Bot)', category: 'discord', icon: '',
+        description: 'صمم لك بوت ديسكورد خاص باحتياجك — إدارة، تذاكر، موسيقى، آلي وما يناسب سيرفرك.',
+        price: 10, features: ['حسب طلبك', 'تشغيل 24/7', 'لوحة تحكم', 'دعم التركيب'],
+        status: 'active', sales: 0
+      },
+      {
+        id: 13, name: 'سيرفر ديسكورد جاهز (ببوتات)', category: 'discord', icon: '',
+        description: 'سيرفر ديسكورد جاهز بالكامل — بوتات وترتيب وكل اللي تحتاجه يشتغل مباشرة بدون تعب.',
+        price: 5, features: ['بوتات جاهزة', 'ترتيب كامل', 'رتب وسلطات مضبوطة', 'تفعيل مباشر'],
+        status: 'active', sales: 0
       }
     ];
   },
