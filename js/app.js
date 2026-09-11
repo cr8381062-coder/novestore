@@ -2347,60 +2347,6 @@ const APP = {
   getDefaultProducts() {
     return [
       {
-        id: 1, name: 'qb-core Framework Script', category: 'fivem', icon: '',
-        description: 'Complete QBCore framework script for FiveM with full features',
-        price: 49.99, features: ['Full source code', 'Documentation', 'Free updates', 'Discord support'],
-        status: 'active', sales: 156
-      },
-      {
-        id: 2, name: 'Discord Verification Bot', category: 'discord', icon: '',
-        description: 'Advanced verification bot for Discord servers with role management',
-        price: 29.99, features: ['Auto verification', 'Role assignment', 'Anti-raid', 'Logs'],
-        status: 'active', sales: 234
-      },
-      {
-        id: 3, name: 'ESX Essentials Pack', category: 'fivem', icon: '',
-        description: 'Essential scripts pack for ESX framework - jobs, inventory, and more',
-        price: 79.99, features: ['20+ scripts', 'MySQL support', 'Multi-language', '24/7 support'],
-        status: 'active', sales: 89
-      },
-      {
-        id: 4, name: 'Discord Ticket System', category: 'discord', icon: '',
-        description: 'Professional ticket system with categories and transcripts',
-        price: 19.99, features: ['Category support', 'Transcripts', 'Auto-close', 'Staff roles'],
-        status: 'active', sales: 312
-      },
-      {
-        id: 5, name: 'FiveM Launcher UI', category: 'fivem', icon: '',
-        description: 'Custom server launcher with modern dark UI design',
-        price: 39.99, features: ['Custom themes', 'Server info', 'Rules page', 'Discord widget'],
-        status: 'active', sales: 67
-      },
-      {
-        id: 6, name: 'Discord Music Bot', category: 'discord', icon: '',
-        description: 'Feature-rich music bot with playlist support and effects',
-        price: 24.99, features: ['Multi-platform', 'Queue system', 'Effects', '24/7 mode'],
-        status: 'active', sales: 178
-      },
-      {
-        id: 7, name: 'vMenu Custom Config', category: 'fivem', icon: '',
-        description: 'Pre-configured vMenu with custom options and permissions',
-        price: 14.99, features: ['30+ vehicles', 'Custom perms', 'Admin tools', 'Easy setup'],
-        status: 'active', sales: 201
-      },
-      {
-        id: 8, name: 'Discord Giveaway Bot', category: 'discord', icon: '',
-        description: 'Automated giveaway system with entry requirements',
-        price: 12.99, features: ['Requirements', 'Auto-pick', 'Reroll', 'Embeds'],
-        status: 'active', sales: 145
-      },
-      {
-        id: 9, name: 'Housing Script v2', category: 'fivem', icon: '',
-        description: 'Advanced housing system with interiors and furniture',
-        price: 59.99, features: ['50+ interiors', 'Furniture system', 'Keys', 'Renting'],
-        status: 'active', sales: 92
-      },
-      {
         id: 10, name: 'بناء موقع خاص (Custom Website)', category: 'website', icon: '',
         description: 'أبني لك موقعاً خاصاً كاملاً على ذوقك — متجر أو بطاقة تعريف أو صفحة هبوط، بأحدث التصاميم.',
         price: 20, features: ['تصميم خاص بك', 'متجاوب بالكامل', 'تسليم سريع', 'تدريب على الاستخدام'],
