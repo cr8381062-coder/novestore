@@ -83,32 +83,51 @@ serve(async (req) => {
     return json(429, { error: "rate_limited" });
   }
 
-  const message = String(body.message || "").slice(0, 500);
+  const message = String(body.message || "").slice(0, 800);
   const lang = String(body.lang || "ar") === "en" ? "en" : "ar";
-  const products = Array.isArray(body.products) ? body.products.slice(0, 50) : [];
+  const storeName = String(body.storeName || "Nova Store").slice(0, 60);
+  const discord = String(body.discord || "https://discord.gg/Jf8MwSvdXV").slice(0, 120);
+  const salesRank = String(body.salesRank || "").slice(0, 300);
+  const products = Array.isArray(body.products) ? body.products.slice(0, 60) : [];
   if (!message.trim()) {
     return json(400, { error: "empty_message" });
   }
 
-  const cacheKey = lang + ":" + message;
+  const cacheKey = lang + ":" + storeName + ":" + message;
   const cached = cachedGet(cacheKey);
   if (cached) return json(200, { text: cached });
 
   const catalog = products.length
     ? products
-        .map((p: any) => `- ${p.name} ($${p.price})` + (p.category ? ` [${p.category}]` : ""))
+        .map((p: any) => {
+          const parts = [`- ${p.name} ($${p.price})`];
+          if (p.category) parts.push(`[${p.category}]`);
+          if (p.badge) parts.push(`badge:${p.badge}`);
+          if (p.desc) parts.push(`\n  ${String(p.desc).slice(0, 160)}`);
+          if (p.features && p.features.length) {
+            parts.push(`\n  features: ${String(p.features).slice(0, 200)}`);
+          }
+          return parts.join(" ");
+        })
         .join("\n")
     : "- (no products loaded)";
 
-  const systemBase = `You are "NOVE AI", the smart assistant of Nova Store, a digital products store selling FiveM scripts, Discord bots and gaming resources.
+  const systemBase = `You are "${storeName} AI", the smart, friendly assistant of ${storeName}, a digital products store selling FiveM scripts, Discord bots and gaming resources.
 Available products right now:
 ${catalog}
+Store info:
+- Name: ${storeName}
+- Supports: installation help, delivery and refund questions, suggesting the best product for the customer's need.
+- Payment: PayPal only, secure checkout on-site.
+- Delivery: instant digital delivery after payment.
+- Support & community: ${discord}
+${salesRank ? "- Best sellers ranking: " + salesRank : ""}
 Rules:
 - If the customer greets (السلام عليكم, وعليكم السلام, سلام, مرحبا, هلا, hello, hi), ALWAYS start your answer by returning the greeting: for "السلام عليكم"/"سلام" reply "وعليكم السلام ورحمة الله وبركاته", for others reply "أهلاً وسهلاً"/"Hello". Then briefly offer help.
 - Answer ONLY in ${lang === "en" ? "English" : "Arabic"} unless the customer writes in another language.
+- Understand the question deeply: recommend real products from the catalog above when relevant (mention their name and price), explain how delivery/payment/support works, and help choose between products.
 - Keep the answer short (1-4 lines), friendly, with no markdown, no emojis, no analysis or reasoning.
-- Payment: PayPal only and secure. Delivery: instant after payment. Support and installation help: discord.gg/Jf8MwSvdXV.
-- If you don't know, politely point to discord.gg/Jf8MwSvdXV.`;
+- If you don't know, politely point to ${discord}.`;
 
   let lastErr = "";
   const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -164,7 +183,7 @@ Rules:
         .trim();
       const text = isGemma
         ? extractAnswer(raw)
-        : raw.replace(/\n+/g, "<br>").slice(0, 1200);
+        : raw.replace(/\n+/g, "<br>").slice(0, 1400);
       if (text) {
         cachedSet(cacheKey, text);
         return json(200, { text });

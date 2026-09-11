@@ -3557,6 +3557,13 @@ const APP = {
       } catch (e) {
         answer = null;
       }
+      if (!answer) {
+        try {
+          answer = await this.aiGroqRaw(text);
+        } catch (e2) {
+          answer = null;
+        }
+      }
       if (!answer) answer = this.aiAnswer(text);
     } else {
       answer = this.aiAnswer(text);
@@ -3566,16 +3573,65 @@ const APP = {
     this.aiAddMsg('bot', answer);
   },
 
+  async aiGroqRaw(message) {
+    const cfg = this.getAiConfig();
+    if (!cfg || !cfg.apiKey || !cfg.baseUrl || !cfg.model) throw new Error('no ai config');
+    const catalog = (this.products || [])
+      .filter(p => p.status === 'active')
+      .slice(0, 40)
+      .map(p => `- ${p.name} ($${p.price})` + (p.category ? ` [${p.category}]` : '') + (p.desc ? ` | ${String(p.desc).slice(0, 120)}` : ''))
+      .join('\n');
+    const ctl = new AbortController();
+    const timer = setTimeout(() => ctl.abort(), 16000);
+    try {
+      const res = await fetch(String(cfg.baseUrl).replace(/\/+$/, '') + '/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + cfg.apiKey },
+        body: JSON.stringify({
+          model: cfg.model,
+          messages: [
+            {
+              role: 'system',
+              content: `You are "${this.STORE_NAME} AI", the smart assistant of ${this.STORE_NAME}, a digital products store (FiveM scripts, Discord bots, gaming resources). Available products:\n${catalog}\nAnswer ONLY in ${this.lang === 'en' ? 'English' : 'Arabic'}. Short answer (1-4 lines), friendly, recommend real products with name+price, mention payment (PayPal, instant delivery) and support discord ${this.aiLink()}. No markdown, no emojis.`
+            },
+            { role: 'user', content: String(message).slice(0, 700) }
+          ],
+          temperature: 0.6,
+          max_tokens: 350
+        }),
+        signal: ctl.signal
+      });
+      if (!res.ok) throw new Error('groq http ' + res.status);
+      const data = await res.json();
+      const text = (data && data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content) || '';
+      if (!text || !text.trim()) throw new Error('groq empty');
+      return String(text).trim().replace(/\n+/g, '<br>').slice(0, 1000);
+    } finally {
+      clearTimeout(timer);
+    }
+  },
+
   async aiGemini(message) {
     const cfg = (typeof NOVE_BACKEND !== 'undefined') ? NOVE_BACKEND : null;
     if (!cfg || !cfg.url || !cfg.anonKey) throw new Error('no backend');
     const ctl = new AbortController();
-    const timer = setTimeout(() => ctl.abort(), 15000);
+    const timer = setTimeout(() => ctl.abort(), 16000);
     try {
       const products = (this.products || [])
         .filter(p => p.status === 'active')
-        .map(p => ({ name: p.name, price: p.price, category: p.category || '' }))
-        .slice(0, 50);
+        .map(p => ({
+          name: p.name,
+          price: p.price,
+          category: p.category || '',
+          badge: p.badge || '',
+          desc: String(p.desc || p.longDesc || p.description || '').slice(0, 200),
+          features: Array.isArray(p.features) ? p.features.slice(0, 6).join(', ') : ''
+        }))
+        .slice(0, 60);
+      let discord = this.aiLink();
+      if (this.SETTINGS && this.SETTINGS.social && this.SETTINGS.social.discord) {
+        discord = this.SETTINGS.social.discord;
+      }
       const res = await fetch(cfg.url + '/functions/v1/gemini', {
         method: 'POST',
         headers: {
@@ -3583,7 +3639,13 @@ const APP = {
           apikey: cfg.anonKey,
           Authorization: 'Bearer ' + cfg.anonKey
         },
-        body: JSON.stringify({ message: String(message).slice(0, 500), lang: this.lang, products: products }),
+        body: JSON.stringify({
+          message: String(message).slice(0, 700),
+          lang: this.lang,
+          storeName: this.STORE_NAME,
+          discord: discord,
+          products: products
+        }),
         signal: ctl.signal
       });
       if (res.status === 429) throw new Error('rate_limited');
