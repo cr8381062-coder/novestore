@@ -2373,6 +2373,75 @@ const APP = {
     ];
   },
 
+  // ===== PRODUCT VISUAL IDENTITY =====
+  // Generates a consistent, branded SVG artwork for every product on the fly
+  // (same Nova logo, same gradient, same layout) so the whole store looks
+  // perfectly coherent even for products without an uploaded image.
+  productArt(p, options = {}) {
+    const name = String(p.name || 'Nova Store').slice(0, 34);
+    const price = p.price != null ? p.price : 0;
+    const icon = p.icon || '\u{1F4E6}';
+    const brand = String(this.STORE_NAME || APP.STORE_NAME || 'Nova Store').slice(0, 26);
+    const w = options.w || 800;
+    const h = options.h || 520;
+    const lang = this.isArabic(name) ? 'ar' : 'en';
+
+    const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 800 520">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10131c"/>
+      <stop offset="0.55" stop-color="#0a0d16"/>
+      <stop offset="1" stop-color="#04060b"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#7dd3fc" stop-opacity="0.04"/>
+    </linearGradient>
+    <radialGradient id="halo" cx="0.5" cy="0.42" r="0.6">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.10"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="bar" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#cbd5e1"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="520" fill="url(#bg)"/>
+  <circle cx="400" cy="190" r="360" fill="url(#halo)"/>
+  <rect x="0" y="0" width="800" height="30" fill="url(#glow)"/>
+  <rect x="14" y="14" width="772" height="492" rx="22" fill="none" stroke="#ffffff" stroke-opacity="0.18" stroke-width="2"/>
+  <g>
+    <circle cx="52" cy="50" r="21" fill="#ffffff" fill-opacity="0.06" stroke="#ffffff" stroke-opacity="0.5" stroke-width="1.4"/>
+    <text x="52" y="58" font-family="Arial, sans-serif" font-size="21" font-weight="bold" fill="#ffffff" text-anchor="middle">${brand.charAt(0)}</text>
+    <text x="86" y="57" font-family="Arial, sans-serif" font-size="19" font-weight="700" fill="#ffffff">${brand}</text>
+  </g>
+  <text x="786" y="57" font-family="Arial, sans-serif" font-size="14" fill="#cbd5e1" text-anchor="end">NOVA</text>
+  <circle cx="400" cy="230" r="118" fill="#ffffff" fill-opacity="0.05" stroke="#ffffff" stroke-opacity="0.28" stroke-width="1.6"/>
+  <circle cx="400" cy="230" r="150" fill="#ffffff" fill-opacity="0.03" stroke="#ffffff" stroke-opacity="0.12" stroke-width="1.2"/>
+  <text x="400" y="284" font-family="Arial, sans-serif" font-size="118" text-anchor="middle">${icon}</text>
+  <rect x="180" y="390" width="440" height="3" rx="1.5" fill="url(#bar)"/>
+  <text x="400" y="448" font-family="Arial, sans-serif" font-weight="700" font-size="${lang === 'ar' ? 40 : 34}" fill="#ffffff" text-anchor="middle">${name}</text>
+  <rect x="288" y="470" width="224" height="30" rx="15" fill="#ffffff" fill-opacity="0.07" stroke="#ffffff" stroke-opacity="0.25"/>
+  <text x="400" y="492" font-family="Arial, sans-serif" font-weight="700" font-size="18" fill="#ffffff" text-anchor="middle">${price} USD</text>
+</svg>`;
+    return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+  },
+
+  isArabic(s) {
+    return /[\u0600-\u06FF]/.test(String(s || ''));
+  },
+
+  productById(id) {
+    return (this.products || []).find(p => p.id === Number(id)) || null;
+  },
+
+  productArtHtml(p, cls = '') {
+    return `<div class="product-art${cls ? ' ' + cls : ''}" style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#10131c,#04060b);position:relative;overflow:hidden;">
+      <div style="position:absolute;inset:0;background:radial-gradient(circle at 50% 40%,rgba(255,255,255,0.10),transparent 70%);"></div>
+      <span style="position:relative;font-size:2.6rem;line-height:1;filter:drop-shadow(0 4px 14px rgba(0,0,0,0.6));">${typeof p.icon === 'string' ? this.esc(p.icon) : ''}</span>
+    </div>`;
+  },
+
   // ===== SECURITY & LOGGING =====
   esc(input) {
     return String(input == null ? '' : input)
@@ -3797,7 +3866,7 @@ const APP = {
       <div class="product-card" onclick="APP.showProduct(${p.id})">
         <div class="product-image">
           <span class="product-tag">${this.esc(this.resolveCategoryLabel(p.category))}</span>
-          ${p.image ? `<img src="${this.esc(p.image)}" alt="${this.esc(p.name)}" style="width:100%; height:100%; object-fit:cover;">` : p.icon}
+          ${p.image ? `<img src="${this.esc(p.image)}" alt="${this.esc(p.name)}" style="width:100%; height:100%; object-fit:cover;" onerror="APP.renderProductFallback(this, ${p.id});">` : `<img src="${this.productArt(p)}" alt="${this.esc(p.name)}" style="width:100%; height:100%; object-fit:cover;">`}
         </div>
         <div class="product-info">
           <h3>${this.esc(p.name)}</h3>
@@ -3895,7 +3964,7 @@ const APP = {
     const body = overlay.querySelector('.modal-body');
     body.innerHTML = `
       <div class="product-detail">
-        <div class="product-detail-image">${product.image ? `<img src="${this.esc(product.image)}" alt="${this.esc(product.name)}" style="width:100%; height:100%; object-fit:cover;">` : product.icon}</div>
+        <div class="product-detail-image">${product.image ? `<img src="${this.esc(product.image)}" alt="${this.esc(product.name)}" style="width:100%; height:100%; object-fit:cover;" onerror="this.replaceWith(Object.assign(document.createElement('img'),{src:APP.productArt(APP.productById(${product.id})||${JSON.stringify({id:0})}),style:'width:100%;height:100%;object-fit:cover;'}));">` : `<img src="${this.productArt(APP.productById(${product.id})||product)}" alt="${this.esc(product.name)}" style="width:100%; height:100%; object-fit:cover;">`}</div>
         <div class="product-detail-body">
           <button class="modal-close" onclick="APP.closeModal('product-modal')">&times;</button>
           <div class="category">${this.esc(this.resolveCategoryLabel(product.category))}</div>
